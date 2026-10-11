@@ -1,0 +1,2212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cahier du Professeur</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0F6E56">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:14px;background:#f5f5f0;color:#1a1a1a;min-height:100vh}
+/* AUTH */
+.auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0F6E56,#085041)}
+.auth-card{background:#fff;border-radius:16px;padding:32px 28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
+.auth-logo{text-align:center;margin-bottom:20px}
+.auth-logo .logo-icon{font-size:48px;margin-bottom:8px}
+.auth-logo h1{font-size:20px;font-weight:700;color:#0F6E56}
+.auth-logo p{font-size:12px;color:#888;margin-top:4px}
+.auth-tabs{display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #e5e5e0}
+.auth-tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:500;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px}
+.auth-tab.active{color:#0F6E56;border-bottom-color:#0F6E56}
+.auth-form{display:none}.auth-form.active{display:block}
+.auth-input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:10px;font-family:inherit}
+.auth-input:focus{outline:none;border-color:#0F6E56}
+.auth-btn{width:100%;padding:11px;background:#0F6E56;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;margin-top:4px}
+.auth-btn:hover{background:#085041}
+.auth-err{font-size:12px;color:#c0392b;margin-bottom:8px;text-align:center}
+.auth-info{font-size:11px;color:#888;text-align:center;margin-top:10px}
+/* APP */
+.app-page{display:none}
+.app-page.active{display:block}
+header{background:#0F6E56;color:#fff;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+header h1{font-size:14px;font-weight:700}
+.hright{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.user-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:11px;display:flex;align-items:center;gap:6px}
+.logout-btn{padding:4px 10px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);border-radius:20px;color:#fff;font-size:11px;cursor:pointer}
+#ecole-selector{padding:4px 9px;border-radius:20px;border:1px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;font-size:11px;cursor:pointer}
+#ecole-selector option{color:#1a1a1a;background:#fff}
+.nav{display:flex;background:#fff;border-bottom:1px solid #e5e5e0;overflow-x:auto}
+.nav button{padding:9px 11px;border:none;background:transparent;cursor:pointer;font-size:11px;color:#666;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
+.nav button.active{color:#0F6E56;border-bottom-color:#0F6E56;font-weight:600}
+.nav button:hover:not(.active){background:#f5f5f0}
+.main{padding:12px;max-width:1300px;margin:0 auto}
+.card{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:12px 15px;margin-bottom:11px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:10px;color:#1a1a1a}
+.section{display:none}.section.active{display:block}
+.two-col{display:grid;grid-template-columns:300px 1fr;gap:11px}
+.two-eq{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.form-group{margin-bottom:8px}
+label{font-size:11px;color:#555;display:block;margin-bottom:3px;font-weight:500}
+input,select,textarea{width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;background:#fafafa;color:#1a1a1a;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#0F6E56;background:#fff}
+textarea{resize:vertical;min-height:50px}
+.btn{padding:6px 12px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;color:#333;font-weight:500}
+.btn:hover{background:#f0f0eb}
+.btn-primary{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.btn-primary:hover{background:#085041}
+.btn-warn{background:#F59E0B;color:#fff;border-color:#F59E0B}
+.btn-info{background:#1565C0;color:#fff;border-color:#1565C0}
+.btn-danger{color:#c0392b;border-color:transparent;background:transparent;padding:2px 6px;font-size:11px}
+.btn-sm{padding:3px 8px;font-size:11px}
+.btn-xs{padding:2px 6px;font-size:10px}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:11px}
+.stat{background:#E1F5EE;border-radius:8px;padding:9px 7px;text-align:center}
+.stat-val{font-size:20px;font-weight:700;color:#0F6E56}
+.stat-lbl{font-size:10px;color:#0F6E56;opacity:.8}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e0;font-weight:600;font-size:10px;color:#888;text-transform:uppercase}
+td{padding:6px 8px;border-bottom:1px solid #f0f0eb;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8}
+.badge{display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-college{background:#F0EBF8;color:#4A1C7C}
+.badge-lycee{background:#E6F1FB;color:#0C447C}
+.badge-sup{background:#FEF3C7;color:#92400E}
+.badge-stat{background:#f0f0eb;color:#555;font-size:10px;padding:1px 6px;border-radius:20px}
+.empty{text-align:center;padding:18px;color:#bbb;font-size:12px}
+.note-pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600}
+.alert-box{border-radius:8px;padding:10px 12px;margin-bottom:9px;font-size:12px}
+.alert-info{background:#E6F1FB;color:#0C447C;border:1px solid #B5D4F4}
+.alert-success{background:#E1F5EE;color:#085041;border:1px solid #9FE1CB}
+.alert-warn{background:#FAEEDA;color:#633806;border:1px solid #FAC775}
+.toast{position:fixed;bottom:18px;right:18px;background:#0F6E56;color:#fff;padding:10px 15px;border-radius:8px;font-size:12px;font-weight:500;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:300px}
+.toast.show{opacity:1}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:14px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:11px;padding:18px;width:100%;max-width:700px;max-height:92vh;overflow-y:auto}
+.modal h2{font-size:15px;font-weight:700;margin-bottom:12px}
+.modal-close{float:right;cursor:pointer;font-size:17px;color:#aaa;border:none;background:none}
+.sub-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.sub-tab{padding:5px 12px;border-radius:20px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:11px;color:#666}
+.sub-tab.active{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.sub-content{display:none}.sub-content.active{display:block}
+.import-zone{border:2px dashed #ccc;border-radius:8px;padding:16px;text-align:center;cursor:pointer;background:#fafaf8}
+.import-zone:hover{border-color:#0F6E56;background:#E1F5EE20}
+.import-zone input[type=file]{display:none}
+.drive-link-box{background:#E8F4FD;border:1px solid #B5D4F4;border-radius:7px;padding:8px 10px;display:flex;gap:8px;align-items:center}
+.drive-link-box input{background:#fff;font-size:11px}
+.file-chip{display:inline-flex;align-items:center;gap:5px;background:#E6F1FB;border:1px solid #B5D4F4;border-radius:20px;padding:3px 9px;font-size:11px;color:#0C447C;margin:3px}
+.file-chip a{color:#0C447C;text-decoration:none;font-weight:500}
+.matricule-badge{background:#0F6E56;color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+/* Séances */
+.seance-card{border:1px solid #e5e5e0;border-radius:9px;padding:12px 14px;margin-bottom:10px}
+.eleve-rappel{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #e5e5e0;border-radius:7px;margin-bottom:5px;font-size:12px}
+.eleve-rappel.bon{border-color:#0F6E56;background:#E1F5EE20}
+.eleve-rappel.sanction{border-color:#c0392b;background:#FCEBEB20}
+.bonus-btn{padding:2px 8px;border-radius:20px;border:1px solid #0F6E56;background:#fff;color:#0F6E56;cursor:pointer;font-size:11px;font-weight:600}
+.sanction-chip{display:inline-block;padding:2px 8px;border-radius:20px;background:#FCEBEB;color:#791F1F;font-size:10px;font-weight:600;margin:2px}
+/* Devoir */
+.devoir-card{border:1px solid #e5e5e0;border-radius:8px;padding:11px 13px;margin-bottom:9px}
+.q-block{background:#f9f9f7;border-radius:6px;padding:9px;margin-bottom:7px;border-left:3px solid #0F6E56}
+.share-box{background:#E1F5EE30;border:1px solid #9FE1CB;border-radius:7px;padding:8px 10px;margin-top:7px}
+/* Planning */
+.week-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:8px}
+.day-col{background:#f9f9f7;border-radius:7px;padding:6px;min-height:70px}
+.day-header{font-size:10px;font-weight:700;color:#0F6E56;text-align:center;padding:3px;border-bottom:1px solid #e5e5e0;margin-bottom:4px}
+.day-header.today{background:#0F6E56;color:#fff;border-radius:5px;border-bottom:none}
+.cours-card{background:#fff;border-radius:5px;padding:4px 6px;margin-bottom:3px;border-left:3px solid #0F6E56;font-size:10px}
+/* EDT */
+.grid-wrap{overflow-x:auto}
+table.edt{width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed}
+table.edt th{background:#f5f5f0;padding:5px 3px;border:1px solid #e5e5e0;font-weight:600;font-size:9px;text-align:center;color:#666}
+table.edt td{border:1px solid #e5e5e0;padding:2px;vertical-align:top;height:48px}
+table.edt td.heure{background:#f5f5f0;text-align:center;font-size:9px;color:#888;font-weight:600;width:52px}
+.slot{border-radius:4px;padding:2px 4px;font-size:9px;line-height:1.3;position:relative}
+.del-btn{position:absolute;top:1px;right:1px;font-size:8px;cursor:pointer;color:inherit;opacity:.5;border:none;background:none;padding:0}
+.slot-empty{display:block;min-height:42px}
+/* Print */
+@media print{.no-print{display:none!important}body{background:#fff}}
+/* Sync indicator */
+.sync-dot{width:8px;height:8px;border-radius:50%;background:#4CAF50;display:inline-block;margin-right:4px}
+.sync-dot.syncing{background:#FF9800;animation:pulse 1s infinite}
+.sync-dot.error{background:#F44336}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+/* Élève page devoir */
+.eleve-page{display:none;position:fixed;inset:0;background:#f5f5f0;z-index:2000;overflow-y:auto;padding:16px}
+.eleve-page.show{display:block}
+/* Loading */
+.loading{display:flex;align-items:center;justify-content:center;padding:40px;flex-direction:column;gap:10px}
+.spinner{width:32px;height:32px;border:3px solid #e5e5e0;border-top-color:#0F6E56;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:700px){.two-col{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}.three-col{grid-template-columns:1fr 1fr}.week-grid{grid-template-columns:repeat(3,1fr)}}
+@media print{
+  .no-print{display:none!important}
+  body{background:#fff}
+}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- PAGE AUTH -->
+<div class="auth-page" id="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="logo-icon">📚</div>
+      <h1>Cahier du Professeur</h1>
+      <p>Plateforme pédagogique numérique</p>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" onclick="showAuthTab('login')">Connexion</div>
+      <div class="auth-tab" onclick="showAuthTab('register')">Inscription</div>
+    </div>
+    <!-- LOGIN -->
+    <div class="auth-form active" id="auth-login">
+      <div id="login-err" class="auth-err"></div>
+      <input class="auth-input" id="login-email" type="email" placeholder="Votre adresse email">
+      <input class="auth-input" id="login-pwd" type="password" placeholder="Mot de passe">
+      <button class="auth-btn" onclick="login()">Se connecter</button>
+      <div class="auth-info">Pas encore de compte ? Cliquez sur "Inscription"</div>
+    </div>
+    <!-- REGISTER -->
+    <div class="auth-form" id="auth-register">
+      <div id="register-err" class="auth-err"></div>
+      <input class="auth-input" id="reg-prenom" placeholder="Prénom">
+      <input class="auth-input" id="reg-nom" placeholder="Nom de famille">
+      <input class="auth-input" id="reg-email" type="email" placeholder="Adresse email">
+      <input class="auth-input" id="reg-pwd" type="password" placeholder="Mot de passe (min. 6 caractères)">
+      <input class="auth-input" id="reg-pwd2" type="password" placeholder="Confirmer le mot de passe">
+      <button class="auth-btn" onclick="register()">Créer mon compte</button>
+      <div class="auth-info">Déjà un compte ? Cliquez sur "Connexion"</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE ÉLÈVE DEVOIR -->
+<div class="eleve-page" id="eleve-page">
+  <div style="max-width:620px;margin:0 auto">
+    <div style="background:#0F6E56;color:#fff;border-radius:9px;padding:12px 16px;margin-bottom:14px;text-align:center">
+      <div style="font-size:17px;font-weight:700" id="ep-titre">Devoir</div>
+      <div style="font-size:11px;opacity:.8;margin-top:3px" id="ep-meta"></div>
+    </div>
+    <div id="ep-login" class="card">
+      <div class="card-title">🔐 Connexion élève</div>
+      <div class="form-group"><label>Nom complet</label><input id="ep-nom" placeholder="Fatoumata Diallo"></div>
+      <div class="form-group"><label>Mot de passe</label><input id="ep-pwd" type="password"></div>
+      <div id="ep-err" style="font-size:11px;color:#c0392b;margin-bottom:7px"></div>
+      <button class="btn btn-primary" onclick="eleveLogin()">Connexion →</button>
+    </div>
+    <div id="ep-form" style="display:none">
+      <div id="ep-questions"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="eleveSubmit()">📤 Envoyer</button>
+    </div>
+    <div id="ep-done" style="display:none" class="card">
+      <div style="text-align:center;padding:20px"><div style="font-size:36px">✅</div><div style="font-size:15px;font-weight:600;margin-top:6px">Devoir envoyé !</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FICHE ÉLÈVE -->
+<div class="modal-overlay" id="modal-eleve"><div class="modal"><button class="modal-close" onclick="closeModal('modal-eleve')">✕</button><div id="fiche-eleve-content"></div></div></div>
+
+<!-- MODAL CRÉER DEVOIR -->
+<div class="modal-overlay" id="modal-devoir">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-devoir')">✕</button>
+    <h2>📋 Créer un devoir / Évaluation</h2>
+    <div class="three-col">
+      <div class="form-group"><label>École</label><select id="dv-ecole" onchange="filterClassesDevoir()"><option value="">--</option></select></div>
+      <div class="form-group"><label>Classe</label><select id="dv-classe"><option value="">--</option></select></div>
+      <div class="form-group"><label>Type</label><select id="dv-type"><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select></div>
+    </div>
+    <div class="two-eq">
+      <div class="form-group"><label>Titre</label><input id="dv-titre" placeholder="Devoir 1 — Biologie"></div>
+      <div class="form-group"><label>Matière</label><input id="dv-mat" placeholder="Biologie"></div>
+    </div>
+    <div class="three-col">
+      <div class="form-group"><label>Date limite</label><input id="dv-deadline" type="date"></div>
+      <div class="form-group"><label>Durée (min)</label><input id="dv-duree" type="number" placeholder="60"></div>
+      <div class="form-group"><label>Barème</label><input id="dv-bareme" type="number" value="20"></div>
+    </div>
+    <div class="form-group"><label>Consignes</label><textarea id="dv-consignes"></textarea></div>
+    <div class="form-group"><label>📎 Lien fichier sujet (Google Drive...)</label>
+      <div class="drive-link-box"><input id="dv-drive-link" placeholder="https://drive.google.com/..."></div>
+    </div>
+    <div style="border-top:1px solid #e5e5e0;margin:10px 0;padding-top:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="font-size:12px">Questions en ligne</strong>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-info btn-sm" onclick="ajouterQuestion('qcm')">+ QCM</button>
+          <button class="btn btn-primary btn-sm" onclick="ajouterQuestion('open')">+ Ouverte</button>
+        </div>
+      </div>
+      <div id="questions-builder"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveDevoir()">💾 Créer</button>
+  </div>
+</div>
+
+<!-- MODAL RÉSULTATS -->
+<div class="modal-overlay" id="modal-resultats"><div class="modal"><button class="modal-close" onclick="closeModal('modal-resultats')">✕</button><h2 id="res-titre">Résultats</h2><div id="res-content"></div></div></div>
+
+<!-- MODAL REGISTRE -->
+<div class="modal-overlay" id="modal-registre" style="padding:8px">
+  <div class="modal" style="max-width:95vw">
+    <button class="modal-close" onclick="closeModal('modal-registre')">✕</button>
+    <h2 id="registre-titre">Registre de présence</h2>
+    <div id="registre-content" style="overflow-x:auto"></div>
+  </div>
+</div>
+
+<!-- MODAL CAHIER JOURNAL CLASSE -->
+<div class="modal-overlay" id="modal-cahier-classe" style="padding:8px">
+  <div class="modal" style="max-width:900px">
+    <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 id="cahier-classe-titre">📔 Cahier journal</h2>
+      <button class="modal-close" onclick="closeModal('modal-cahier-classe')">✕</button>
+    </div>
+    <div class="sub-tabs no-print" id="cahier-subtabs">
+      <button class="sub-tab active" onclick="showCahierTab('cj-seances')">📅 Séances</button>
+      <button class="sub-tab" onclick="showCahierTab('cj-rappel')">🎯 Rappel</button>
+      <button class="sub-tab" onclick="showCahierTab('cj-sanctions')">⚠️ Sanctions</button>
+      <button class="sub-tab" onclick="showCahierTab('cj-bonus')">⭐ Bonus</button>
+    </div>
+    <!-- SÉANCES -->
+    <div id="cj-seances" class="sub-content active">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <strong style="font-size:13px">Séances du cours</strong>
+        <button class="btn btn-primary btn-sm" onclick="ouvrirNouvelleSeance()">+ Nouvelle séance</button>
+      </div>
+      <div id="form-nouvelle-seance" style="display:none" class="card">
+        <div class="three-col">
+          <div class="form-group"><label>Date</label><input type="date" id="sj-date"></div>
+          <div class="form-group"><label>Matière</label><input id="sj-mat" placeholder="Biologie"></div>
+          <div class="form-group"><label>Leçon</label><input id="sj-lecon" placeholder="La cellule vivante"></div>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>Heure début</label><input type="time" id="sj-hdeb"></div>
+          <div class="form-group"><label>Heure fin</label><input type="time" id="sj-hfin"></div>
+        </div>
+        <div class="form-group"><label>Contenu</label><textarea id="sj-contenu" placeholder="Résumé du contenu enseigné..."></textarea></div>
+        <div class="form-group"><label>Observations</label><textarea id="sj-obs" placeholder="Remarques..."></textarea></div>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-primary" onclick="enregistrerSeance()">💾 Enregistrer</button>
+          <button class="btn" onclick="document.getElementById('form-nouvelle-seance').style.display='none'">Annuler</button>
+        </div>
+      </div>
+      <div id="liste-seances-classe"><div class="empty">Aucune séance</div></div>
+    </div>
+    <!-- RAPPEL -->
+    <div id="cj-rappel" class="sub-content">
+      <div class="card">
+        <div class="card-title">🎯 Configurer la séance de rappel</div>
+        <div class="two-eq">
+          <div class="form-group"><label>Leçon à rappeler</label><input id="rp-lecon" placeholder="La cellule vivante"></div>
+          <div class="form-group"><label>Nombre d'élèves</label><input type="number" id="rp-nb" value="5" min="1"></div>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" onclick="tiragAleatoire()">🎲 Tirage aléatoire</button>
+          <button class="btn btn-info" onclick="choixManuel()">✋ Choisir manuellement</button>
+        </div>
+      </div>
+      <div id="zone-tirage" style="display:none">
+        <div class="card">
+          <div class="card-title">Élèves interrogés — <span id="rp-lecon-titre" style="color:#0F6E56"></span></div>
+          <div id="liste-interroges"></div>
+          <div style="margin-top:10px;display:flex;gap:7px">
+            <button class="btn btn-primary" onclick="sauvegarderRappel()">💾 Enregistrer</button>
+            <button class="btn" onclick="document.getElementById('zone-tirage').style.display='none'">Fermer</button>
+          </div>
+        </div>
+      </div>
+      <div id="zone-choix-manuel" style="display:none" class="card">
+        <div class="card-title">Sélectionner les élèves</div>
+        <div id="liste-choix-manuel"></div>
+        <button class="btn btn-primary" style="margin-top:8px" onclick="confirmerChoixManuel()">✓ Confirmer</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📋 Historique des rappels</div>
+        <div id="historique-rappels-classe"><div class="empty">Aucune séance de rappel</div></div>
+      </div>
+    </div>
+    <!-- SANCTIONS -->
+    <div id="cj-sanctions" class="sub-content">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong>⚠️ Sanctions</strong>
+        <div style="display:flex;gap:6px">
+          <button class="btn btn-warn btn-sm" onclick="imprimerSanctions()">🖨️ Imprimer</button>
+          <button class="btn btn-info btn-sm" onclick="telechargerPDFSanctions()">📄 PDF</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Ajouter une sanction</div>
+        <div class="two-eq">
+          <div class="form-group"><label>Élève</label><select id="sanc-eleve"><option value="">--</option></select></div>
+          <div class="form-group"><label>Date</label><input type="date" id="sanc-date"></div>
+        </div>
+        <div class="form-group"><label>Motif</label>
+          <select id="sanc-motif">
+            <option>Rappel de cours non effectué</option><option>Cahier non à jour</option>
+            <option>Perturbation de cours</option><option>Distraction des amis</option>
+            <option>Devoir non rendu</option><option>Téléphone en classe</option>
+            <option>Absence non justifiée</option><option>Retard répété</option>
+            <option>Manque de respect</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Précisions</label><input id="sanc-detail" placeholder="Détails..."></div>
+        <button class="btn btn-warn btn-sm" onclick="ajouterSanction()">+ Ajouter</button>
+      </div>
+      <div id="liste-sanctions-classe"><div class="empty">Aucune sanction</div></div>
+    </div>
+    <!-- BONUS -->
+    <div id="cj-bonus" class="sub-content">
+      <div class="card">
+        <div class="card-title">⭐ Ajouter des points de bonus</div>
+        <div class="three-col">
+          <div class="form-group"><label>Élève</label><select id="bon-eleve"><option value="">--</option></select></div>
+          <div class="form-group"><label>Points</label><select id="bon-points"><option value="1">+1</option><option value="2">+2</option><option value="3">+3</option></select></div>
+          <div class="form-group"><label>Motif</label><input id="bon-motif" placeholder="Excellent rappel..."></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="ajouterBonus()">+ Ajouter</button>
+      </div>
+      <div class="card"><div class="card-title">⭐ Classement</div><div id="liste-bonus-classe"><div class="empty">Aucun bonus</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ZONE IMPRESSION -->
+<div id="print-sanctions" style="display:none">
+  <div style="padding:20px;font-family:Arial,sans-serif">
+    <div style="text-align:center;margin-bottom:16px;border-bottom:2px solid #000;padding-bottom:10px">
+      <h2 id="print-ecole-nom" style="font-size:16px;margin:0"></h2>
+      <h3 id="print-classe-nom" style="font-size:14px;margin:4px 0;color:#555"></h3>
+      <p id="print-date-titre" style="font-size:12px;color:#888;margin:0"></p>
+    </div>
+    <h3 style="font-size:14px;text-align:center;margin-bottom:12px;color:#c0392b">⚠️ LISTE DES ÉLÈVES À SANCTIONNER</h3>
+    <div id="print-sanctions-content"></div>
+    <div style="margin-top:20px;border-top:1px solid #ccc;padding-top:10px;display:flex;justify-content:space-between">
+      <div><p style="font-size:11px">Signature du professeur :</p><div style="margin-top:20px;border-top:1px solid #000;width:150px"></div></div>
+      <div><p style="font-size:11px">Visa du Directeur :</p><div style="margin-top:20px;border-top:1px solid #000;width:150px"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div class="app-page" id="app-page">
+  <header>
+    <h1>📚 Cahier du Professeur</h1>
+    <div class="hright">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span style="font-size:10px;opacity:.7" id="date-now"></span>
+      <div class="user-badge">
+        <span>👤</span>
+        <span id="user-name">Prof.</span>
+      </div>
+      <select id="ecole-selector" onchange="switchEcole(this.value)"><option value="">🏫 Toutes</option></select>
+      <button class="logout-btn" onclick="logout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <nav class="nav">
+    <button class="active" onclick="showTab('accueil')">🏠 Accueil</button>
+    <button onclick="showTab('ecoles')">🏫 Écoles</button>
+    <button onclick="showTab('classes')">👥 Classes</button>
+    <button onclick="showTab('cours')">📖 Cours</button>
+    <button onclick="showTab('notes')">📊 Notes</button>
+    <button onclick="showTab('devoirs')">📋 Devoirs</button>
+    <button onclick="showTab('ressources')">📁 Ressources</button>
+    <button onclick="showTab('edt')">🗓️ EDT</button>
+    <button onclick="showTab('alertes')">🔔 Alertes</button>
+  </nav>
+
+  <div class="main">
+
+  <!-- ACCUEIL -->
+  <div id="accueil" class="section active">
+    <div class="stats">
+      <div class="stat"><div class="stat-val" id="s-ecoles">0</div><div class="stat-lbl">Écoles</div></div>
+      <div class="stat"><div class="stat-val" id="s-classes">0</div><div class="stat-lbl">Classes</div></div>
+      <div class="stat"><div class="stat-val" id="s-eleves">0</div><div class="stat-lbl">Élèves</div></div>
+      <div class="stat"><div class="stat-val" id="s-cours">0</div><div class="stat-lbl">Cours</div></div>
+      <div class="stat"><div class="stat-val" id="s-devoirs">0</div><div class="stat-lbl">Devoirs</div></div>
+      <div class="stat"><div class="stat-val" id="s-ressources">0</div><div class="stat-lbl">Ressources</div></div>
+    </div>
+    <div id="rappel-demain"></div>
+    <div class="card">
+      <div class="card-title">📅 Planning semaine <span id="semaine-label" style="font-size:10px;color:#aaa;font-weight:400"></span></div>
+      <div class="week-grid" id="week-grid"></div>
+    </div>
+    <div class="two-eq">
+      <div class="card"><div class="card-title">📊 Dernières notes</div><div id="recent-notes"><div class="empty">Aucune note</div></div></div>
+      <div class="card"><div class="card-title">📋 Devoirs récents</div><div id="recent-devoirs"><div class="empty">Aucun devoir</div></div></div>
+    </div>
+  </div>
+
+  <!-- ÉCOLES -->
+  <div id="ecoles" class="section">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">➕ Nouvelle école</div>
+        <div class="form-group"><label>Nom</label><input id="ec-nom" placeholder="École Internationale Maloum"></div>
+        <div class="form-group"><label>Abréviation</label><input id="ec-abr" placeholder="EIM"></div>
+        <div class="form-group"><label>Localité</label><input id="ec-loc" placeholder="Conakry"></div>
+        <div class="form-group"><label>Type</label><select id="ec-type"><option>Collège & Lycée</option><option>Collège</option><option>Lycée</option><option>Supérieur / Université</option><option>École professionnelle</option></select></div>
+        <div class="form-group"><label>Couleur</label><select id="ec-couleur"><option value="#0F6E56">Vert</option><option value="#1565C0">Bleu</option><option value="#6A1B9A">Violet</option><option value="#B71C1C">Rouge</option><option value="#E65100">Orange</option></select></div>
+        <button class="btn btn-primary" onclick="addEcole()">+ Ajouter</button>
+      </div>
+      <div class="card"><div class="card-title">Mes écoles</div><div id="liste-ecoles"><div class="empty">Aucune école</div></div></div>
+    </div>
+  </div>
+
+  <!-- CLASSES -->
+  <div id="classes" class="section">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="showSubTab('classes','cl-liste')">📋 Liste</button>
+      <button class="sub-tab" onclick="showSubTab('classes','cl-add')">➕ Ajouter</button>
+      <button class="sub-tab" onclick="showSubTab('classes','cl-eleves')">👥 Élèves</button>
+      <button class="sub-tab" onclick="showSubTab('classes','cl-import')">📥 Import Excel</button>
+    </div>
+    <div id="cl-liste" class="sub-content active">
+      <div style="margin-bottom:8px"><select id="filter-ecole-cl" onchange="renderClasses()" style="width:220px"><option value="">Toutes les écoles</option></select></div>
+      <div id="liste-classes"><div class="loading"><div class="spinner"></div><span>Chargement...</span></div></div>
+    </div>
+    <div id="cl-add" class="sub-content">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Nouvelle classe</div>
+          <div class="form-group"><label>École</label><select id="cl-ecole"><option value="">--</option></select></div>
+          <div class="two-eq">
+            <div class="form-group"><label>Cycle</label><select id="cl-cycle" onchange="updateClasseOptions()"><option value="Collège">Collège</option><option value="Lycée">Lycée</option><option value="Supérieur">Supérieur</option></select></div>
+            <div class="form-group"><label>Niveau</label><select id="cl-niveau"><option>7ème</option><option>8ème</option><option>9ème</option><option>10ème</option></select></div>
+          </div>
+          <div class="two-eq">
+            <div class="form-group"><label>Lettre</label><select id="cl-lettre"><option value="">— Aucune</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+            <div class="form-group"><label>Effectif</label><input id="cl-eff" type="number" placeholder="35"></div>
+          </div>
+          <div class="form-group"><label>Année scolaire</label><input id="cl-annee" value="2026-2027"></div>
+          <button class="btn btn-primary" onclick="addClasse()">+ Ajouter</button>
+        </div>
+        <div class="card">
+          <div class="card-title">Nouvel élève</div>
+          <div class="form-group"><label>Nom complet</label><input id="el-nom" placeholder="Fatoumata Diallo"></div>
+          <div class="form-group"><label>Classe</label><select id="el-classe"><option value="">--</option></select></div>
+          <div class="form-group"><label>Date de naissance</label><input id="el-ddn" type="date"></div>
+          <div class="form-group"><label>Email</label><input id="el-email" type="email"></div>
+          <div class="form-group"><label>WhatsApp</label><input id="el-wa" placeholder="+224 621 000 000"></div>
+          <div class="form-group"><label>Mot de passe devoir</label><input id="el-pwd" placeholder="motdepasse123"></div>
+          <button class="btn btn-primary" onclick="addEleve()">+ Ajouter</button>
+        </div>
+      </div>
+    </div>
+    <div id="cl-eleves" class="sub-content">
+      <div style="display:flex;gap:7px;margin-bottom:9px;flex-wrap:wrap">
+        <select id="filter-ecole-el" onchange="filterClassesByEcole();renderEleves()" style="flex:1"><option value="">Toutes les écoles</option></select>
+        <select id="filter-classe-el" onchange="renderEleves()" style="flex:1"><option value="">Toutes les classes</option></select>
+        <input id="search-eleve" placeholder="🔍 Chercher..." onkeyup="renderEleves()" style="flex:1">
+      </div>
+      <div id="liste-eleves"><div class="loading"><div class="spinner"></div><span>Chargement...</span></div></div>
+    </div>
+    <div id="cl-import" class="sub-content">
+      <div class="card">
+        <div class="card-title">📥 Import liste élèves (Excel)</div>
+        <div class="alert-info alert-box">Format : <code>Nom | Email | WhatsApp | Mot de passe</code> (1ère ligne = en-tête)</div>
+        <div class="form-group"><label>Classe cible</label><select id="import-classe"><option value="">--</option></select></div>
+        <div class="import-zone" onclick="document.getElementById('import-file').click()">
+          <input type="file" id="import-file" accept=".xlsx,.xls,.csv" onchange="importExcelEleves(this)">
+          <div style="font-size:28px;margin-bottom:6px">📊</div>
+          <div style="font-size:12px;color:#888">Clique pour importer le fichier Excel</div>
+        </div>
+        <div id="import-preview" style="margin-top:10px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COURS -->
+  <div id="cours" class="section">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="showSubTab('cours','co-liste')">📖 Cours</button>
+      <button class="sub-tab" onclick="showSubTab('cours','co-add')">➕ Ajouter</button>
+      <button class="sub-tab" onclick="showSubTab('cours','co-journal')">📔 Cahier journal</button>
+      <button class="sub-tab" onclick="showSubTab('cours','co-planning')">📅 Planning annuel</button>
+    </div>
+    <div id="co-liste" class="sub-content active">
+      <div style="display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap">
+        <select id="filter-ecole-cours" onchange="renderCours()" style="flex:1"><option value="">Toutes écoles</option></select>
+        <select id="filter-classe-cours" onchange="renderCours()" style="flex:1"><option value="">Toutes classes</option></select>
+        <select id="filter-statut-cours" onchange="renderCours()" style="flex:1"><option value="">Tous statuts</option><option>En cours</option><option>Terminé</option><option>Planifié</option></select>
+      </div>
+      <div id="liste-cours"><div class="loading"><div class="spinner"></div><span>Chargement...</span></div></div>
+    </div>
+    <div id="co-add" class="sub-content">
+      <div class="two-col">
+        <div class="card">
+          <div class="card-title">Nouveau cours</div>
+          <div class="form-group"><label>Titre</label><input id="co-titre" placeholder="La cellule vivante"></div>
+          <div class="two-eq">
+            <div class="form-group"><label>École</label><select id="co-ecole" onchange="filterClassesByCours()"><option value="">--</option></select></div>
+            <div class="form-group"><label>Classe</label><select id="co-classe"><option value="">--</option></select></div>
+          </div>
+          <div class="form-group"><label>Matière</label><input id="co-mat" placeholder="Biologie, SVT..."></div>
+          <div class="two-eq">
+            <div class="form-group"><label>Date</label><input id="co-debut" type="date"></div>
+            <div class="form-group"><label>N° Chapitre</label><input id="co-num" placeholder="Chap. 1"></div>
+          </div>
+          <div class="form-group"><label>Statut</label><select id="co-statut"><option>En cours</option><option>Terminé</option><option>Planifié</option></select></div>
+          <div class="form-group"><label>Objectifs</label><textarea id="co-obj" placeholder="L'élève doit être capable de..."></textarea></div>
+          <div class="form-group"><label>Contenu</label><textarea id="co-contenu" placeholder="Résumé..."></textarea></div>
+          <div style="border-top:1px solid #e5e5e0;margin:8px 0;padding-top:8px">
+            <label style="font-weight:600;margin-bottom:6px;display:block">📎 Fichiers du cours</label>
+            <div id="co-fichiers-list" style="margin-bottom:7px"></div>
+            <div class="drive-link-box">
+              <input id="co-fichier-url" placeholder="Lien Google Drive / YouTube...">
+              <input id="co-fichier-nom" placeholder="Nom" style="width:120px">
+              <select id="co-fichier-type" style="width:80px"><option>PDF</option><option>Word</option><option>PPT</option><option>Image</option><option>Vidéo</option></select>
+              <button class="btn btn-sm btn-primary" onclick="addFichierCours()">+</button>
+            </div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="addCours()">💾 Enregistrer</button>
+        </div>
+        <div class="card">
+          <div class="alert-info alert-box" style="font-size:11px">💡 Les cours "Terminés" sont automatiquement ajoutés au <strong>cahier journal</strong> et à la <strong>planification annuelle</strong>.</div>
+        </div>
+      </div>
+    </div>
+    <div id="co-journal" class="sub-content">
+      <div class="card">
+        <div class="card-title">📔 Cahier journal global</div>
+        <div style="display:flex;gap:7px;margin-bottom:9px">
+          <select id="journal-ecole" onchange="filterClassesJournal()" style="flex:1"><option value="">Toutes écoles</option></select>
+          <select id="journal-classe" onchange="renderJournal()" style="flex:1"><option value="">Toutes classes</option></select>
+          <select id="journal-mat" onchange="renderJournal()" style="flex:1"><option value="">Toutes matières</option></select>
+        </div>
+        <div id="cahier-journal"><div class="empty">Les cours "Terminés" apparaissent ici</div></div>
+      </div>
+    </div>
+    <div id="co-planning" class="sub-content">
+      <div class="card">
+        <div class="card-title">📅 Planification annuelle</div>
+        <div style="display:flex;gap:7px;margin-bottom:9px;flex-wrap:wrap">
+          <select id="planning-ecole" onchange="filterClassesPlanning()" style="flex:1"><option value="">École</option></select>
+          <select id="planning-classe" onchange="renderPlanning()" style="flex:1"><option value="">Classe</option></select>
+          <select id="planning-mat" onchange="renderPlanning()" style="flex:1"><option value="">Matière</option></select>
+        </div>
+        <div id="planning-annuel"><div class="empty">Sélectionne une classe et une matière</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES -->
+  <div id="notes" class="section">
+    <div class="sub-tabs">
+      <button class="sub-tab active" onclick="showSubTab('notes','no-liste')">📊 Notes</button>
+      <button class="sub-tab" onclick="showSubTab('notes','no-add')">➕ Saisir</button>
+      <button class="sub-tab" onclick="showSubTab('notes','no-rapide')">⚡ Saisie rapide</button>
+      <button class="sub-tab" onclick="showSubTab('notes','no-import')">📥 Import</button>
+      <button class="sub-tab" onclick="showSubTab('notes','no-bulletin')">📄 Bulletins</button>
+    </div>
+    <div id="no-liste" class="sub-content active">
+      <div style="display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap">
+        <select id="filter-ecole-note" onchange="renderNotes()" style="flex:1"><option value="">Toutes écoles</option></select>
+        <select id="filter-classe-note" onchange="renderNotes()" style="flex:1"><option value="">Toutes classes</option></select>
+        <select id="filter-type-note" onchange="renderNotes()" style="flex:1"><option value="">Tous types</option><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select>
+      </div>
+      <div id="moy-display" style="margin-bottom:7px"></div>
+      <div id="liste-notes"><div class="loading"><div class="spinner"></div><span>Chargement...</span></div></div>
+    </div>
+    <div id="no-add" class="sub-content">
+      <div class="card">
+        <div class="card-title">Saisir une note</div>
+        <div class="three-col">
+          <div class="form-group"><label>Type</label><select id="no-type"><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select></div>
+          <div class="form-group"><label>Titre</label><input id="no-titre" placeholder="Devoir 1 — Biologie"></div>
+          <div class="form-group"><label>Matière</label><input id="no-mat" placeholder="Biologie"></div>
+        </div>
+        <div class="three-col">
+          <div class="form-group"><label>École</label><select id="no-ecole" onchange="filterElevesNote()"><option value="">--</option></select></div>
+          <div class="form-group"><label>Classe</label><select id="no-classe" onchange="filterElevesNote()"><option value="">--</option></select></div>
+          <div class="form-group"><label>Date</label><input id="no-date" type="date"></div>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>Élève</label><select id="no-eleve"><option value="">--</option></select></div>
+          <div class="form-group"><label>Note / Barème</label>
+            <div style="display:flex;gap:5px">
+              <input id="no-note" type="number" step="0.25" placeholder="15" style="flex:1">
+              <span style="padding:6px 4px;font-size:12px">/</span>
+              <input id="no-bareme" type="number" value="20" style="width:60px">
+            </div>
+          </div>
+        </div>
+        <div class="form-group"><label>Observation</label><input id="no-obs" placeholder="Très bien..."></div>
+        <button class="btn btn-primary" onclick="addNote()">+ Enregistrer</button>
+      </div>
+    </div>
+    <div id="no-rapide" class="sub-content">
+      <div class="card">
+        <div class="card-title">⚡ Saisie rapide — toute une classe</div>
+        <div class="three-col">
+          <div class="form-group"><label>École</label><select id="no-rapide-ecole" onchange="loadClasseRapide()"><option value="">--</option></select></div>
+          <div class="form-group"><label>Classe</label><select id="no-rapide-classe" onchange="loadElevesRapide()"><option value="">--</option></select></div>
+          <div class="form-group"><label>Type</label><select id="no-rapide-type"><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select></div>
+        </div>
+        <div class="three-col">
+          <div class="form-group"><label>Titre</label><input id="no-rapide-titre" placeholder="Composition 1"></div>
+          <div class="form-group"><label>Matière</label><input id="no-rapide-mat" placeholder="Biologie"></div>
+          <div class="form-group"><label>Barème / Date</label>
+            <div style="display:flex;gap:5px">
+              <input id="no-rapide-bareme" type="number" value="20" style="width:60px">
+              <input id="no-rapide-date" type="date" style="flex:1">
+            </div>
+          </div>
+        </div>
+        <div id="eleves-rapide-list"><div class="empty">Sélectionne une classe</div></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="saveNotesRapide()">💾 Enregistrer toutes les notes</button>
+      </div>
+    </div>
+    <div id="no-import" class="sub-content">
+      <div class="card">
+        <div class="card-title">📥 Import notes (Excel)</div>
+        <div class="alert-info alert-box">Format : <code>Nom élève | Note | Observation</code></div>
+        <div class="three-col">
+          <div class="form-group"><label>École</label><select id="no-imp-ecole"><option value="">--</option></select></div>
+          <div class="form-group"><label>Classe</label><select id="no-imp-classe"><option value="">--</option></select></div>
+          <div class="form-group"><label>Type</label><select id="no-imp-type"><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select></div>
+        </div>
+        <div class="three-col">
+          <div class="form-group"><label>Titre</label><input id="no-imp-titre" placeholder="Composition 1"></div>
+          <div class="form-group"><label>Matière</label><input id="no-imp-mat" placeholder="Biologie"></div>
+          <div class="two-eq">
+            <div class="form-group"><label>Date</label><input id="no-imp-date" type="date"></div>
+            <div class="form-group"><label>Barème</label><input id="no-imp-bareme" type="number" value="20"></div>
+          </div>
+        </div>
+        <div class="import-zone" onclick="document.getElementById('notes-import-file').click()">
+          <input type="file" id="notes-import-file" accept=".xlsx,.xls,.csv" onchange="importExcelNotes(this)">
+          <div style="font-size:24px;margin-bottom:5px">📊</div>
+          <div style="font-size:12px;color:#888">Importer fichier Excel</div>
+        </div>
+        <div id="notes-import-preview" style="margin-top:10px"></div>
+      </div>
+    </div>
+    <div id="no-bulletin" class="sub-content">
+      <div class="card">
+        <div class="card-title">📄 Bulletins</div>
+        <div style="display:flex;gap:7px;margin-bottom:9px">
+          <select id="bull-ecole" onchange="filterClassesBull()" style="flex:1"><option value="">École</option></select>
+          <select id="bull-classe" onchange="renderBulletin()" style="flex:1"><option value="">Classe</option></select>
+          <select id="bull-eleve" onchange="renderBulletin()" style="flex:1"><option value="">Tous</option></select>
+        </div>
+        <div id="bulletin-content"><div class="empty">Sélectionne une classe</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEVOIRS -->
+  <div id="devoirs" class="section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+      <strong style="font-size:14px">📋 Devoirs, Évaluations & Compositions</strong>
+      <button class="btn btn-primary" onclick="openModal('modal-devoir')">+ Créer</button>
+    </div>
+    <div style="display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap">
+      <select id="filter-ecole-dv" onchange="renderDevoirs()" style="flex:1"><option value="">Toutes écoles</option></select>
+      <select id="filter-classe-dv" onchange="renderDevoirs()" style="flex:1"><option value="">Toutes classes</option></select>
+      <select id="filter-type-dv" onchange="renderDevoirs()" style="flex:1"><option value="">Tous types</option><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select>
+    </div>
+    <div id="liste-devoirs"><div class="loading"><div class="spinner"></div><span>Chargement...</span></div></div>
+  </div>
+
+  <!-- RESSOURCES -->
+  <div id="ressources" class="section">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">➕ Nouvelle ressource</div>
+        <div class="form-group"><label>Titre</label><input id="re-titre" placeholder="Livre de Biologie"></div>
+        <div class="two-eq">
+          <div class="form-group"><label>Type</label><select id="re-type"><option>Document PDF</option><option>Livre</option><option>Cours (Word/PPT)</option><option>Exercice</option><option>Corrigé</option><option>Image/Schéma</option><option>Vidéo</option><option>Lien web</option><option>Autre</option></select></div>
+          <div class="form-group"><label>Matière</label><input id="re-mat" placeholder="Biologie"></div>
+        </div>
+        <div class="form-group"><label>École</label><select id="re-ecole"><option value="">Toutes</option></select></div>
+        <div class="form-group"><label>🔗 Lien (Google Drive, YouTube...)</label>
+          <div class="drive-link-box"><input id="re-url" placeholder="https://drive.google.com/..."></div>
+        </div>
+        <div class="form-group"><label>Description</label><textarea id="re-desc" placeholder="Description..."></textarea></div>
+        <button class="btn btn-primary" style="width:100%" onclick="addRessource()">+ Ajouter</button>
+      </div>
+      <div class="card">
+        <div class="card-title">📚 Mes ressources</div>
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <select id="filter-type-res" onchange="renderRessources()" style="flex:1"><option value="">Tous types</option><option>Document PDF</option><option>Livre</option><option>Cours (Word/PPT)</option><option>Exercice</option><option>Corrigé</option><option>Image/Schéma</option><option>Vidéo</option><option>Lien web</option><option>Autre</option></select>
+          <input id="search-res" placeholder="🔍 Rechercher..." onkeyup="renderRessources()" style="flex:1">
+        </div>
+        <div id="liste-ressources"><div class="loading"><div class="spinner"></div><span>Chargement...</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDT -->
+  <div id="edt" class="section">
+    <div class="card">
+      <div class="card-title">Ajouter un créneau</div>
+      <div class="three-col">
+        <div class="form-group"><label>École</label><select id="et-ecole"><option value="">--</option></select></div>
+        <div class="form-group"><label>Jour</label><select id="et-jour"><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option></select></div>
+        <div class="form-group"><label>Matière</label><input id="et-mat" placeholder="Biologie"></div>
+      </div>
+      <div class="three-col">
+        <div class="form-group"><label>Heure début</label><select id="et-hdeb"><option>07h00</option><option>08h00</option><option>09h00</option><option>10h00</option><option>11h00</option><option>12h00</option><option>13h00</option><option>14h00</option><option>15h00</option><option>16h00</option><option>17h00</option></select></div>
+        <div class="form-group"><label>Heure fin</label><select id="et-hfin"><option>08h00</option><option>09h00</option><option>10h00</option><option>11h00</option><option>12h00</option><option>13h00</option><option>14h00</option><option>15h00</option><option>16h00</option><option>17h00</option><option>18h00</option></select></div>
+        <div class="form-group"><label>Salle</label><input id="et-salle" placeholder="Salle 12"></div>
+      </div>
+      <div class="three-col">
+        <div class="form-group"><label>Classe</label><input id="et-classe" placeholder="9ème A"></div>
+        <div class="form-group"><label>Leçon</label><input id="et-lecon" placeholder="La cellule vivante"></div>
+        <div class="form-group"><label>Note programme</label><input id="et-note" placeholder="Apporter TP..."></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-primary" onclick="addSlot()">+ Ajouter</button>
+        <span id="et-err" style="font-size:11px;color:#c0392b"></span>
+        <button class="btn btn-danger" onclick="clearEdt()" style="margin-left:auto">🗑 Effacer tout</button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Grille horaire</div>
+      <div style="margin-bottom:7px"><select id="filter-ecole-edt" onchange="renderEdt()" style="width:220px"><option value="">Toutes les écoles</option></select></div>
+      <div class="grid-wrap">
+        <table class="edt"><thead><tr><th style="width:52px">Heure</th><th>Lundi</th><th>Mardi</th><th>Mercredi</th><th>Jeudi</th><th>Vendredi</th><th>Samedi</th></tr></thead><tbody id="edt-body"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALERTES -->
+  <div id="alertes" class="section">
+    <div class="card">
+      <div class="card-title">🔔 Alertes de rappel</div>
+      <div class="alert-info alert-box">Rappel automatique la veille de chaque cours.</div>
+      <div class="two-eq" style="max-width:500px">
+        <div class="form-group"><label>Email</label><input id="email-rappel" type="email"></div>
+        <div style="display:flex;align-items:flex-end;gap:6px;padding-bottom:7px">
+          <button class="btn btn-primary" onclick="sauvegarderEmail()">💾</button>
+          <button class="btn btn-primary" onclick="activerNotifs()">🔔 Activer</button>
+        </div>
+      </div>
+      <div id="notif-status" class="alert-warn alert-box">Non activées</div>
+      <div class="card-title" style="margin-top:10px">📧 EmailJS</div>
+      <div class="three-col" style="max-width:600px">
+        <div class="form-group"><label>Service ID</label><input id="ejs-service" placeholder="service_xxx"></div>
+        <div class="form-group"><label>Template ID</label><input id="ejs-template" placeholder="template_xxx"></div>
+        <div class="form-group"><label>Public Key</label><input id="ejs-pubkey" placeholder="xxxxxxx"></div>
+      </div>
+      <button class="btn btn-primary" onclick="sauvegarderEmailJS()">💾 Sauvegarder EmailJS</button>
+      <div id="ejs-status" style="margin-top:6px;font-size:11px;color:#0F6E56"></div>
+    </div>
+    <div class="card"><div class="card-title">Cours de demain</div><div id="demain-liste"><div class="empty">Aucun cours</div></div></div>
+  </div>
+
+  </div><!-- /main -->
+</div><!-- /app-page -->
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+// ===== SUPABASE CONFIG =====
+const SUPABASE_URL='https://kkmegpbfmgprujpjnfpk.supabase.co';
+const SUPABASE_KEY='sb_publishable_FRsYkEiIfz2oXGvT1I0fOQ_jwAnaPzs';
+const {createClient}=supabase;
+const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
+
+const JOURS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const JOURS_FR=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const HEURES=['07h00','08h00','09h00','10h00','11h00','12h00','13h00','14h00','15h00','16h00','17h00','18h00'];
+
+let currentUser=null;
+let currentEcoleFilter='';
+let dvQuestions=[];
+let coFichiers=[];
+let currentCahierClasseId=null;
+let elevesInterroges=[];
+let currentDevoirId=null;
+let currentEleveDevoir=null;
+let cfg={email:'',ejsService:'',ejsTemplate:'',ejsPubKey:''};
+
+// Cache local pour éviter trop de requêtes
+let cache={ecoles:[],classes:[],eleves:[],cours:[],notes:[],devoirs:[],copies:[],ressources:[],slots:[],seances:{},sanctions:{},bonus:{},rappelsClasse:{}};
+
+function toast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function setSyncStatus(status){
+  const dot=document.getElementById('sync-dot');
+  if(!dot)return;
+  dot.className='sync-dot'+(status==='syncing'?' syncing':status==='error'?' error':'');
+}
+
+// ===== AUTH =====
+function showAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.auth-form').forEach(f=>f.classList.remove('active'));
+  document.querySelector(`.auth-tab:${tab==='login'?'first-child':'last-child'}`).classList.add('active');
+  document.getElementById('auth-'+tab).classList.add('active');
+}
+
+async function register(){
+  const prenom=document.getElementById('reg-prenom').value.trim();
+  const nom=document.getElementById('reg-nom').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const pwd=document.getElementById('reg-pwd').value;
+  const pwd2=document.getElementById('reg-pwd2').value;
+  const err=document.getElementById('register-err');
+  if(!prenom||!nom||!email||!pwd){err.textContent='Tous les champs sont requis.';return;}
+  if(pwd!==pwd2){err.textContent='Les mots de passe ne correspondent pas.';return;}
+  if(pwd.length<6){err.textContent='Mot de passe trop court (min. 6 caractères).';return;}
+  err.textContent='Création en cours...';
+  const{data,error}=await sb.auth.signUp({email,password:pwd,options:{data:{prenom,nom,full_name:prenom+' '+nom}}});
+  if(error){err.textContent=error.message;return;}
+  err.style.color='#0F6E56';
+  err.textContent='✓ Compte créé ! Vérifie ton email pour confirmer puis connecte-toi.';
+}
+
+async function login(){
+  const email=document.getElementById('login-email').value.trim();
+  const pwd=document.getElementById('login-pwd').value;
+  const err=document.getElementById('login-err');
+  if(!email||!pwd){err.textContent='Email et mot de passe requis.';return;}
+  err.textContent='Connexion en cours...';
+  const{data,error}=await sb.auth.signInWithPassword({email,password:pwd});
+  if(error){err.textContent='Email ou mot de passe incorrect.';return;}
+  err.textContent='';
+  await initApp(data.user);
+}
+
+async function logout(){
+  await sb.auth.signOut();
+  currentUser=null;
+  cache={ecoles:[],classes:[],eleves:[],cours:[],notes:[],devoirs:[],copies:[],ressources:[],slots:[],seances:{},sanctions:{},bonus:{},rappelsClasse:{}};
+  document.getElementById('app-page').classList.remove('active');
+  document.getElementById('auth-page').style.display='flex';
+}
+
+async function initApp(user){
+  currentUser=user;
+  document.getElementById('auth-page').style.display='none';
+  document.getElementById('app-page').classList.add('active');
+  const meta=user.user_metadata||{};
+  document.getElementById('user-name').textContent=(meta.prenom||meta.full_name||user.email.split('@')[0]);
+  document.getElementById('date-now').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  cfg.email=user.email;
+  document.getElementById('email-rappel').value=user.email;
+  await loadAllData();
+  updateAccueil();
+  updateNotifStatus();
+}
+
+// ===== SUPABASE TABLES =====
+// Toutes les données sont filtrées par user_id automatiquement via RLS
+async function sbGet(table,filters={}){
+  let q=sb.from(table).select('*').eq('user_id',currentUser.id);
+  Object.entries(filters).forEach(([k,v])=>q=q.eq(k,v));
+  const{data,error}=await q.order('created_at',{ascending:false});
+  if(error){console.error(table,error);return[];}
+  return data||[];
+}
+async function sbInsert(table,obj){
+  setSyncStatus('syncing');
+  const{data,error}=await sb.from(table).insert({...obj,user_id:currentUser.id}).select().single();
+  setSyncStatus(error?'error':'');
+  if(error){toast('Erreur de sauvegarde : '+error.message);console.error(error);return null;}
+  return data;
+}
+async function sbDelete(table,id){
+  setSyncStatus('syncing');
+  const{error}=await sb.from(table).delete().eq('id',id).eq('user_id',currentUser.id);
+  setSyncStatus(error?'error':'');
+  if(error)toast('Erreur de suppression');
+}
+async function sbUpdate(table,id,obj){
+  setSyncStatus('syncing');
+  const{data,error}=await sb.from(table).update(obj).eq('id',id).eq('user_id',currentUser.id).select().single();
+  setSyncStatus(error?'error':'');
+  return data;
+}
+
+async function loadAllData(){
+  setSyncStatus('syncing');
+  try{
+    [cache.ecoles,cache.classes,cache.eleves,cache.cours,cache.notes,cache.devoirs,cache.copies,cache.ressources,cache.slots]=await Promise.all([
+      sbGet('ecoles'),sbGet('classes'),sbGet('eleves'),sbGet('cours'),
+      sbGet('notes'),sbGet('devoirs'),sbGet('copies'),sbGet('ressources'),sbGet('slots')
+    ]);
+    // Charger les données JSON (seances, sanctions, bonus, rappels)
+    const extras=await sbGet('extras');
+    extras.forEach(e=>{
+      if(e.type==='seances')cache.seances[e.classe_id]=e.data||[];
+      if(e.type==='sanctions')cache.sanctions[e.classe_id]=e.data||[];
+      if(e.type==='bonus')cache.bonus[e.classe_id]=e.data||[];
+      if(e.type==='rappels')cache.rappelsClasse[e.classe_id]=e.data||[];
+    });
+    setSyncStatus('');
+  }catch(e){setSyncStatus('error');console.error(e);}
+  refreshAllSelects();
+  renderClasses();renderEleves();renderCours();renderNotes();renderDevoirs();renderRessources();renderEdt();
+  updateStats();
+}
+
+async function saveExtra(type,classeId,data){
+  const existing=await sb.from('extras').select('id').eq('user_id',currentUser.id).eq('type',type).eq('classe_id',classeId).single();
+  if(existing.data){
+    await sb.from('extras').update({data}).eq('id',existing.data.id);
+  }else{
+    await sb.from('extras').insert({user_id:currentUser.id,type,classe_id:classeId,data});
+  }
+}
+
+// ===== HELPERS =====
+function getEcoleAbr(id){const e=cache.ecoles.find(x=>x.id==id);return e?e.abr:'?';}
+function getEcoleNom(id){const e=cache.ecoles.find(x=>x.id==id);return e?e.nom:'—';}
+function getEcoleCouleur(id){const e=cache.ecoles.find(x=>x.id==id);return e?e.couleur:'#0F6E56';}
+function getClasseNom(id){const c=cache.classes.find(x=>x.id==id);return c?c.nom:'—';}
+function getClasseEcoleId(id){const c=cache.classes.find(x=>x.id==id);return c?c.ecole_id:null;}
+function getEleveNom(id){const e=cache.eleves.find(x=>x.id==id);return e?e.nom:'—';}
+function noteStyle(n,b){const p=n/b;if(p>=0.7)return 'background:#E1F5EE;color:#085041';if(p>=0.5)return 'background:#FAEEDA;color:#633806';return 'background:#FCEBEB;color:#791F1F';}
+function hIdx(h){return HEURES.indexOf(h);}
+function genCode(){return Math.random().toString(36).substr(2,8).toUpperCase();}
+function genMatricule(ecoleId,classeId){
+  const e=cache.ecoles.find(x=>x.id==ecoleId);
+  const c=cache.classes.find(x=>x.id==classeId);
+  const prefix=(e?e.abr.substr(0,3):'XXX')+(c?c.nom.replace(/[^0-9]/g,'').substr(0,2)||'00':'00');
+  return prefix+'-'+String(Date.now()).slice(-4);
+}
+function typeIcon(type){const icons={PDF:'📕',Word:'📄',PPT:'📊',Image:'🖼️','Vidéo':'🎬',Autre:'📎','Document PDF':'📕','Image/Schéma':'🖼️','Cours (Word/PPT)':'📊',Livre:'📚',Exercice:'✏️',Corrigé:'✅','Lien web':'🔗'};return icons[type]||'📎';}
+
+function showTab(t){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(t).classList.add('active');
+  const tabs=['accueil','ecoles','classes','cours','notes','devoirs','ressources','edt','alertes'];
+  document.querySelectorAll('.nav button')[tabs.indexOf(t)].classList.add('active');
+  if(t==='accueil')updateAccueil();
+  if(t==='edt')renderEdt();
+  if(t==='devoirs')renderDevoirs();
+  if(t==='alertes'){renderDemain();updateNotifStatus();}
+  if(t==='cours'){filterClassesJournal();filterClassesPlanning();}
+}
+function showSubTab(section,id){
+  const parent=document.getElementById(section);
+  parent.querySelectorAll('.sub-content').forEach(e=>e.classList.remove('active'));
+  parent.querySelectorAll('.sub-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const tabs=[...parent.querySelectorAll('.sub-content')];
+  const idx=tabs.indexOf(document.getElementById(id));
+  parent.querySelectorAll('.sub-tab')[idx].classList.add('active');
+}
+function switchEcole(id){currentEcoleFilter=id;updateAccueil();}
+
+function refreshAllSelects(){
+  const ecoleOpts=cache.ecoles.map(e=>`<option value="${e.id}">${e.abr} — ${e.nom}</option>`).join('');
+  document.getElementById('ecole-selector').innerHTML='<option value="">🏫 Toutes</option>'+ecoleOpts;
+  ['cl-ecole','co-ecole','no-ecole','et-ecole','re-ecole','dv-ecole','no-rapide-ecole','no-imp-ecole','bull-ecole','journal-ecole','planning-ecole'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const first=el.options[0].cloneNode(true);el.innerHTML='';el.appendChild(first);
+    el.insertAdjacentHTML('beforeend',ecoleOpts);
+  });
+  ['filter-ecole-cl','filter-ecole-el','filter-ecole-cours','filter-ecole-note','filter-ecole-edt','filter-ecole-dv'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const first=el.options[0].cloneNode(true);el.innerHTML='';el.appendChild(first);
+    el.insertAdjacentHTML('beforeend',ecoleOpts);
+  });
+  const classOpts=cache.classes.map(c=>`<option value="${c.id}">${c.nom} (${getEcoleAbr(c.ecole_id)})</option>`).join('');
+  ['el-classe','filter-classe-el','filter-classe-cours','filter-classe-note','filter-classe-dv','import-classe','no-imp-classe'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const first=el.options[0].cloneNode(true);el.innerHTML='';el.appendChild(first);
+    el.insertAdjacentHTML('beforeend',classOpts);
+  });
+  ['re-classe'].forEach(id=>{const el=document.getElementById(id);if(!el)return;el.innerHTML='<option value="">Toutes</option>'+classOpts;});
+  filterElevesNote();
+}
+function filterClassesByCours(){
+  const eid=document.getElementById('co-ecole').value;
+  const arr=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
+  document.getElementById('co-classe').innerHTML='<option value="">--</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+}
+function filterClassesDevoir(){
+  const eid=document.getElementById('dv-ecole').value;
+  const arr=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
+  document.getElementById('dv-classe').innerHTML='<option value="">--</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+}
+function filterClassesByEcole(){
+  const eid=document.getElementById('filter-ecole-el').value;
+  const arr=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
+  document.getElementById('filter-classe-el').innerHTML='<option value="">Toutes</option>'+arr.map(c=>`<option value="${c.id}">${c.nom} (${getEcoleAbr(c.ecole_id)})</option>`).join('');
+}
+function filterElevesNote(){
+  const eid=document.getElementById('no-ecole')?document.getElementById('no-ecole').value:'';
+  const cid=document.getElementById('no-classe')?document.getElementById('no-classe').value:'';
+  let arrC=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
+  const selC=document.getElementById('no-classe');
+  if(selC){selC.innerHTML='<option value="">--</option>'+arrC.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');if(cid)selC.value=cid;}
+  const classeId=selC?selC.value:'';
+  let arrE=classeId?cache.eleves.filter(e=>e.classe_id==classeId):[];
+  const selE=document.getElementById('no-eleve');
+  if(selE)selE.innerHTML='<option value="">--</option>'+arrE.map(e=>`<option value="${e.id}">${e.nom}</option>`).join('');
+}
+function filterClassesJournal(){
+  const eid=document.getElementById('journal-ecole').value;
+  const arr=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
+  document.getElementById('journal-classe').innerHTML='<option value="">Toutes</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+  const mats=[...new Set(cache.cours.map(c=>c.mat).filter(Boolean))];
+  document.getElementById('journal-mat').innerHTML='<option value="">Toutes</option>'+mats.map(m=>`<option>${m}</option>`).join('');
+  renderJournal();
+}
+function filterClassesPlanning(){
+  const eid=document.getElementById('planning-ecole').value;
+  const arr=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
+  document.getElementById('planning-classe').innerHTML='<option value="">Classe</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+  const mats=[...new Set(cache.cours.map(c=>c.mat).filter(Boolean))];
+  document.getElementById('planning-mat').innerHTML='<option value="">Matière</option>'+mats.map(m=>`<option>${m}</option>`).join('');
+  renderPlanning();
+}
+function filterClassesBull(){
+  const eid=document.getElementById('bull-ecole').value;
+  const arr=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
+  document.getElementById('bull-classe').innerHTML='<option value="">Classe</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+  document.getElementById('bull-eleve').innerHTML='<option value="">Tous</option>';
+  renderBulletin();
+}
+
+// ===== ÉCOLES =====
+async function addEcole(){
+  const nom=document.getElementById('ec-nom').value.trim();
+  const abr=document.getElementById('ec-abr').value.trim().toUpperCase();
+  if(!nom||!abr)return toast('Nom et abréviation requis');
+  const obj={nom,abr,loc:document.getElementById('ec-loc').value.trim(),type:document.getElementById('ec-type').value,couleur:document.getElementById('ec-couleur').value};
+  const data=await sbInsert('ecoles',obj);
+  if(!data)return;
+  cache.ecoles.unshift(data);
+  document.getElementById('ec-nom').value='';document.getElementById('ec-abr').value='';document.getElementById('ec-loc').value='';
+  refreshAllSelects();renderEcoles();updateStats();toast('École ajoutée ✓');
+}
+async function delEcole(id){
+  if(!confirm('Supprimer ?'))return;
+  await sbDelete('ecoles',id);
+  cache.ecoles=cache.ecoles.filter(x=>x.id!==id);
+  refreshAllSelects();renderEcoles();updateStats();
+}
+function renderEcoles(){
+  const el=document.getElementById('liste-ecoles');
+  if(!cache.ecoles.length){el.innerHTML='<div class="empty">Aucune école</div>';return;}
+  el.innerHTML=cache.ecoles.map(e=>`
+    <div style="border:1px solid ${e.couleur}40;border-left:4px solid ${e.couleur};border-radius:8px;padding:9px 13px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <span style="font-size:15px;font-weight:700;color:${e.couleur}">${e.abr}</span>
+        <strong style="margin-left:7px">${e.nom}</strong>
+        <span class="badge-stat" style="margin-left:5px">${e.type}</span>
+        ${e.loc?`<span style="font-size:10px;color:#aaa;margin-left:5px">📍${e.loc}</span>`:''}
+        <div style="margin-top:3px;font-size:10px;color:#888">${cache.classes.filter(c=>c.ecole_id===e.id).length} classes · ${cache.eleves.filter(ev=>{const c=cache.classes.find(x=>x.id==ev.classe_id);return c&&c.ecole_id==e.id;}).length} élèves</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="delEcole('${e.id}')">✕</button>
+    </div>`).join('');
+}
+
+// ===== CLASSES =====
+function updateClasseOptions(){
+  const cycle=document.getElementById('cl-cycle').value;
+  let opts='';
+  if(cycle==='Collège')opts='<option>7ème</option><option>8ème</option><option>9ème</option><option>10ème</option>';
+  else if(cycle==='Lycée')opts='<option>11ème</option><option>12ème</option><option>Terminale</option>';
+  else opts='<option>1ère année</option><option>2ème année</option><option>3ème année</option><option>4ème année</option><option>5ème année</option>';
+  document.getElementById('cl-niveau').innerHTML=opts;
+}
+async function addClasse(){
+  const ecoleId=document.getElementById('cl-ecole').value;
+  if(!ecoleId)return toast('Choisir une école');
+  const niveau=document.getElementById('cl-niveau').value;
+  const lettre=document.getElementById('cl-lettre').value;
+  const cycle=document.getElementById('cl-cycle').value;
+  const nom=niveau+(lettre?' '+lettre:'');
+  const obj={nom,niveau,cycle,ecole_id:ecoleId,effectif:document.getElementById('cl-eff').value||'?',annee:document.getElementById('cl-annee').value||'2026-2027'};
+  const data=await sbInsert('classes',obj);
+  if(!data)return;
+  cache.classes.unshift(data);
+  document.getElementById('cl-lettre').value='';document.getElementById('cl-eff').value='';
+  refreshAllSelects();renderClasses();updateStats();toast('Classe ajoutée ✓');
+}
+async function delClasse(id){
+  if(!confirm('Supprimer ?'))return;
+  await sbDelete('classes',id);
+  cache.classes=cache.classes.filter(x=>x.id!==id);
+  cache.eleves=cache.eleves.filter(x=>x.classe_id!==id);
+  refreshAllSelects();renderClasses();renderEleves();updateStats();
+}
+function renderClasses(){
+  const el=document.getElementById('liste-classes');
+  const fe=document.getElementById('filter-ecole-cl').value;
+  let arr=fe?cache.classes.filter(c=>c.ecole_id==fe):cache.classes;
+  if(!arr.length){el.innerHTML='<div class="empty">Aucune classe</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Classe</th><th>École</th><th>Cycle</th><th>Eff.</th><th>Élèves</th><th>Actions</th></tr></thead><tbody>'+
+    arr.map(c=>{
+      const badgeCls=c.cycle==='Lycée'?'badge-lycee':c.cycle==='Supérieur'?'badge-sup':'badge-college';
+      return `<tr>
+        <td><strong>${c.nom}</strong></td>
+        <td><span style="font-size:10px;padding:1px 6px;border-radius:20px;background:${getEcoleCouleur(c.ecole_id)}20;color:${getEcoleCouleur(c.ecole_id)};font-weight:600">${getEcoleAbr(c.ecole_id)}</span></td>
+        <td><span class="${badgeCls} badge">${c.cycle}</span></td>
+        <td>${c.effectif}</td>
+        <td>${cache.eleves.filter(e=>e.classe_id===c.id).length}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="ouvrirCahierClasse('${c.id}')" style="margin-right:3px">📔 Cahier</button>
+          <button class="btn btn-danger btn-sm" onclick="delClasse('${c.id}')">✕</button>
+        </td>
+      </tr>`;}).join('')+'</tbody></table>';
+}
+
+// ===== ÉLÈVES =====
+async function addEleve(){
+  const nom=document.getElementById('el-nom').value.trim();
+  const classeId=document.getElementById('el-classe').value;
+  if(!nom||!classeId)return toast('Nom et classe requis');
+  const cl=cache.classes.find(x=>x.id===classeId);
+  const pwd=document.getElementById('el-pwd').value.trim()||nom.split(' ')[0].toLowerCase()+'123';
+  const mat=genMatricule(cl?cl.ecole_id:null,classeId);
+  const obj={nom,classe_id:classeId,ecole_id:cl?cl.ecole_id:null,matricule:mat,ddn:document.getElementById('el-ddn').value,email:document.getElementById('el-email').value.trim(),wa:document.getElementById('el-wa').value.trim(),pwd,observations:[]};
+  const data=await sbInsert('eleves',obj);
+  if(!data)return;
+  cache.eleves.unshift(data);
+  ['el-nom','el-email','el-wa','el-pwd','el-ddn'].forEach(id=>document.getElementById(id).value='');
+  refreshAllSelects();renderEleves();updateStats();toast('Élève ajouté ✓ — Matricule : '+mat);
+}
+async function delEleve(id){
+  await sbDelete('eleves',id);
+  cache.eleves=cache.eleves.filter(x=>x.id!==id);
+  refreshAllSelects();renderEleves();updateStats();
+}
+function renderEleves(){
+  const el=document.getElementById('liste-eleves');
+  const fc=document.getElementById('filter-classe-el').value;
+  const fe=document.getElementById('filter-ecole-el').value;
+  const search=(document.getElementById('search-eleve').value||'').toLowerCase();
+  let arr=cache.eleves;
+  if(fc)arr=arr.filter(e=>e.classe_id==fc);
+  else if(fe)arr=arr.filter(e=>e.ecole_id==fe);
+  if(search)arr=arr.filter(e=>e.nom.toLowerCase().includes(search)||(e.matricule||'').toLowerCase().includes(search));
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun élève</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Matricule</th><th>Nom</th><th>Classe</th><th>Email</th><th>Mdp devoir</th><th>Actions</th></tr></thead><tbody>'+
+    arr.map(e=>`<tr>
+      <td><span class="matricule-badge">${e.matricule||'—'}</span></td>
+      <td><strong>${e.nom}</strong></td>
+      <td>${getClasseNom(e.classe_id)}</td>
+      <td style="font-size:10px">${e.email||'—'}</td>
+      <td><span style="font-family:monospace;font-size:10px;background:#f0f0eb;padding:1px 5px;border-radius:4px">${e.pwd||'—'}</span></td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="ouvrirFicheEleve('${e.id}')" style="margin-right:2px">👤</button>
+        <button class="btn btn-danger btn-sm" onclick="delEleve('${e.id}')">✕</button>
+      </td>
+    </tr>`).join('')+'</tbody></table>';
+}
+
+// ===== FICHE ÉLÈVE =====
+function ouvrirFicheEleve(id){
+  const e=cache.eleves.find(x=>x.id===id);if(!e)return;
+  const cl=cache.classes.find(x=>x.id==e.classe_id);
+  const notes=cache.notes.filter(n=>n.eleve_id===id);
+  const moy=notes.length?(notes.reduce((s,n)=>s+n.note/n.bareme*20,0)/notes.length).toFixed(2):'—';
+  let html=`
+    <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap">
+      <div style="width:70px;height:70px;border-radius:50%;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:28px;border:2px solid #0F6E56">👤</div>
+      <div style="flex:1">
+        <h2 style="font-size:16px;margin-bottom:4px">${e.nom}</h2>
+        <div class="matricule-badge">${e.matricule||'—'}</div>
+        <div style="font-size:12px;color:#666;margin-top:5px">${cl?cl.nom:''} · ${getEcoleAbr(e.ecole_id)}</div>
+        ${e.ddn?`<div style="font-size:11px;color:#888">Né(e) le : ${e.ddn}</div>`:''}
+        ${e.email?`<div style="font-size:11px;color:#888">✉️ ${e.email}</div>`:''}
+        ${e.wa?`<div style="font-size:11px;color:#888">📱 ${e.wa}</div>`:''}
+      </div>
+      <div style="text-align:center;background:#E1F5EE;border-radius:8px;padding:8px 14px">
+        <div style="font-size:22px;font-weight:700;color:#0F6E56">${moy}</div>
+        <div style="font-size:10px;color:#0F6E56">/20 Moyenne</div>
+      </div>
+    </div>
+    <div style="margin-bottom:12px">
+      <div style="font-weight:600;font-size:13px;margin-bottom:7px;border-bottom:1px solid #e5e5e0;padding-bottom:5px">📊 Notes</div>
+      ${notes.length?'<table><thead><tr><th>Évaluation</th><th>Type</th><th>Matière</th><th>Note</th></tr></thead><tbody>'+notes.map(n=>`<tr><td>${n.titre}</td><td>${n.type||'—'}</td><td>${n.mat||'—'}</td><td><span class="note-pill" style="${noteStyle(n.note,n.bareme)}">${n.note}/${n.bareme}</span></td></tr>`).join('')+'</tbody></table>':'<div class="empty">Aucune note</div>'}
+    </div>
+    <div>
+      <div style="font-weight:600;font-size:13px;margin-bottom:7px;border-bottom:1px solid #e5e5e0;padding-bottom:5px">📝 Observations</div>
+      <div style="margin-bottom:8px">${(e.observations||[]).map((obs,i)=>`<div style="background:#f9f9f7;border-radius:6px;padding:6px 9px;margin-bottom:4px;font-size:12px;display:flex;justify-content:space-between"><div><span style="font-size:10px;color:#888">${obs.date}</span><br>${obs.texte}</div><button class="btn btn-danger btn-xs" onclick="delObs('${id}',${i})">✕</button></div>`).join('')||'<div class="empty">Aucune observation</div>'}</div>
+      <div style="display:flex;gap:6px"><input id="obs-new-${id}" placeholder="Nouvelle observation..." style="flex:1"><button class="btn btn-primary btn-sm" onclick="addObs('${id}')">+ Ajouter</button></div>
+    </div>`;
+  document.getElementById('fiche-eleve-content').innerHTML=html;
+  openModal('modal-eleve');
+}
+async function addObs(eleveId){
+  const e=cache.eleves.find(x=>x.id===eleveId);if(!e)return;
+  const txt=document.getElementById('obs-new-'+eleveId).value.trim();if(!txt)return;
+  if(!e.observations)e.observations=[];
+  e.observations.push({date:new Date().toLocaleDateString('fr-FR'),texte:txt});
+  await sbUpdate('eleves',eleveId,{observations:e.observations});
+  ouvrirFicheEleve(eleveId);toast('Observation ajoutée ✓');
+}
+async function delObs(eleveId,idx){
+  const e=cache.eleves.find(x=>x.id===eleveId);if(!e)return;
+  e.observations.splice(idx,1);
+  await sbUpdate('eleves',eleveId,{observations:e.observations});
+  ouvrirFicheEleve(eleveId);
+}
+
+// ===== IMPORT EXCEL ÉLÈVES =====
+function importExcelEleves(input){
+  const classeId=document.getElementById('import-classe').value;
+  if(!classeId)return toast('Choisir la classe');
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      const data=rows.slice(1).filter(r=>r[0]);
+      window._importData=data;window._importClasseId=classeId;
+      let preview=`<div class="alert-success alert-box">${data.length} élève(s) détecté(s). <button class="btn btn-primary btn-sm" onclick="confirmImportEleves()">✓ Confirmer</button></div>`;
+      preview+='<table><thead><tr><th>Nom</th><th>Email</th><th>WhatsApp</th><th>Mdp</th></tr></thead><tbody>';
+      data.slice(0,5).forEach(r=>{preview+=`<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||'auto'}</td></tr>`;});
+      preview+='</tbody></table>';
+      document.getElementById('import-preview').innerHTML=preview;
+    }catch(err){toast('Erreur : '+err.message);}
+  };reader.readAsBinaryString(file);
+}
+async function confirmImportEleves(){
+  const classeId=window._importClasseId;
+  const cl=cache.classes.find(x=>x.id===classeId);
+  const data=window._importData||[];
+  let added=0;
+  for(const r of data){
+    const nom=(r[0]||'').trim();if(!nom)continue;
+    const pwd=(r[3]||'').toString().trim()||nom.split(' ')[0].toLowerCase()+'123';
+    const mat=genMatricule(cl?cl.ecole_id:null,classeId);
+    const obj={nom,classe_id:classeId,ecole_id:cl?cl.ecole_id:null,matricule:mat,email:(r[1]||'').trim(),wa:(r[2]||'').toString().trim(),pwd,observations:[]};
+    const data2=await sbInsert('eleves',obj);
+    if(data2){cache.eleves.unshift(data2);added++;}
+  }
+  refreshAllSelects();renderEleves();updateStats();
+  document.getElementById('import-preview').innerHTML=`<div class="alert-success alert-box">✓ ${added} élève(s) importé(s) !</div>`;
+  toast(`${added} élèves importés ✓`);
+}
+
+// ===== COURS =====
+let coFichiersBuffer=[];
+function addFichierCours(){
+  const url=document.getElementById('co-fichier-url').value.trim();
+  const nom=document.getElementById('co-fichier-nom').value.trim()||'Fichier';
+  const type=document.getElementById('co-fichier-type').value;
+  if(!url)return;
+  coFichiersBuffer.push({url,nom,type});
+  document.getElementById('co-fichier-url').value='';document.getElementById('co-fichier-nom').value='';
+  renderCoFichiers();
+}
+function renderCoFichiers(){
+  document.getElementById('co-fichiers-list').innerHTML=coFichiersBuffer.map((f,i)=>`<span class="file-chip">${typeIcon(f.type)} <a href="${f.url}" target="_blank">${f.nom}</a> <span onclick="coFichiersBuffer.splice(${i},1);renderCoFichiers()" style="cursor:pointer;opacity:.6">✕</span></span>`).join('');
+}
+async function addCours(){
+  const titre=document.getElementById('co-titre').value.trim();
+  const classeId=document.getElementById('co-classe').value;
+  const ecoleId=document.getElementById('co-ecole').value;
+  const mat=document.getElementById('co-mat').value.trim();
+  if(!titre||!classeId||!ecoleId||!mat)return toast('Remplis tous les champs');
+  const obj={titre,mat,ecole_id:ecoleId,classe_id:classeId,debut:document.getElementById('co-debut').value,num:document.getElementById('co-num').value,statut:document.getElementById('co-statut').value,obj_pedagogique:document.getElementById('co-obj').value.trim(),contenu:document.getElementById('co-contenu').value.trim(),fichiers:[...coFichiersBuffer]};
+  const data=await sbInsert('cours',obj);
+  if(!data)return;
+  cache.cours.unshift(data);
+  coFichiersBuffer=[];renderCoFichiers();
+  ['co-titre','co-obj','co-contenu','co-mat','co-num'].forEach(id=>document.getElementById(id).value='');
+  renderCours();renderJournal();renderPlanning();updateStats();toast('Cours enregistré ✓');
+}
+async function delCours(id){
+  await sbDelete('cours',id);
+  cache.cours=cache.cours.filter(x=>x.id!==id);
+  renderCours();renderJournal();renderPlanning();updateStats();
+}
+function renderCours(){
+  const el=document.getElementById('liste-cours');
+  const fe=document.getElementById('filter-ecole-cours').value;
+  const fc=document.getElementById('filter-classe-cours').value;
+  const fs=document.getElementById('filter-statut-cours').value;
+  let arr=cache.cours;
+  if(fe)arr=arr.filter(c=>c.ecole_id==fe);
+  if(fc)arr=arr.filter(c=>c.classe_id==fc);
+  if(fs)arr=arr.filter(c=>c.statut===fs);
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun cours</div>';return;}
+  el.innerHTML=arr.map(co=>`
+    <div style="border:1px solid #e5e5e0;border-left:3px solid ${getEcoleCouleur(co.ecole_id)};border-radius:8px;padding:10px 13px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;gap:8px">
+        <div>
+          <span style="font-size:10px;padding:1px 6px;border-radius:20px;background:${getEcoleCouleur(co.ecole_id)}20;color:${getEcoleCouleur(co.ecole_id)};font-weight:700">${getEcoleAbr(co.ecole_id)}</span>
+          <span class="badge-stat" style="margin-left:4px">${co.mat}</span>
+          <span class="badge-stat" style="margin-left:3px">${co.statut}</span>
+          ${co.num?`<span class="badge-stat" style="margin-left:3px">${co.num}</span>`:''}
+          <div style="font-size:14px;font-weight:600;margin-top:3px">${co.titre}</div>
+          <div style="font-size:11px;color:#888">${getClasseNom(co.classe_id)} · ${co.debut||'—'}</div>
+          ${co.obj_pedagogique?`<div style="font-size:11px;color:#666;margin-top:2px">${co.obj_pedagogique}</div>`:''}
+          ${co.fichiers&&co.fichiers.length?`<div style="margin-top:4px">${co.fichiers.map(f=>`<span class="file-chip">${typeIcon(f.type)} <a href="${f.url}" target="_blank">${f.nom}</a></span>`).join('')}</div>`:''}
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="delCours('${co.id}')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function renderJournal(){
+  const el=document.getElementById('cahier-journal');
+  const fe=document.getElementById('journal-ecole').value;
+  const fc=document.getElementById('journal-classe').value;
+  const fm=document.getElementById('journal-mat').value;
+  let arr=cache.cours.filter(c=>c.statut==='Terminé');
+  if(fe)arr=arr.filter(c=>c.ecole_id==fe);
+  if(fc)arr=arr.filter(c=>c.classe_id==fc);
+  if(fm)arr=arr.filter(c=>c.mat===fm);
+  arr.sort((a,b)=>(a.debut||'').localeCompare(b.debut||''));
+  if(!arr.length){el.innerHTML='<div class="empty">Les cours "Terminés" apparaissent ici</div>';return;}
+  el.innerHTML=arr.map(co=>`
+    <div style="border-left:3px solid #0F6E56;padding:8px 12px;margin-bottom:8px;background:#f9f9f7;border-radius:0 7px 7px 0">
+      <div style="font-size:10px;font-weight:700;color:#888">${co.num||''} · ${co.mat} · ${getClasseNom(co.classe_id)} (${getEcoleAbr(co.ecole_id)}) · ${co.debut||'—'}</div>
+      <div style="font-size:13px;font-weight:600;margin-top:2px">${co.titre}</div>
+      ${co.obj_pedagogique?`<div style="font-size:11px;color:#666;margin-top:2px">🎯 ${co.obj_pedagogique}</div>`:''}
+      ${co.contenu?`<div style="font-size:11px;color:#888;margin-top:2px">${co.contenu}</div>`:''}
+      ${co.fichiers&&co.fichiers.length?`<div style="margin-top:4px">${co.fichiers.map(f=>`<span class="file-chip">${typeIcon(f.type)} <a href="${f.url}" target="_blank">${f.nom}</a></span>`).join('')}</div>`:''}
+    </div>`).join('');
+}
+function renderPlanning(){
+  const el=document.getElementById('planning-annuel');
+  const fe=document.getElementById('planning-ecole').value;
+  const fc=document.getElementById('planning-classe').value;
+  const fm=document.getElementById('planning-mat').value;
+  if(!fc&&!fm){el.innerHTML='<div class="empty">Sélectionne une classe et/ou une matière</div>';return;}
+  let arr=cache.cours;
+  if(fe)arr=arr.filter(c=>c.ecole_id==fe);
+  if(fc)arr=arr.filter(c=>c.classe_id==fc);
+  if(fm)arr=arr.filter(c=>c.mat===fm);
+  arr.sort((a,b)=>(a.debut||'').localeCompare(b.debut||''));
+  const done=arr.filter(c=>c.statut==='Terminé').length;
+  const pct=arr.length?Math.round(done/arr.length*100):0;
+  el.innerHTML=`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px"><span>${done}/${arr.length} cours</span><span style="font-weight:700;color:#0F6E56">${pct}%</span></div>
+      <div style="background:#e5e5e0;border-radius:20px;height:6px"><div style="background:#0F6E56;height:6px;border-radius:20px;width:${pct}%"></div></div>
+    </div>
+    ${arr.map(co=>`
+      <div style="display:grid;grid-template-columns:80px 1fr 100px 90px;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0eb;align-items:center;font-size:12px">
+        <div style="font-size:10px;color:#888">${co.num||'—'}<br>${co.debut||'—'}</div>
+        <div><strong>${co.titre}</strong>${co.obj_pedagogique?`<div style="font-size:10px;color:#888">${co.obj_pedagogique.substr(0,50)}...</div>`:''}</div>
+        <div style="font-size:11px">${getClasseNom(co.classe_id)}</div>
+        <div><span class="badge-stat">${co.statut}</span></div>
+      </div>`).join('')}`;
+}
+
+// ===== NOTES =====
+async function addNote(){
+  const titre=document.getElementById('no-titre').value.trim();
+  const classeId=document.getElementById('no-classe').value;
+  const eleveId=document.getElementById('no-eleve').value;
+  const note=parseFloat(document.getElementById('no-note').value);
+  const ecoleId=document.getElementById('no-ecole').value;
+  if(!titre||!classeId||!eleveId||isNaN(note)||!ecoleId)return toast('Remplis tous les champs');
+  const bareme=parseFloat(document.getElementById('no-bareme').value)||20;
+  const obj={titre,type:document.getElementById('no-type').value,mat:document.getElementById('no-mat').value,ecole_id:ecoleId,classe_id:classeId,eleve_id:eleveId,date:document.getElementById('no-date').value,bareme,note,obs:document.getElementById('no-obs').value};
+  const data=await sbInsert('notes',obj);
+  if(!data)return;
+  cache.notes.unshift(data);
+  document.getElementById('no-note').value='';document.getElementById('no-obs').value='';
+  renderNotes();updateStats();toast('Note enregistrée ✓');
+}
+function loadClasseRapide(){
+  const eid=document.getElementById('no-rapide-ecole').value;
+  const arr=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
+  document.getElementById('no-rapide-classe').innerHTML='<option value="">--</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+}
+function loadElevesRapide(){
+  const cid=document.getElementById('no-rapide-classe').value;
+  const eleves=cid?cache.eleves.filter(e=>e.classe_id==cid):[];
+  const el=document.getElementById('eleves-rapide-list');
+  if(!eleves.length){el.innerHTML='<div class="empty">Aucun élève</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Élève</th><th>Note</th></tr></thead><tbody>'+eleves.map(e=>`<tr><td>${e.nom}</td><td><input type="number" step="0.25" id="rapide_${e.id}" placeholder="—" style="width:70px"></td></tr>`).join('')+'</tbody></table>';
+}
+async function saveNotesRapide(){
+  const cid=document.getElementById('no-rapide-classe').value;
+  const titre=document.getElementById('no-rapide-titre').value.trim();
+  const mat=document.getElementById('no-rapide-mat').value.trim();
+  const type=document.getElementById('no-rapide-type').value;
+  const bareme=parseFloat(document.getElementById('no-rapide-bareme').value)||20;
+  const date=document.getElementById('no-rapide-date').value;
+  if(!cid||!titre)return toast('Titre et classe requis');
+  const cl=cache.classes.find(x=>x.id===cid);
+  let added=0;
+  for(const e of cache.eleves.filter(e=>e.classe_id===cid)){
+    const inp=document.getElementById('rapide_'+e.id);
+    if(!inp||inp.value==='')continue;
+    const note=parseFloat(inp.value);if(isNaN(note))continue;
+    const obj={titre,type,mat,ecole_id:cl?cl.ecole_id:null,classe_id:cid,eleve_id:e.id,date,bareme,note,obs:''};
+    const data=await sbInsert('notes',obj);
+    if(data){cache.notes.unshift(data);added++;}
+  }
+  renderNotes();updateStats();toast(`${added} note(s) enregistrée(s) ✓`);
+}
+async function delNote(id){
+  await sbDelete('notes',id);
+  cache.notes=cache.notes.filter(x=>x.id!==id);
+  renderNotes();updateStats();
+}
+function renderNotes(){
+  const el=document.getElementById('liste-notes');
+  const fc=document.getElementById('filter-classe-note').value;
+  const fe=document.getElementById('filter-ecole-note').value;
+  const ft=document.getElementById('filter-type-note').value;
+  let arr=cache.notes;
+  if(fc)arr=arr.filter(n=>n.classe_id==fc);
+  if(fe)arr=arr.filter(n=>n.ecole_id==fe);
+  if(ft)arr=arr.filter(n=>n.type===ft);
+  const moy=document.getElementById('moy-display');
+  if(arr.length){const avg=(arr.reduce((s,n)=>s+n.note/n.bareme*20,0)/arr.length).toFixed(2);moy.innerHTML=`<span style="font-size:11px">Moyenne : <strong style="color:#0F6E56">${avg}/20</strong> (${arr.length} note(s))</span>`;}else moy.innerHTML='';
+  if(!arr.length){el.innerHTML='<div class="empty">Aucune note</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Évaluation</th><th>Type</th><th>Élève</th><th>Mat.</th><th>Note</th><th></th></tr></thead><tbody>'+
+    arr.map(n=>`<tr>
+      <td>${n.titre}<br><span style="font-size:9px;color:#aaa">${n.date||''} · ${getClasseNom(n.classe_id)}</span></td>
+      <td style="font-size:10px">${n.type||'—'}</td>
+      <td>${getEleveNom(n.eleve_id)}</td>
+      <td style="font-size:10px">${n.mat||'—'}</td>
+      <td><span class="note-pill" style="${noteStyle(n.note,n.bareme)}">${n.note}/${n.bareme}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="delNote('${n.id}')">✕</button></td>
+    </tr>`).join('')+'</tbody></table>';
+}
+
+function importExcelNotes(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      const data=rows.slice(1).filter(r=>r[0]);
+      window._importNotesData=data;
+      let prev=`<div class="alert-success alert-box">${data.length} ligne(s). <button class="btn btn-primary btn-sm" onclick="confirmImportNotes()">✓ Confirmer</button></div>`;
+      prev+='<table><thead><tr><th>Nom</th><th>Note</th><th>Obs.</th></tr></thead><tbody>'+data.slice(0,5).map(r=>`<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td></tr>`).join('')+'</tbody></table>';
+      document.getElementById('notes-import-preview').innerHTML=prev;
+    }catch(err){toast('Erreur : '+err.message);}
+  };reader.readAsBinaryString(file);
+}
+async function confirmImportNotes(){
+  const data=window._importNotesData||[];
+  const classeId=document.getElementById('no-imp-classe').value;
+  const titre=document.getElementById('no-imp-titre').value.trim();
+  const mat=document.getElementById('no-imp-mat').value.trim();
+  const type=document.getElementById('no-imp-type').value;
+  const date=document.getElementById('no-imp-date').value;
+  const bareme=parseFloat(document.getElementById('no-imp-bareme').value)||20;
+  if(!classeId||!titre)return toast('Classe et titre requis');
+  const cl=cache.classes.find(x=>x.id===classeId);
+  let added=0;
+  for(const r of data){
+    const nomR=(r[0]||'').trim().toLowerCase();
+    const eleve=cache.eleves.find(e=>e.classe_id===classeId&&e.nom.toLowerCase().includes(nomR));
+    const note=parseFloat(r[1]);
+    if(!eleve||isNaN(note))continue;
+    const obj={titre,type,mat,ecole_id:cl?cl.ecole_id:null,classe_id:classeId,eleve_id:eleve.id,date,bareme,note,obs:(r[2]||'').toString()};
+    const d=await sbInsert('notes',obj);
+    if(d){cache.notes.unshift(d);added++;}
+  }
+  renderNotes();updateStats();
+  document.getElementById('notes-import-preview').innerHTML=`<div class="alert-success alert-box">✓ ${added} note(s) importée(s) !</div>`;
+  toast(`${added} notes importées ✓`);
+}
+
+function renderBulletin(){
+  const fc=document.getElementById('bull-classe').value;
+  const fe=document.getElementById('bull-eleve').value;
+  const el=document.getElementById('bulletin-content');
+  if(!fc){el.innerHTML='<div class="empty">Sélectionne une classe</div>';return;}
+  const elevesClasse=cache.eleves.filter(e=>e.classe_id==fc);
+  document.getElementById('bull-eleve').innerHTML='<option value="">Tous</option>'+elevesClasse.map(e=>`<option value="${e.id}">${e.nom}</option>`).join('');
+  const arr=fe?elevesClasse.filter(e=>e.id==fe):elevesClasse;
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun élève</div>';return;}
+  el.innerHTML=arr.map(e=>{
+    const notes=cache.notes.filter(n=>n.eleve_id===e.id&&n.classe_id==fc);
+    const moy=notes.length?(notes.reduce((s,n)=>s+n.note/n.bareme*20,0)/notes.length).toFixed(2):'—';
+    return `<div style="border:1px solid #e5e5e0;border-radius:8px;padding:11px 14px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div><strong style="font-size:14px">${e.nom}</strong><br><span class="matricule-badge">${e.matricule||'—'}</span></div>
+        <div style="text-align:center;background:#E1F5EE;border-radius:8px;padding:6px 12px"><div style="font-size:20px;font-weight:700;color:#0F6E56">${moy}</div><div style="font-size:10px;color:#0F6E56">/20 Moyenne</div></div>
+      </div>
+      ${notes.length?'<table><thead><tr><th>Évaluation</th><th>Type</th><th>Matière</th><th>Note</th></tr></thead><tbody>'+notes.map(n=>`<tr><td>${n.titre}</td><td>${n.type||'—'}</td><td>${n.mat||'—'}</td><td><span class="note-pill" style="${noteStyle(n.note,n.bareme)}">${n.note}/${n.bareme}</span></td></tr>`).join('')+'</tbody></table>':'<div class="empty">Aucune note</div>'}
+    </div>`;
+  }).join('');
+}
+
+// ===== DEVOIRS =====
+let dvQuestionsArr=[];
+function ajouterQuestion(type){
+  dvQuestionsArr.push({id:Date.now(),type,enonce:'',options:type==='qcm'?['','','','']:null,reponse:''});
+  renderQBuilder();
+}
+function renderQBuilder(){
+  const el=document.getElementById('questions-builder');
+  if(!dvQuestionsArr.length){el.innerHTML='';return;}
+  el.innerHTML=dvQuestionsArr.map((q,i)=>`
+    <div class="q-block ${q.type}" style="margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:10px;font-weight:600">${q.type==='qcm'?'🔵 QCM':'🟢 Ouverte'} — Q${i+1}</span>
+        <button class="btn btn-danger btn-xs" onclick="dvQuestionsArr.splice(${i},1);renderQBuilder()">✕</button>
+      </div>
+      <textarea onchange="dvQuestionsArr[${i}].enonce=this.value" placeholder="Énoncé..." style="min-height:40px;margin-bottom:5px">${q.enonce}</textarea>
+      ${q.type==='qcm'?q.options.map((opt,oi)=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><input type="radio" name="c_${q.id}" value="${oi}" ${q.reponse==oi?'checked':''} onchange="dvQuestionsArr[${i}].reponse='${oi}'" style="width:auto"><input type="text" value="${opt}" placeholder="Option ${oi+1}" onchange="dvQuestionsArr[${i}].options[${oi}]=this.value" style="flex:1"></div>`).join(''):`<textarea onchange="dvQuestionsArr[${i}].reponse=this.value" placeholder="Réponse attendue...">${q.reponse}</textarea>`}
+    </div>`).join('');
+}
+async function saveDevoir(){
+  const titre=document.getElementById('dv-titre').value.trim();
+  const classeId=document.getElementById('dv-classe').value;
+  const ecoleId=document.getElementById('dv-ecole').value;
+  if(!titre||!classeId||!ecoleId)return toast('Remplis les champs obligatoires');
+  const code=genCode();
+  const obj={titre,type:document.getElementById('dv-type').value,ecole_id:ecoleId,classe_id:classeId,mat:document.getElementById('dv-mat').value,deadline:document.getElementById('dv-deadline').value,duree:document.getElementById('dv-duree').value,bareme:parseFloat(document.getElementById('dv-bareme').value)||20,consignes:document.getElementById('dv-consignes').value,drive_link:document.getElementById('dv-drive-link').value,questions:JSON.parse(JSON.stringify(dvQuestionsArr)),code,statut:'ouvert'};
+  const data=await sbInsert('devoirs',obj);
+  if(!data)return;
+  cache.devoirs.unshift(data);
+  dvQuestionsArr=[];
+  ['dv-titre','dv-consignes','dv-mat','dv-drive-link'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('questions-builder').innerHTML='';
+  closeModal('modal-devoir');renderDevoirs();updateStats();toast('Devoir créé ✓',4000);
+}
+function getLien(code){return window.location.href.split('?')[0]+'?devoir='+code;}
+function partagerWA(code,titre){window.open('https://wa.me/?text='+encodeURIComponent(`📚 *${titre}*\n\n${getLien(code)}`),'_blank');}
+function copierLien(code){navigator.clipboard.writeText(getLien(code)).then(()=>toast('Lien copié ✓'));}
+async function cloturerDevoir(id){
+  await sbUpdate('devoirs',id,{statut:'cloture'});
+  const d=cache.devoirs.find(x=>x.id===id);if(d)d.statut='cloture';
+  renderDevoirs();toast('Clôturé');
+}
+async function voirResultats(id){
+  const dv=cache.devoirs.find(x=>x.id===id);if(!dv)return;
+  // Charger les copies depuis Supabase
+  const{data:copies}=await sb.from('copies').select('*').eq('devoir_id',id);
+  document.getElementById('res-titre').textContent='Résultats — '+dv.titre;
+  let html=`<div style="font-size:12px;color:#666;margin-bottom:9px">${(copies||[]).length} copie(s) reçue(s)</div>`;
+  if(!copies||!copies.length){html+='<div class="empty">Aucune copie</div>';}
+  else (copies||[]).forEach(cp=>{
+    const el=cache.eleves.find(e=>e.id==cp.eleve_id);
+    html+=`<div style="border:1px solid #e5e5e0;border-radius:7px;padding:9px 12px;margin-bottom:7px">
+      <div style="font-weight:600;margin-bottom:5px">${el?el.nom:'Élève'} <span style="font-size:10px;color:#888">${cp.created_at?new Date(cp.created_at).toLocaleString('fr-FR'):''}</span></div>`;
+    (dv.questions||[]).forEach((q,i)=>{
+      const rep=(cp.reponses||[])[i]||'—';
+      const ok=q.type==='qcm'?q.reponse==rep:null;
+      html+=`<div style="background:#f9f9f7;border-radius:5px;padding:6px 8px;margin-bottom:4px;font-size:11px">
+        <div style="font-weight:600">Q${i+1} : ${q.enonce}</div>
+        <div>→ ${q.type==='qcm'?`<span style="color:${ok?'#085041':'#c0392b'}">${(q.options||[])[parseInt(rep)]||rep} ${ok?'✓':'✗'}</span>`:rep}</div>
+        ${q.type==='qcm'&&!ok?`<div style="color:#085041;font-size:10px">✓ ${(q.options||[])[parseInt(q.reponse)]}</div>`:''}
+      </div>`;
+    });
+    html+='</div>';
+  });
+  document.getElementById('res-content').innerHTML=html;
+  openModal('modal-resultats');
+}
+function renderDevoirs(){
+  const el=document.getElementById('liste-devoirs');
+  const fe=document.getElementById('filter-ecole-dv').value;
+  const fc=document.getElementById('filter-classe-dv').value;
+  const ft=document.getElementById('filter-type-dv').value;
+  let arr=cache.devoirs;
+  if(fe)arr=arr.filter(d=>d.ecole_id==fe);
+  if(fc)arr=arr.filter(d=>d.classe_id==fc);
+  if(ft)arr=arr.filter(d=>d.type===ft);
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun devoir</div>';return;}
+  el.innerHTML=arr.map(dv=>{
+    const nbCopies=cache.copies.filter(c=>c.devoir_id===dv.id).length;
+    const nbEl=cache.eleves.filter(e=>e.classe_id==dv.classe_id).length;
+    const ec=cache.ecoles.find(e=>e.id==dv.ecole_id);const col=ec?ec.couleur:'#0F6E56';
+    return `<div class="devoir-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <span style="font-size:10px;font-weight:700;color:${col};background:${col}20;padding:1px 6px;border-radius:20px">${getEcoleAbr(dv.ecole_id)}</span>
+          <span class="badge-stat" style="margin-left:4px">${dv.type}</span>
+          <span class="badge-stat" style="margin-left:3px;background:${dv.statut==='ouvert'?'#E1F5EE':'#f0f0eb'};color:${dv.statut==='ouvert'?'#085041':'#555'}">${dv.statut==='ouvert'?'✓ Ouvert':'Clôturé'}</span>
+          <div style="font-size:13px;font-weight:600;margin-top:3px">${dv.titre}</div>
+          <div style="font-size:10px;color:#888">${getClasseNom(dv.classe_id)} · ${(dv.questions||[]).length} question(s)${dv.deadline?' · Limite : '+dv.deadline:''}</div>
+          <div style="font-size:11px;color:#0F6E56;font-weight:600">📥 ${nbCopies}/${nbEl} copie(s)</div>
+          ${dv.drive_link?`<div style="margin-top:4px"><span class="file-chip">📎 <a href="${dv.drive_link}" target="_blank">Fichier sujet</a></span></div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+          <button class="btn btn-primary btn-sm" onclick="voirResultats('${dv.id}')">📊 Résultats</button>
+          ${dv.statut==='ouvert'?`<button class="btn btn-warn btn-sm" onclick="cloturerDevoir('${dv.id}')">🔒 Clôturer</button>`:''}
+          <button class="btn btn-danger btn-sm" onclick="delDevoir('${dv.id}')">✕</button>
+        </div>
+      </div>
+      <div class="share-box">
+        <div style="font-size:11px;font-weight:600;margin-bottom:5px">📤 Partager</div>
+        <div style="display:flex;gap:5px;margin-bottom:5px">
+          <button class="btn btn-primary btn-sm" onclick="partagerWA('${dv.code}','${dv.titre.replace(/'/g,"\\'")}')">💬 WhatsApp</button>
+          <button class="btn btn-sm" onclick="copierLien('${dv.code}')">🔗 Copier lien</button>
+        </div>
+        <input value="${getLien(dv.code)}" readonly style="font-size:10px;color:#555;width:100%">
+      </div>
+    </div>`;}).join('');
+}
+async function delDevoir(id){
+  await sbDelete('devoirs',id);
+  cache.devoirs=cache.devoirs.filter(x=>x.id!==id);
+  renderDevoirs();updateStats();
+}
+
+// ===== PAGE ÉLÈVE DEVOIR =====
+async function checkDevoirParam(){
+  const code=new URLSearchParams(window.location.search).get('devoir');if(!code)return;
+  // Charger le devoir depuis Supabase (public)
+  const{data:dv}=await sb.from('devoirs').select('*').eq('code',code).single();
+  if(!dv){alert('Devoir introuvable.');return;}
+  currentDevoirId=dv.id;
+  // Charger les données de la classe
+  const{data:classeData}=await sb.from('classes').select('*').eq('id',dv.classe_id).single();
+  const{data:ecoleData}=await sb.from('ecoles').select('*').eq('id',dv.ecole_id).single();
+  const{data:elevesData}=await sb.from('eleves').select('*').eq('classe_id',dv.classe_id);
+  cache.devoirs=[dv];
+  cache.classes=classeData?[classeData]:[];
+  cache.ecoles=ecoleData?[ecoleData]:[];
+  cache.eleves=elevesData||[];
+  document.getElementById('ep-titre').textContent=dv.titre;
+  document.getElementById('ep-meta').textContent=(classeData?classeData.nom:'')+' · '+(ecoleData?ecoleData.abr:'')+(dv.mat?' · '+dv.mat:'');
+  document.getElementById('auth-page').style.display='none';
+  document.getElementById('eleve-page').classList.add('show');
+}
+async function eleveLogin(){
+  const nom=document.getElementById('ep-nom').value.trim();
+  const pwd=document.getElementById('ep-pwd').value.trim();
+  const err=document.getElementById('ep-err');
+  const dv=cache.devoirs.find(d=>d.id===currentDevoirId);
+  const eleve=cache.eleves.find(e=>e.nom.toLowerCase()===nom.toLowerCase()&&e.pwd===pwd);
+  if(!eleve){err.textContent='Nom ou mot de passe incorrect.';return;}
+  // Vérifier si déjà soumis
+  const{data:dejaFait}=await sb.from('copies').select('id').eq('devoir_id',currentDevoirId).eq('eleve_id',eleve.id).single();
+  if(dejaFait){err.textContent='Tu as déjà soumis ce devoir.';return;}
+  if(dv.statut!=='ouvert'){err.textContent='Ce devoir est clôturé.';return;}
+  currentEleveDevoir=eleve;
+  document.getElementById('ep-login').style.display='none';
+  let html=`<div class="card" style="margin-bottom:9px"><div style="font-weight:600;font-size:13px;margin-bottom:5px">${dv.titre}</div>${dv.consignes?`<div style="font-size:12px;color:#555;background:#f9f9f7;border-radius:6px;padding:7px">${dv.consignes}</div>`:''}${dv.drive_link?`<div style="margin-top:6px"><a href="${dv.drive_link}" target="_blank" class="btn btn-info btn-sm">📎 Ouvrir le sujet</a></div>`:''}</div>`;
+  (dv.questions||[]).forEach((q,i)=>{
+    html+=`<div class="card" style="margin-bottom:7px"><div style="font-size:11px;font-weight:600;color:${q.type==='qcm'?'#0C447C':'#085041'};margin-bottom:5px">Q${i+1}</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">${q.enonce}</div>
+      ${q.type==='qcm'?(q.options||[]).map((opt,oi)=>`<label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:12px"><input type="radio" name="q_${i}" value="${oi}" style="width:auto"> ${opt}</label>`).join(''):`<textarea id="rep_${i}" placeholder="Ta réponse..." style="min-height:70px"></textarea>`}</div>`;
+  });
+  document.getElementById('ep-questions').innerHTML=html;
+  document.getElementById('ep-form').style.display='block';
+}
+async function eleveSubmit(){
+  const dv=cache.devoirs.find(d=>d.id===currentDevoirId);
+  const reps=(dv.questions||[]).map((q,i)=>q.type==='qcm'?(document.querySelector(`input[name="q_${i}"]:checked`)||{}).value||'':(document.getElementById('rep_'+i)||{}).value||'');
+  if(reps.some(r=>r==='')&&!confirm('Questions incomplètes. Envoyer quand même ?'))return;
+  const{error}=await sb.from('copies').insert({devoir_id:currentDevoirId,eleve_id:currentEleveDevoir.id,reponses:reps,user_id:dv.user_id});
+  if(error){toast('Erreur d\'envoi : '+error.message);return;}
+  document.getElementById('ep-form').style.display='none';
+  document.getElementById('ep-done').style.display='block';
+}
+
+// ===== RESSOURCES =====
+async function addRessource(){
+  const titre=document.getElementById('re-titre').value.trim();if(!titre)return;
+  const obj={titre,type:document.getElementById('re-type').value,mat:document.getElementById('re-mat').value.trim(),ecole_id:document.getElementById('re-ecole').value,url:document.getElementById('re-url').value.trim(),desc:document.getElementById('re-desc').value.trim()};
+  const data=await sbInsert('ressources',obj);
+  if(!data)return;
+  cache.ressources.unshift(data);
+  ['re-titre','re-desc','re-url','re-mat'].forEach(id=>document.getElementById(id).value='');
+  renderRessources();updateStats();toast('Ressource ajoutée ✓');
+}
+async function delRessource(id){
+  await sbDelete('ressources',id);
+  cache.ressources=cache.ressources.filter(x=>x.id!==id);
+  renderRessources();updateStats();
+}
+function renderRessources(){
+  const el=document.getElementById('liste-ressources');
+  const ft=document.getElementById('filter-type-res').value;
+  const search=(document.getElementById('search-res').value||'').toLowerCase();
+  let arr=cache.ressources;
+  if(ft)arr=arr.filter(r=>r.type===ft);
+  if(search)arr=arr.filter(r=>r.titre.toLowerCase().includes(search)||(r.mat||'').toLowerCase().includes(search));
+  if(!arr.length){el.innerHTML='<div class="empty">Aucune ressource</div>';return;}
+  el.innerHTML=arr.map(r=>`
+    <div style="border:1px solid #e5e5e0;border-radius:7px;padding:9px 12px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div style="flex:1">
+        <span style="font-size:16px">${typeIcon(r.type)}</span>
+        <strong style="margin-left:5px">${r.titre}</strong>
+        <span class="badge-stat" style="margin-left:5px">${r.type}</span>
+        ${r.mat?`<span style="font-size:10px;color:#888;margin-left:4px">${r.mat}</span>`:''}
+        ${r.desc?`<div style="font-size:11px;color:#666;margin-top:2px">${r.desc}</div>`:''}
+        ${r.url?`<div style="margin-top:4px"><a href="${r.url}" target="_blank" class="btn btn-sm btn-info">${typeIcon(r.type)} Ouvrir</a></div>`:''}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="delRessource('${r.id}')">✕</button>
+    </div>`).join('');
+}
+
+// ===== EDT =====
+async function addSlot(){
+  const hdeb=document.getElementById('et-hdeb').value,hfin=document.getElementById('et-hfin').value;
+  const classe=document.getElementById('et-classe').value.trim(),ecoleId=document.getElementById('et-ecole').value;
+  const err=document.getElementById('et-err');
+  if(hIdx(hdeb)>=hIdx(hfin)){err.textContent='Fin après début.';return;}
+  if(!classe||!ecoleId){err.textContent='Classe et école requises.';return;}
+  err.textContent='';
+  const obj={jour:document.getElementById('et-jour').value,hdeb,hfin,mat:document.getElementById('et-mat').value,ecole_id:parseInt(ecoleId)||ecoleId,classe,lecon:document.getElementById('et-lecon').value.trim(),salle:document.getElementById('et-salle').value.trim(),note_prog:document.getElementById('et-note').value.trim(),span:hIdx(hfin)-hIdx(hdeb)};
+  const data=await sbInsert('slots',obj);
+  if(!data)return;
+  cache.slots.unshift(data);
+  ['et-classe','et-lecon','et-salle','et-note'].forEach(id=>document.getElementById(id).value='');
+  renderEdt();toast('Créneau ajouté ✓');
+}
+async function delSlot(id){
+  await sbDelete('slots',id);
+  cache.slots=cache.slots.filter(s=>s.id!==id);
+  renderEdt();
+}
+async function clearEdt(){
+  if(!confirm('Effacer tout ?'))return;
+  for(const s of cache.slots)await sbDelete('slots',s.id);
+  cache.slots=[];renderEdt();
+}
+function renderEdt(){
+  const body=document.getElementById('edt-body');
+  const fe=document.getElementById('filter-ecole-edt').value;
+  let slots=fe?cache.slots.filter(s=>s.ecole_id==fe):cache.slots;
+  const occ={};
+  slots.forEach(s=>{const ji=JOURS.indexOf(s.jour),hi=hIdx(s.hdeb);for(let r=hi;r<hi+s.span;r++){if(!occ[r])occ[r]={};occ[r][ji]=r===hi?{slot:s,first:true}:{skip:true};}});
+  let html='';
+  for(let r=0;r<HEURES.length-1;r++){
+    html+=`<tr><td class="heure">${HEURES[r]}<br><span style="font-size:8px;opacity:.6">→${HEURES[r+1]}</span></td>`;
+    for(let j=0;j<6;j++){
+      const cell=occ[r]?occ[r][j]:null;
+      if(cell&&cell.skip)continue;
+      if(cell&&cell.first){
+        const s=cell.slot;const ec=cache.ecoles.find(e=>e.id==s.ecole_id);const col=ec?ec.couleur:'#0F6E56';
+        html+=`<td rowspan="${s.span}"><div class="slot" style="min-height:${s.span*42}px;border-left:3px solid ${col};background:${col}15;border-radius:4px;padding:2px 4px;font-size:9px;position:relative">
+          <button class="del-btn" onclick="delSlot('${s.id}')">✕</button>
+          ${ec?`<span style="font-weight:700;color:${col}">${ec.abr}</span> `:''}
+          <strong>${s.mat}</strong><br><span style="font-weight:600">${s.classe}</span>
+          ${s.lecon?`<br><span style="opacity:.8">${s.lecon}</span>`:''}
+          ${s.note_prog?`<br><span style="background:#FFF9E6;border-radius:2px;padding:0 2px;color:#633806;font-size:8px">📌</span>`:''}
+        </div></td>`;
+      }else html+=`<td><span class="slot-empty"></span></td>`;
+    }html+='</tr>';
+  }
+  body.innerHTML=html;
+}
+
+// ===== PLANNING SEMAINE =====
+function renderWeekGrid(){
+  const today=new Date();const todayNom=JOURS_FR[today.getDay()];
+  const lundi=new Date(today);lundi.setDate(today.getDate()-(today.getDay()===0?6:today.getDay()-1));
+  document.getElementById('semaine-label').textContent=lundi.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' – '+new Date(lundi.getTime()+5*86400000).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+  const fe=currentEcoleFilter;
+  let slots=fe?cache.slots.filter(s=>s.ecole_id==fe):cache.slots;
+  document.getElementById('week-grid').innerHTML=JOURS.map((jour,ji)=>{
+    const isToday=jour===todayNom;
+    const jourSlots=slots.filter(s=>s.jour===jour).sort((a,b)=>hIdx(a.hdeb)-hIdx(b.hdeb));
+    const dateJ=new Date(lundi);dateJ.setDate(lundi.getDate()+ji);
+    return `<div class="day-col"><div class="day-header${isToday?' today':''}">${jour}<br><span style="font-size:9px;opacity:.8">${dateJ.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</span></div>
+      ${jourSlots.length?jourSlots.map(s=>{const ec=cache.ecoles.find(e=>e.id==s.ecole_id);const col=ec?ec.couleur:'#0F6E56';
+        return `<div class="cours-card" style="border-left-color:${col}">
+          <div style="font-size:9px;color:#999">${s.hdeb}–${s.hfin}</div>
+          ${ec?`<div style="font-size:9px;font-weight:700;color:${col}">${ec.abr}</div>`:''}
+          <div style="font-weight:600;font-size:10px">${s.classe} <span style="font-size:9px;font-weight:400;color:#888">${s.mat}</span></div>
+          ${s.lecon?`<div style="font-size:9px;color:#666;font-style:italic">${s.lecon}</div>`:''}
+          ${s.note_prog?`<div style="font-size:9px;color:#633806;background:#FFF9E6;border-radius:2px;padding:1px 3px">📌 ${s.note_prog}</div>`:''}
+        </div>`;}).join(''):'<div style="font-size:10px;color:#ccc;text-align:center;padding:5px">—</div>'}
+    </div>`;
+  }).join('');
+}
+
+// ===== CAHIER JOURNAL DE CLASSE =====
+async function ouvrirCahierClasse(classeId){
+  currentCahierClasseId=classeId;
+  const cl=cache.classes.find(x=>x.id===classeId);if(!cl)return;
+  document.getElementById('cahier-classe-titre').textContent=`📔 Cahier journal — ${cl.nom} (${getEcoleAbr(cl.ecole_id)})`;
+  if(!cache.seances[classeId])cache.seances[classeId]=[];
+  if(!cache.sanctions[classeId])cache.sanctions[classeId]=[];
+  if(!cache.bonus[classeId])cache.bonus[classeId]=[];
+  if(!cache.rappelsClasse[classeId])cache.rappelsClasse[classeId]=[];
+  const eleves=cache.eleves.filter(e=>e.classe_id===classeId);
+  const opts='<option value="">--</option>'+eleves.map(e=>`<option value="${e.id}">${e.nom}</option>`).join('');
+  document.getElementById('sanc-eleve').innerHTML=opts;
+  document.getElementById('bon-eleve').innerHTML=opts;
+  document.getElementById('sj-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('sanc-date').value=new Date().toISOString().split('T')[0];
+  showCahierTab('cj-seances');
+  renderSeancesClasse();renderSanctionsClasse();renderBonusClasse();renderHistoriqueRappels();
+  openModal('modal-cahier-classe');
+}
+function showCahierTab(id){
+  document.querySelectorAll('#modal-cahier-classe .sub-content').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('#cahier-subtabs .sub-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const tabs=['cj-seances','cj-rappel','cj-sanctions','cj-bonus'];
+  document.querySelectorAll('#cahier-subtabs .sub-tab')[tabs.indexOf(id)].classList.add('active');
+}
+function ouvrirNouvelleSeance(){
+  const f=document.getElementById('form-nouvelle-seance');
+  f.style.display=f.style.display==='none'?'block':'none';
+}
+async function enregistrerSeance(){
+  const classeId=currentCahierClasseId;
+  const date=document.getElementById('sj-date').value;
+  const mat=document.getElementById('sj-mat').value.trim();
+  const lecon=document.getElementById('sj-lecon').value.trim();
+  if(!date||!mat||!lecon)return toast('Date, matière et leçon requis');
+  const seance={id:Date.now(),date,mat,lecon,hdeb:document.getElementById('sj-hdeb').value,hfin:document.getElementById('sj-hfin').value,contenu:document.getElementById('sj-contenu').value.trim(),obs:document.getElementById('sj-obs').value.trim(),presences:{}};
+  cache.eleves.filter(e=>e.classe_id===classeId).forEach(e=>{seance.presences[e.id]='P';});
+  cache.seances[classeId].push(seance);
+  await saveExtra('seances',classeId,cache.seances[classeId]);
+  document.getElementById('form-nouvelle-seance').style.display='none';
+  ['sj-mat','sj-lecon','sj-hdeb','sj-hfin','sj-contenu','sj-obs'].forEach(id=>document.getElementById(id).value='');
+  renderSeancesClasse();toast('Séance enregistrée ✓');
+}
+async function togglePresenceSeance(seanceId,eleveId){
+  const classeId=currentCahierClasseId;
+  const seance=cache.seances[classeId].find(s=>s.id===seanceId);if(!seance)return;
+  const cur=seance.presences[eleveId]||'P';
+  seance.presences[eleveId]=cur==='P'?'A':'P';
+  await saveExtra('seances',classeId,cache.seances[classeId]);
+  const btn=event.target;
+  btn.style.background=seance.presences[eleveId]==='P'?'#E1F5EE':'#FCEBEB';
+  btn.style.color=seance.presences[eleveId]==='P'?'#085041':'#791F1F';
+  btn.textContent=seance.presences[eleveId];
+}
+async function delSeance(seanceId){
+  const classeId=currentCahierClasseId;
+  cache.seances[classeId]=cache.seances[classeId].filter(s=>s.id!==seanceId);
+  await saveExtra('seances',classeId,cache.seances[classeId]);
+  renderSeancesClasse();
+}
+function renderSeancesClasse(){
+  const classeId=currentCahierClasseId;
+  const el=document.getElementById('liste-seances-classe');
+  const seances=(cache.seances[classeId]||[]).slice().reverse();
+  const eleves=cache.eleves.filter(e=>e.classe_id===classeId);
+  if(!seances.length){el.innerHTML='<div class="empty">Aucune séance — clique sur "+ Nouvelle séance"</div>';return;}
+  el.innerHTML=seances.map(s=>{
+    const nbA=eleves.filter(e=>s.presences[e.id]==='A').length;
+    const nbP=eleves.filter(e=>s.presences[e.id]==='P').length;
+    return `<div class="seance-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <span style="font-size:11px;font-weight:700;color:#0F6E56">${s.date}</span>
+          ${s.hdeb?`<span style="font-size:10px;color:#888;margin-left:6px">${s.hdeb}–${s.hfin}</span>`:''}
+          <span class="badge-stat" style="margin-left:6px">${s.mat}</span>
+          <div style="font-size:14px;font-weight:600;margin-top:3px">${s.lecon}</div>
+          ${s.contenu?`<div style="font-size:11px;color:#666;margin-top:2px">${s.contenu}</div>`:''}
+          ${s.obs?`<div style="font-size:11px;color:#888;font-style:italic;margin-top:2px">💬 ${s.obs}</div>`:''}
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <span style="font-size:11px;background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:20px">✓ ${nbP}</span>
+          <span style="font-size:11px;background:#FCEBEB;color:#791F1F;padding:2px 7px;border-radius:20px">✗ ${nbA}</span>
+          <button class="btn btn-danger btn-sm" onclick="delSeance(${s.id})">✕</button>
+        </div>
+      </div>
+      <div style="border-top:1px solid #f0f0eb;padding-top:8px">
+        <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:6px">PRÉSENCES — clique pour basculer</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          ${eleves.map(e=>{
+            const val=s.presences[e.id]||'P';
+            return `<div style="display:flex;align-items:center;gap:4px;background:${val==='P'?'#E1F5EE':'#FCEBEB'};border-radius:6px;padding:3px 7px;cursor:pointer" onclick="togglePresenceSeance(${s.id},'${e.id}')">
+              <span style="font-size:10px;font-weight:700;color:${val==='P'?'#085041':'#791F1F'}">${val}</span>
+              <span style="font-size:11px">${e.nom.split(' ')[0]}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ===== RAPPEL =====
+function tiragAleatoire(){
+  const classeId=currentCahierClasseId;
+  const nb=parseInt(document.getElementById('rp-nb').value)||5;
+  const lecon=document.getElementById('rp-lecon').value.trim();
+  if(!lecon)return toast('Indique la leçon');
+  const eleves=cache.eleves.filter(e=>e.classe_id===classeId);
+  if(!eleves.length)return toast('Aucun élève');
+  const shuffled=[...eleves].sort(()=>Math.random()-0.5);
+  elevesInterroges=shuffled.slice(0,Math.min(nb,eleves.length)).map(e=>({eleveId:e.id,nom:e.nom,statut:'pending',bonus:0}));
+  document.getElementById('rp-lecon-titre').textContent=lecon;
+  document.getElementById('zone-tirage').style.display='block';
+  document.getElementById('zone-choix-manuel').style.display='none';
+  renderInterroges();
+}
+function choixManuel(){
+  const lecon=document.getElementById('rp-lecon').value.trim();
+  if(!lecon)return toast('Indique la leçon');
+  const eleves=cache.eleves.filter(e=>e.classe_id===currentCahierClasseId);
+  document.getElementById('liste-choix-manuel').innerHTML=eleves.map(e=>`
+    <label style="display:flex;align-items:center;gap:8px;padding:6px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:12px">
+      <input type="checkbox" value="${e.id}" data-nom="${e.nom}" style="width:auto"> ${e.nom}
+    </label>`).join('');
+  document.getElementById('zone-choix-manuel').style.display='block';
+  document.getElementById('zone-tirage').style.display='none';
+}
+function confirmerChoixManuel(){
+  const lecon=document.getElementById('rp-lecon').value.trim();
+  const checked=[...document.querySelectorAll('#liste-choix-manuel input:checked')];
+  if(!checked.length)return toast('Sélectionne au moins un élève');
+  elevesInterroges=checked.map(c=>({eleveId:c.value,nom:c.dataset.nom,statut:'pending',bonus:0}));
+  document.getElementById('rp-lecon-titre').textContent=lecon;
+  document.getElementById('zone-tirage').style.display='block';
+  document.getElementById('zone-choix-manuel').style.display='none';
+  renderInterroges();
+}
+function renderInterroges(){
+  document.getElementById('liste-interroges').innerHTML=elevesInterroges.map((ei,i)=>`
+    <div class="eleve-rappel ${ei.statut}">
+      <div style="flex:1">
+        <strong>${ei.nom}</strong>
+        ${ei.statut==='bon'?`<span style="color:#0F6E56;font-size:11px;margin-left:6px">✓ Bon ${ei.bonus>0?'(+'+ei.bonus+')':''}</span>`:''}
+        ${ei.statut==='sanction'?`<span style="color:#c0392b;font-size:11px;margin-left:6px">✗ Pas répondu</span>`:''}
+      </div>
+      <div style="display:flex;gap:5px">
+        ${ei.statut==='pending'?`<button class="btn btn-primary btn-sm" onclick="marquerBon(${i})">✓ Bon</button><button class="btn btn-sm" style="background:#FCEBEB;color:#791F1F;border-color:#f5b8b8" onclick="marquerSanction(${i})">✗</button>`:''}
+        ${ei.statut==='bon'?`<button class="bonus-btn" onclick="ajouterBonusRapide(${i},1)">+1</button><button class="bonus-btn" onclick="ajouterBonusRapide(${i},2)">+2</button><button class="bonus-btn" onclick="ajouterBonusRapide(${i},3)">+3</button>`:''}
+        <button class="btn btn-xs" onclick="elevesInterroges[${i}].statut='pending';elevesInterroges[${i}].bonus=0;renderInterroges()">↺</button>
+      </div>
+    </div>`).join('');
+}
+function marquerBon(i){elevesInterroges[i].statut='bon';renderInterroges();}
+function marquerSanction(i){elevesInterroges[i].statut='sanction';renderInterroges();}
+function ajouterBonusRapide(i,pts){elevesInterroges[i].bonus=pts;renderInterroges();toast(`+${pts} pts pour ${elevesInterroges[i].nom}`);}
+async function sauvegarderRappel(){
+  const classeId=currentCahierClasseId;
+  const lecon=document.getElementById('rp-lecon').value.trim();
+  const date=new Date().toLocaleDateString('fr-FR');
+  cache.rappelsClasse[classeId].push({date,lecon,eleves:JSON.parse(JSON.stringify(elevesInterroges))});
+  elevesInterroges.filter(ei=>ei.statut==='bon'&&ei.bonus>0).forEach(ei=>{
+    cache.bonus[classeId].push({eleveId:ei.eleveId,nom:ei.nom,points:ei.bonus,motif:`Rappel : ${lecon}`,date});
+  });
+  elevesInterroges.filter(ei=>ei.statut==='sanction').forEach(ei=>{
+    cache.sanctions[classeId].push({eleveId:ei.eleveId,nom:ei.nom,motif:'Rappel de cours non effectué',detail:`Leçon : ${lecon}`,date});
+  });
+  await Promise.all([
+    saveExtra('rappels',classeId,cache.rappelsClasse[classeId]),
+    saveExtra('sanctions',classeId,cache.sanctions[classeId]),
+    saveExtra('bonus',classeId,cache.bonus[classeId])
+  ]);
+  elevesInterroges=[];
+  document.getElementById('zone-tirage').style.display='none';
+  document.getElementById('rp-lecon').value='';
+  renderHistoriqueRappels();renderSanctionsClasse();renderBonusClasse();
+  showCahierTab('cj-sanctions');
+  toast('Résultats enregistrés ✓',4000);
+}
+function renderHistoriqueRappels(){
+  const classeId=currentCahierClasseId;
+  const el=document.getElementById('historique-rappels-classe');
+  const rappels=(cache.rappelsClasse[classeId]||[]).slice().reverse();
+  if(!rappels.length){el.innerHTML='<div class="empty">Aucun rappel</div>';return;}
+  el.innerHTML=rappels.map(r=>{
+    const bons=r.eleves.filter(e=>e.statut==='bon').length;
+    const sanc=r.eleves.filter(e=>e.statut==='sanction').length;
+    return `<div style="border:1px solid #e5e5e0;border-radius:7px;padding:8px 11px;margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <div><strong>${r.lecon}</strong> <span style="color:#888;font-size:10px">${r.date}</span></div>
+        <div style="display:flex;gap:5px">
+          <span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:20px;font-size:10px">✓ ${bons}</span>
+          <span style="background:#FCEBEB;color:#791F1F;padding:2px 7px;border-radius:20px;font-size:10px">✗ ${sanc}</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${r.eleves.map(e=>`<span style="font-size:10px;padding:1px 7px;border-radius:20px;background:${e.statut==='bon'?'#E1F5EE':e.statut==='sanction'?'#FCEBEB':'#f0f0eb'};color:${e.statut==='bon'?'#085041':e.statut==='sanction'?'#791F1F':'#555'}">${e.nom.split(' ')[0]} ${e.statut==='bon'?(e.bonus>0?'+'+e.bonus:'✓'):e.statut==='sanction'?'✗':'·'}</span>`).join('')}</div>
+    </div>`;
+  }).join('');
+}
+
+// ===== SANCTIONS =====
+async function ajouterSanction(){
+  const classeId=currentCahierClasseId;
+  const eleveId=document.getElementById('sanc-eleve').value;
+  if(!eleveId)return toast('Choisir un élève');
+  const eleve=cache.eleves.find(e=>e.id===eleveId);
+  cache.sanctions[classeId].push({eleveId,nom:eleve?eleve.nom:'—',motif:document.getElementById('sanc-motif').value,detail:document.getElementById('sanc-detail').value.trim(),date:document.getElementById('sanc-date').value});
+  document.getElementById('sanc-detail').value='';
+  await saveExtra('sanctions',classeId,cache.sanctions[classeId]);
+  renderSanctionsClasse();toast('Sanction ajoutée ✓');
+}
+async function delSanction(idx){
+  const classeId=currentCahierClasseId;
+  cache.sanctions[classeId].splice(idx,1);
+  await saveExtra('sanctions',classeId,cache.sanctions[classeId]);
+  renderSanctionsClasse();
+}
+function renderSanctionsClasse(){
+  const classeId=currentCahierClasseId;
+  const el=document.getElementById('liste-sanctions-classe');
+  const sanctions=cache.sanctions[classeId]||[];
+  if(!sanctions.length){el.innerHTML='<div class="empty">Aucune sanction</div>';return;}
+  const byEleve={};
+  sanctions.forEach((s,i)=>{if(!byEleve[s.nom])byEleve[s.nom]=[];byEleve[s.nom].push({...s,idx:i});});
+  el.innerHTML=Object.entries(byEleve).map(([nom,ss])=>`
+    <div style="border:1px solid #f5b8b8;border-left:3px solid #c0392b;border-radius:7px;padding:9px 12px;margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <strong>${nom}</strong>
+        <span style="font-size:11px;background:#FCEBEB;color:#791F1F;padding:2px 8px;border-radius:20px">${ss.length} sanction(s)</span>
+      </div>
+      ${ss.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;background:#f9f9f7;border-radius:5px;padding:5px 8px;margin-bottom:3px;font-size:11px">
+        <div><span class="sanction-chip">${s.motif}</span>${s.detail?`<span style="color:#666;font-size:10px"> — ${s.detail}</span>`:''}<span style="color:#aaa;font-size:10px;margin-left:5px">${s.date}</span></div>
+        <button class="btn btn-danger btn-xs" onclick="delSanction(${s.idx})">✕</button>
+      </div>`).join('')}
+    </div>`).join('');
+}
+function imprimerSanctions(){preparerImpressionSanctions();document.getElementById('print-sanctions').style.display='block';window.print();document.getElementById('print-sanctions').style.display='none';}
+function telechargerPDFSanctions(){imprimerSanctions();}
+function preparerImpressionSanctions(){
+  const classeId=currentCahierClasseId;
+  const cl=cache.classes.find(x=>x.id===classeId);
+  const ec=cache.ecoles.find(x=>x.id==(cl?cl.ecole_id:null));
+  const sanctions=cache.sanctions[classeId]||[];
+  document.getElementById('print-ecole-nom').textContent=ec?ec.nom:'';
+  document.getElementById('print-classe-nom').textContent=`Classe : ${cl?cl.nom:''} — ${cl?cl.annee:'2026-2027'}`;
+  document.getElementById('print-date-titre').textContent=`Imprimé le ${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
+  const byEleve={};
+  sanctions.forEach(s=>{if(!byEleve[s.nom])byEleve[s.nom]=[];byEleve[s.nom].push(s);});
+  let html=`<table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f0f0f0"><th style="border:1px solid #ccc;padding:6px">N°</th><th style="border:1px solid #ccc;padding:6px">Élève</th><th style="border:1px solid #ccc;padding:6px">Motif(s)</th><th style="border:1px solid #ccc;padding:6px">Date</th><th style="border:1px solid #ccc;padding:6px">Nb</th></tr></thead><tbody>`;
+  let n=1;
+  Object.entries(byEleve).forEach(([nom,ss])=>{
+    html+=`<tr><td style="border:1px solid #ccc;padding:5px">${n++}</td><td style="border:1px solid #ccc;padding:5px;font-weight:600">${nom}</td><td style="border:1px solid #ccc;padding:5px">${ss.map(s=>s.motif+(s.detail?' ('+s.detail+')':'')).join('<br>')}</td><td style="border:1px solid #ccc;padding:5px">${ss.map(s=>s.date).join('<br>')}</td><td style="border:1px solid #ccc;padding:5px;text-align:center;font-weight:700;color:#c0392b">${ss.length}</td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('print-sanctions-content').innerHTML=html;
+}
+
+// ===== BONUS =====
+async function ajouterBonus(){
+  const classeId=currentCahierClasseId;
+  const eleveId=document.getElementById('bon-eleve').value;
+  if(!eleveId)return toast('Choisir un élève');
+  const eleve=cache.eleves.find(e=>e.id===eleveId);
+  const points=parseInt(document.getElementById('bon-points').value);
+  cache.bonus[classeId].push({eleveId,nom:eleve?eleve.nom:'—',points,motif:document.getElementById('bon-motif').value.trim()||'Participation',date:new Date().toLocaleDateString('fr-FR')});
+  document.getElementById('bon-motif').value='';
+  await saveExtra('bonus',classeId,cache.bonus[classeId]);
+  renderBonusClasse();toast(`+${points} point(s) ajouté(s) ✓`);
+}
+function renderBonusClasse(){
+  const classeId=currentCahierClasseId;
+  const el=document.getElementById('liste-bonus-classe');
+  const bonus=cache.bonus[classeId]||[];
+  if(!bonus.length){el.innerHTML='<div class="empty">Aucun bonus</div>';return;}
+  const totaux={};
+  bonus.forEach(b=>{if(!totaux[b.nom])totaux[b.nom]={nom:b.nom,total:0,details:[]};totaux[b.nom].total+=b.points;totaux[b.nom].details.push(b);});
+  const sorted=Object.values(totaux).sort((a,b)=>b.total-a.total);
+  el.innerHTML=sorted.map((t,i)=>`
+    <div style="border:1px solid #e5e5e0;border-radius:7px;padding:8px 11px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <span style="font-size:12px;font-weight:700;color:#888;margin-right:6px">#${i+1}</span>
+        <strong>${t.nom}</strong>
+        <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px">${t.details.map(d=>`<span style="font-size:10px;background:#E1F5EE;color:#085041;padding:1px 6px;border-radius:20px">+${d.points} ${d.motif} <span style="color:#aaa">${d.date}</span></span>`).join('')}</div>
+      </div>
+      <div style="text-align:center;background:#0F6E56;color:#fff;border-radius:8px;padding:5px 10px;flex-shrink:0">
+        <div style="font-size:20px;font-weight:700">+${t.total}</div>
+        <div style="font-size:9px;opacity:.8">pts</div>
+      </div>
+    </div>`).join('');
+}
+
+// ===== ALERTES =====
+function sauvegarderEmail(){cfg.email=document.getElementById('email-rappel').value.trim();toast('Email sauvegardé ✓');}
+function sauvegarderEmailJS(){
+  cfg.ejsService=document.getElementById('ejs-service').value.trim();
+  cfg.ejsTemplate=document.getElementById('ejs-template').value.trim();
+  cfg.ejsPubKey=document.getElementById('ejs-pubkey').value.trim();
+  if(cfg.ejsPubKey){try{emailjs.init(cfg.ejsPubKey);}catch(e){}}
+  document.getElementById('ejs-status').textContent='✓ Sauvegardé !';toast('EmailJS configuré ✓');
+}
+function getCoursDemain(){const d=new Date();d.setDate(d.getDate()+1);return cache.slots.filter(s=>s.jour===JOURS_FR[d.getDay()]);}
+function renderDemain(){
+  const el=document.getElementById('demain-liste');const slots=getCoursDemain();
+  if(!slots.length){el.innerHTML='<div class="empty">Aucun cours demain</div>';return;}
+  const d=new Date();d.setDate(d.getDate()+1);
+  el.innerHTML=`<p style="font-size:11px;color:#888;margin-bottom:7px">${d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})} :</p>`+
+    slots.map(s=>{const ec=cache.ecoles.find(e=>e.id==s.ecole_id);const col=ec?ec.couleur:'#0F6E56';
+      return `<div style="border:1px solid #e5e5e0;border-left:3px solid ${col};border-radius:7px;padding:7px 11px;margin-bottom:5px;font-size:12px"><strong style="color:${col}">${ec?ec.abr:''}</strong> · <strong>${s.classe}</strong> — ${s.mat} — ${s.hdeb}–${s.hfin}${s.lecon?`<br><span style="color:#666">📖 ${s.lecon}</span>`:''}</div>`;}).join('');
+}
+async function verifierRappels(){
+  const slots=getCoursDemain();if(!slots.length){toast('Aucun cours demain.');return;}
+  let nb=0;
+  for(const s of slots){
+    if(cfg.ejsService&&cfg.ejsTemplate&&cfg.ejsPubKey){
+      const ec=cache.ecoles.find(e=>e.id==s.ecole_id);
+      try{await emailjs.send(cfg.ejsService,cfg.ejsTemplate,{to_email:cfg.email,ecole:ec?ec.nom:'',classe:s.classe,matiere:s.mat,lecon:s.lecon||'—',horaire:s.hdeb+'–'+s.hfin});nb++;}catch(e){}
+    }
+    if(Notification.permission==='granted'){new Notification(`🔔 Cours demain — ${s.classe}`,{body:`${s.mat} · ${s.hdeb}–${s.hfin}`});nb++;}
+  }
+  toast(nb>0?`${nb} rappel(s) envoyé(s) ✓`:'Configure EmailJS ou active les notifications',4000);
+}
+function activerNotifs(){
+  if(!('Notification'in window)){toast('Non supporté');return;}
+  Notification.requestPermission().then(p=>{updateNotifStatus();if(p==='granted')toast('Notifications activées ✓');});
+}
+function updateNotifStatus(){
+  const el=document.getElementById('notif-status');if(!el)return;
+  if(Notification.permission==='granted'){el.className='alert-box alert-success';el.textContent='✓ Notifications activées.';}
+  else{el.className='alert-box alert-warn';el.textContent='Notifications non activées.';}
+}
+
+// ===== ACCUEIL =====
+function updateStats(){
+  document.getElementById('s-ecoles').textContent=cache.ecoles.length;
+  document.getElementById('s-classes').textContent=cache.classes.length;
+  document.getElementById('s-eleves').textContent=cache.eleves.length;
+  document.getElementById('s-cours').textContent=cache.cours.length;
+  document.getElementById('s-devoirs').textContent=cache.devoirs.length;
+  document.getElementById('s-ressources').textContent=cache.ressources.length;
+}
+function updateAccueil(){
+  updateStats();renderWeekGrid();
+  const fe=currentEcoleFilter;
+  const demain=JOURS_FR[new Date(Date.now()+86400000).getDay()];
+  let ds=cache.slots.filter(s=>s.jour===demain);if(fe)ds=ds.filter(s=>s.ecole_id==fe);
+  const rd=document.getElementById('rappel-demain');
+  if(ds.length){rd.innerHTML=`<div class="alert-box alert-info" style="margin-bottom:9px;font-size:12px">🔔 <strong>Demain (${demain}) :</strong> ${ds.map(s=>{const ec=cache.ecoles.find(e=>e.id==s.ecole_id);return `${ec?`<span style="font-weight:700;color:${ec.couleur}">${ec.abr}</span> · `:''}<strong>${s.classe}</strong> ${s.mat} ${s.hdeb}–${s.hfin}`;}).join(' | ')}</div>`;}
+  else rd.innerHTML='';
+  let notes=cache.notes;if(fe)notes=notes.filter(n=>n.ecole_id==fe);
+  const rn=document.getElementById('recent-notes');
+  if(!notes.length)rn.innerHTML='<div class="empty">Aucune note</div>';
+  else{const arr=notes.slice(0,4);rn.innerHTML='<table><tbody>'+arr.map(n=>`<tr><td>${n.titre}</td><td>${getEleveNom(n.eleve_id)}</td><td><span class="note-pill" style="${noteStyle(n.note,n.bareme)}">${n.note}/${n.bareme}</span></td></tr>`).join('')+'</tbody></table>';}
+  let devoirs=cache.devoirs;if(fe)devoirs=devoirs.filter(d=>d.ecole_id==fe);
+  const rd2=document.getElementById('recent-devoirs');
+  if(!devoirs.length)rd2.innerHTML='<div class="empty">Aucun devoir</div>';
+  else rd2.innerHTML='<table><tbody>'+devoirs.slice(0,4).map(d=>`<tr><td>${d.titre}</td><td style="font-size:10px">${d.type}</td><td><span style="font-size:10px;color:#0F6E56">${cache.copies.filter(c=>c.devoir_id===d.id).length} copie(s)</span></td></tr>`).join('')+'</tbody></table>';
+}
+
+// ===== INIT =====
+document.getElementById('date-now').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+
+// Vérifier session existante
+sb.auth.getSession().then(async({data:{session}})=>{
+  if(session){
+    await initApp(session.user);
+  } else {
+    // Vérifier si c'est un lien de devoir
+    const code=new URLSearchParams(window.location.search).get('devoir');
+    if(code){
+      await checkDevoirParam();
+    }else{
+      document.getElementById('auth-page').style.display='flex';
+    }
+  }
+});
+
+// Écouter les changements d'auth
+sb.auth.onAuthStateChange((event,session)=>{
+  if(event==='SIGNED_OUT'){
+    document.getElementById('app-page').classList.remove('active');
+    document.getElementById('auth-page').style.display='flex';
+  }
+});
+
+// Rappel automatique 20h
+(function(){
+  const m=new Date(),p=new Date();p.setHours(20,0,0,0);
+  if(p<=m)p.setDate(p.getDate()+1);
+  setTimeout(()=>{if(currentUser)verifierRappels();setInterval(()=>{if(currentUser)verifierRappels();},86400000);},p-m);
+})();
+</script>
+</body>
+</html>
