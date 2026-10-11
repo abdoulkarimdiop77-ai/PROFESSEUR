@@ -1,0 +1,2469 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion des Cours — Prof. Karim DIOP</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0F6E56">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:14px;background:#f5f5f0;color:#1a1a1a;min-height:100vh}
+header{background:#0F6E56;color:#fff;padding:11px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+header h1{font-size:14px;font-weight:700}
+.hright{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+#notif-btn{padding:4px 10px;background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.4);border-radius:20px;color:#fff;font-size:11px;cursor:pointer}
+#ecole-selector{padding:4px 9px;border-radius:20px;border:1px solid rgba(255,255,255,0.4);background:rgba(255,255,255,0.15);color:#fff;font-size:11px;cursor:pointer}
+#ecole-selector option{color:#1a1a1a;background:#fff}
+.nav{display:flex;background:#fff;border-bottom:1px solid #e5e5e0;overflow-x:auto}
+.nav button{padding:9px 11px;border:none;background:transparent;cursor:pointer;font-size:11px;color:#666;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
+.nav button.active{color:#0F6E56;border-bottom-color:#0F6E56;font-weight:600}
+.nav button:hover:not(.active){background:#f5f5f0}
+.main{padding:12px;max-width:1300px;margin:0 auto}
+.card{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:12px 15px;margin-bottom:11px}
+.card-title{font-size:13px;font-weight:600;margin-bottom:10px;color:#1a1a1a;display:flex;align-items:center;gap:6px}
+.section{display:none}.section.active{display:block}
+.two-col{display:grid;grid-template-columns:300px 1fr;gap:11px}
+.two-eq{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+.four-col{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px}
+.form-group{margin-bottom:7px}
+label{font-size:11px;color:#555;display:block;margin-bottom:3px;font-weight:500}
+input,select,textarea{width:100%;padding:6px 8px;border:1px solid #ddd;border-radius:6px;font-size:12px;background:#fafafa;color:#1a1a1a;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#0F6E56;background:#fff}
+textarea{resize:vertical;min-height:50px}
+.btn{padding:6px 12px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;color:#333;font-weight:500;transition:all .12s}
+.btn:hover{background:#f0f0eb}
+.btn-primary{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.btn-primary:hover{background:#085041}
+.btn-warn{background:#F59E0B;color:#fff;border-color:#F59E0B}
+.btn-info{background:#1565C0;color:#fff;border-color:#1565C0}
+.btn-danger{color:#c0392b;border-color:transparent;background:transparent;padding:2px 6px;font-size:11px}
+.btn-sm{padding:3px 8px;font-size:11px}
+.btn-xs{padding:2px 6px;font-size:10px}
+.stats{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-bottom:11px}
+.stat{background:#E1F5EE;border-radius:8px;padding:9px 7px;text-align:center}
+.stat-val{font-size:20px;font-weight:700;color:#0F6E56}
+.stat-lbl{font-size:10px;color:#0F6E56;opacity:.8}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:6px 8px;border-bottom:1px solid #e5e5e0;font-weight:600;font-size:10px;color:#888;text-transform:uppercase;letter-spacing:.3px}
+td{padding:6px 8px;border-bottom:1px solid #f0f0eb;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8}
+.badge{display:inline-block;padding:1px 7px;border-radius:20px;font-size:10px;font-weight:600}
+.badge-college{background:#F0EBF8;color:#4A1C7C}
+.badge-lycee{background:#E6F1FB;color:#0C447C}
+.badge-sup{background:#FEF3C7;color:#92400E}
+.badge-p{background:#E1F5EE;color:#085041;font-weight:700}
+.badge-a{background:#FCEBEB;color:#791F1F;font-weight:700}
+.badge-r{background:#FEF3C7;color:#92400E;font-weight:700}
+.badge-stat{background:#f0f0eb;color:#555;font-size:10px;padding:1px 6px;border-radius:20px}
+.empty{text-align:center;padding:18px;color:#bbb;font-size:12px}
+.note-pill{display:inline-block;padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600}
+/* Import zone */
+.import-zone{border:2px dashed #ccc;border-radius:8px;padding:16px;text-align:center;cursor:pointer;background:#fafaf8;transition:all .15s}
+.import-zone:hover{border-color:#0F6E56;background:#E1F5EE20}
+.import-zone input[type=file]{display:none}
+.import-zone .iz-icon{font-size:28px;margin-bottom:6px}
+.import-zone .iz-text{font-size:12px;color:#888}
+.import-zone .iz-sub{font-size:10px;color:#bbb;margin-top:3px}
+/* Drive link */
+.drive-link-box{background:#E8F4FD;border:1px solid #B5D4F4;border-radius:7px;padding:8px 10px;display:flex;gap:8px;align-items:center}
+.drive-link-box input{background:#fff;font-size:11px}
+/* Fiche élève */
+.eleve-avatar{width:70px;height:70px;border-radius:50%;object-fit:cover;border:2px solid #0F6E56;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:24px;overflow:hidden;flex-shrink:0}
+.eleve-avatar img{width:100%;height:100%;object-fit:cover}
+.matricule-badge{background:#0F6E56;color:#fff;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;letter-spacing:.5px}
+/* Tabs secondaires */
+.sub-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
+.sub-tab{padding:5px 12px;border-radius:20px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:11px;color:#666}
+.sub-tab.active{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.sub-content{display:none}.sub-content.active{display:block}
+/* Registre présence */
+.registre-table{font-size:10px}
+.registre-table th{padding:4px 3px;font-size:9px;text-align:center}
+.registre-table td{padding:3px 2px;text-align:center;border:1px solid #f0f0eb}
+.registre-table td.nom-col{text-align:left;padding-left:6px;font-weight:500;white-space:nowrap;min-width:120px}
+.registre-table td.date-col{writing-mode:vertical-rl;transform:rotate(180deg);font-size:8px;white-space:nowrap;max-width:24px}
+.pres-btn{width:22px;height:22px;border-radius:4px;border:1px solid #ddd;cursor:pointer;font-size:9px;font-weight:700;background:#fff}
+.pres-btn.P{background:#E1F5EE;color:#085041;border-color:#9FE1CB}
+.pres-btn.A{background:#FCEBEB;color:#791F1F;border-color:#f5b8b8}
+/* Cahier journal */
+.journal-entry{border-left:3px solid #0F6E56;padding:8px 12px;margin-bottom:8px;background:#f9f9f7;border-radius:0 7px 7px 0}
+.journal-entry .je-date{font-size:10px;color:#888;font-weight:600}
+.journal-entry .je-titre{font-size:13px;font-weight:600;margin:2px 0}
+.journal-entry .je-meta{font-size:11px;color:#666}
+/* Planning annuel */
+.planning-row{display:grid;grid-template-columns:80px 1fr 120px 100px;gap:8px;padding:6px 0;border-bottom:1px solid #f0f0eb;align-items:center;font-size:12px}
+/* EDT week */
+.week-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:8px}
+.day-col{background:#f9f9f7;border-radius:7px;padding:6px;min-height:70px}
+.day-header{font-size:10px;font-weight:700;color:#0F6E56;text-align:center;padding:3px;border-bottom:1px solid #e5e5e0;margin-bottom:4px}
+.day-header.today{background:#0F6E56;color:#fff;border-radius:5px;border-bottom:none}
+.cours-card{background:#fff;border-radius:5px;padding:4px 6px;margin-bottom:3px;border-left:3px solid #0F6E56;font-size:10px}
+/* EDT grille */
+.grid-wrap{overflow-x:auto}
+table.edt{width:100%;border-collapse:collapse;font-size:10px;table-layout:fixed}
+table.edt th{background:#f5f5f0;padding:5px 3px;border:1px solid #e5e5e0;font-weight:600;font-size:9px;text-align:center;color:#666}
+table.edt td{border:1px solid #e5e5e0;padding:2px;vertical-align:top;height:48px}
+table.edt td.heure{background:#f5f5f0;text-align:center;font-size:9px;color:#888;font-weight:600;width:52px}
+.slot{border-radius:4px;padding:2px 4px;font-size:9px;line-height:1.3;position:relative}
+.del-btn{position:absolute;top:1px;right:1px;font-size:8px;cursor:pointer;color:inherit;opacity:.5;border:none;background:none;padding:0}
+.slot-empty{display:block;min-height:42px}
+/* Alertes */
+.alert-box{border-radius:8px;padding:10px 12px;margin-bottom:9px;font-size:12px}
+.alert-info{background:#E6F1FB;color:#0C447C;border:1px solid #B5D4F4}
+.alert-success{background:#E1F5EE;color:#085041;border:1px solid #9FE1CB}
+.alert-warn{background:#FAEEDA;color:#633806;border:1px solid #FAC775}
+.toast{position:fixed;bottom:18px;right:18px;background:#0F6E56;color:#fff;padding:10px 15px;border-radius:8px;font-size:12px;font-weight:500;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:300px}
+.toast.show{opacity:1}
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:14px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:11px;padding:18px;width:100%;max-width:700px;max-height:92vh;overflow-y:auto}
+.modal h2{font-size:15px;font-weight:700;margin-bottom:12px}
+.modal-close{float:right;cursor:pointer;font-size:17px;color:#aaa;border:none;background:none}
+/* Devoir */
+.devoir-card{border:1px solid #e5e5e0;border-radius:8px;padding:11px 13px;margin-bottom:9px}
+.q-block{background:#f9f9f7;border-radius:6px;padding:9px;margin-bottom:7px;border-left:3px solid #0F6E56}
+.share-box{background:#E1F5EE30;border:1px solid #9FE1CB;border-radius:7px;padding:8px 10px;margin-top:7px}
+/* Élève page devoir */
+.eleve-page{display:none;position:fixed;inset:0;background:#f5f5f0;z-index:2000;overflow-y:auto;padding:16px}
+.eleve-page.show{display:block}
+/* Photo */
+.photo-preview{width:80px;height:80px;border-radius:50%;object-fit:cover;border:2px solid #0F6E56;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}
+.photo-preview img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+/* Cahier journal classe */
+.seance-card{border:1px solid #e5e5e0;border-radius:9px;padding:12px 14px;margin-bottom:10px}
+.seance-card.active{border-color:#0F6E56;background:#f9fdfc}
+.eleve-rappel{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #e5e5e0;border-radius:7px;margin-bottom:5px;font-size:12px}
+.eleve-rappel.bon{border-color:#0F6E56;background:#E1F5EE20}
+.eleve-rappel.sanction{border-color:#c0392b;background:#FCEBEB20}
+.eleve-rappel.pending{background:#f9f9f7}
+.bonus-btn{padding:2px 8px;border-radius:20px;border:1px solid #0F6E56;background:#fff;color:#0F6E56;cursor:pointer;font-size:11px;font-weight:600}
+.bonus-btn:hover{background:#0F6E56;color:#fff}
+.sanction-chip{display:inline-block;padding:2px 8px;border-radius:20px;background:#FCEBEB;color:#791F1F;font-size:10px;font-weight:600;margin:2px}
+/* Print */
+@media print{
+  .no-print{display:none!important}
+  .print-only{display:block!important}
+  body{background:#fff}
+  .modal{box-shadow:none;border:none}
+}
+/* Fichier chip */
+.file-chip{display:inline-flex;align-items:center;gap:5px;background:#E6F1FB;border:1px solid #B5D4F4;border-radius:20px;padding:3px 9px;font-size:11px;color:#0C447C;margin:3px}
+.file-chip a{color:#0C447C;text-decoration:none;font-weight:500}
+.file-chip a:hover{text-decoration:underline}
+@media(max-width:700px){
+  .two-col{grid-template-columns:1fr}
+  .stats{grid-template-columns:repeat(3,1fr)}
+  .three-col,.four-col{grid-template-columns:1fr 1fr}
+  .week-grid{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- PAGE ÉLÈVE DEVOIR -->
+<div class="eleve-page" id="eleve-page">
+  <div style="max-width:620px;margin:0 auto">
+    <div style="background:#0F6E56;color:#fff;border-radius:9px;padding:12px 16px;margin-bottom:14px;text-align:center">
+      <div style="font-size:17px;font-weight:700" id="ep-titre">Devoir</div>
+      <div style="font-size:11px;opacity:.8;margin-top:3px" id="ep-meta"></div>
+    </div>
+    <div id="ep-login" class="card">
+      <div class="card-title">🔐 Connexion élève</div>
+      <div class="form-group"><label>Nom complet</label><input id="ep-nom" placeholder="Fatoumata Diallo"></div>
+      <div class="form-group"><label>Mot de passe</label><input id="ep-pwd" type="password"></div>
+      <div id="ep-err" style="font-size:11px;color:#c0392b;margin-bottom:7px"></div>
+      <button class="btn btn-primary" onclick="eleveLogin()">Connexion →</button>
+    </div>
+    <div id="ep-form" style="display:none">
+      <div id="ep-questions"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="eleveSubmit()">📤 Envoyer</button>
+    </div>
+    <div id="ep-done" style="display:none" class="card">
+      <div style="text-align:center;padding:20px"><div style="font-size:36px">✅</div><div style="font-size:15px;font-weight:600;margin-top:6px">Devoir envoyé !</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FICHE ÉLÈVE -->
+<div class="modal-overlay" id="modal-eleve">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-eleve')">✕</button>
+    <div id="fiche-eleve-content"></div>
+  </div>
+</div>
+
+<!-- MODAL CRÉER DEVOIR -->
+<div class="modal-overlay" id="modal-devoir">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-devoir')">✕</button>
+    <h2>📋 Créer un devoir / Évaluation</h2>
+    <div class="three-col">
+      <div class="form-group"><label>École</label><select id="dv-ecole" onchange="filterClassesDevoir()"><option value="">--</option></select></div>
+      <div class="form-group"><label>Classe</label><select id="dv-classe"><option value="">--</option></select></div>
+      <div class="form-group"><label>Type</label>
+        <select id="dv-type">
+          <option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option>
+        </select>
+      </div>
+    </div>
+    <div class="two-eq">
+      <div class="form-group"><label>Titre</label><input id="dv-titre" placeholder="Devoir 1 — Biologie"></div>
+      <div class="form-group"><label>Matière</label><input id="dv-mat" placeholder="Biologie"></div>
+    </div>
+    <div class="three-col">
+      <div class="form-group"><label>Date limite</label><input id="dv-deadline" type="date"></div>
+      <div class="form-group"><label>Durée (min)</label><input id="dv-duree" type="number" placeholder="60"></div>
+      <div class="form-group"><label>Barème</label><input id="dv-bareme" type="number" value="20"></div>
+    </div>
+    <div class="form-group"><label>Consignes</label><textarea id="dv-consignes" placeholder="Lis attentivement..."></textarea></div>
+
+    <!-- Import fichier sujet -->
+    <div class="form-group">
+      <label>📎 Importer un sujet (PDF, Word, Image...)</label>
+      <div class="drive-link-box">
+        <span style="font-size:16px">📁</span>
+        <input id="dv-drive-link" placeholder="Colle le lien Google Drive / OneDrive du fichier sujet...">
+        <button class="btn btn-sm btn-info" onclick="previewDriveLink('dv-drive-link','dv-preview')">Aperçu</button>
+      </div>
+      <div id="dv-preview" style="margin-top:5px"></div>
+    </div>
+
+    <div style="border-top:1px solid #e5e5e0;margin:10px 0;padding-top:10px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <strong style="font-size:12px">Questions en ligne (optionnel)</strong>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-info btn-sm" onclick="ajouterQuestion('qcm')">+ QCM</button>
+          <button class="btn btn-primary btn-sm" onclick="ajouterQuestion('open')">+ Ouverte</button>
+        </div>
+      </div>
+      <div id="questions-builder"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveDevoir()">💾 Créer</button>
+  </div>
+</div>
+
+<!-- MODAL RÉSULTATS -->
+<div class="modal-overlay" id="modal-resultats">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-resultats')">✕</button>
+    <h2 id="res-titre">Résultats</h2>
+    <div id="res-content"></div>
+  </div>
+</div>
+
+<!-- MODAL PLANNING ANNUEL -->
+<div class="modal-overlay" id="modal-planning">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('modal-planning')">✕</button>
+    <h2 id="planning-titre">Planification annuelle</h2>
+    <div id="planning-content"></div>
+  </div>
+</div>
+
+<!-- MODAL REGISTRE -->
+<div class="modal-overlay" id="modal-registre" style="padding:8px">
+  <div class="modal" style="max-width:95vw">
+    <button class="modal-close no-print" onclick="closeModal('modal-registre')">✕</button>
+    <h2 id="registre-titre">Registre de présence</h2>
+    <div id="registre-content" style="overflow-x:auto"></div>
+  </div>
+</div>
+
+<!-- MODAL CAHIER JOURNAL CLASSE -->
+<div class="modal-overlay" id="modal-cahier-classe" style="padding:8px">
+  <div class="modal" style="max-width:900px">
+    <div class="no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 id="cahier-classe-titre">📔 Cahier journal</h2>
+      <button class="modal-close" onclick="closeModal('modal-cahier-classe')">✕</button>
+    </div>
+
+    <!-- Sous-onglets du cahier -->
+    <div class="sub-tabs no-print" id="cahier-subtabs">
+      <button class="sub-tab active" onclick="showCahierTab('cj-seances')">📅 Séances</button>
+      <button class="sub-tab" onclick="showCahierTab('cj-rappel')">🎯 Séance de rappel</button>
+      <button class="sub-tab" onclick="showCahierTab('cj-sanctions')">⚠️ Sanctions</button>
+      <button class="sub-tab" onclick="showCahierTab('cj-bonus')">⭐ Bonus</button>
+    </div>
+
+    <!-- SÉANCES -->
+    <div id="cj-seances" class="sub-content active">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px" class="no-print">
+        <strong style="font-size:13px">Nouvelle séance</strong>
+        <button class="btn btn-primary btn-sm" onclick="ouvrirNouvelleSeance()">+ Démarrer une séance</button>
+      </div>
+      <!-- Formulaire nouvelle séance -->
+      <div id="form-nouvelle-seance" style="display:none" class="card no-print" style="margin-bottom:10px">
+        <div class="three-col">
+          <div class="form-group"><label>Date</label><input type="date" id="sj-date"></div>
+          <div class="form-group"><label>Matière</label><input id="sj-mat" placeholder="Biologie"></div>
+          <div class="form-group"><label>Leçon / Chapitre</label><input id="sj-lecon" placeholder="La cellule vivante"></div>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>Heure début</label><input type="time" id="sj-hdeb"></div>
+          <div class="form-group"><label>Heure fin</label><input type="time" id="sj-hfin"></div>
+        </div>
+        <div class="form-group"><label>Contenu du cours</label><textarea id="sj-contenu" placeholder="Résumé du contenu enseigné..."></textarea></div>
+        <div class="form-group"><label>Observations générales</label><textarea id="sj-obs" placeholder="Remarques sur le déroulement..."></textarea></div>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-primary" onclick="enregistrerSeance()">💾 Enregistrer la séance</button>
+          <button class="btn" onclick="document.getElementById('form-nouvelle-seance').style.display='none'">Annuler</button>
+        </div>
+      </div>
+      <!-- Liste des séances -->
+      <div id="liste-seances-classe"><div class="empty">Aucune séance enregistrée</div></div>
+    </div>
+
+    <!-- SÉANCE DE RAPPEL -->
+    <div id="cj-rappel" class="sub-content">
+      <div class="card no-print" style="margin-bottom:10px">
+        <div class="card-title">🎯 Configurer la séance de rappel</div>
+        <div class="two-eq">
+          <div class="form-group"><label>Leçon à rappeler</label><input id="rp-lecon" placeholder="La cellule vivante — Chapitre 1"></div>
+          <div class="form-group"><label>Nombre d'élèves à interroger</label><input type="number" id="rp-nb" value="5" min="1" max="30"></div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="tiragAleatoire()">🎲 Tirage aléatoire</button>
+          <button class="btn btn-info" onclick="choixManuel()">✋ Choisir manuellement</button>
+        </div>
+      </div>
+      <!-- Zone de tirage -->
+      <div id="zone-tirage" style="display:none">
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-title">Élèves interrogés — <span id="rp-lecon-titre" style="color:#0F6E56"></span></div>
+          <div id="liste-interroges"></div>
+          <div style="margin-top:10px;display:flex;gap:7px" class="no-print">
+            <button class="btn btn-primary" onclick="sauvegarderRappel()">💾 Enregistrer les résultats</button>
+            <button class="btn" onclick="document.getElementById('zone-tirage').style.display='none'">Fermer</button>
+          </div>
+        </div>
+      </div>
+      <!-- Choix manuel -->
+      <div id="zone-choix-manuel" style="display:none" class="card no-print">
+        <div class="card-title">Sélectionner les élèves à interroger</div>
+        <div id="liste-choix-manuel"></div>
+        <button class="btn btn-primary" style="margin-top:8px" onclick="confirmerChoixManuel()">✓ Confirmer la sélection</button>
+      </div>
+      <!-- Historique rappels -->
+      <div class="card">
+        <div class="card-title">📋 Historique des séances de rappel</div>
+        <div id="historique-rappels-classe"><div class="empty">Aucune séance de rappel enregistrée</div></div>
+      </div>
+    </div>
+
+    <!-- SANCTIONS -->
+    <div id="cj-sanctions" class="sub-content">
+      <div class="no-print" style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong style="font-size:13px">⚠️ Liste des sanctions</strong>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-warn btn-sm" onclick="imprimerSanctions()">🖨️ Imprimer</button>
+            <button class="btn btn-info btn-sm" onclick="telechargerPDFSanctions()">📄 PDF</button>
+          </div>
+        </div>
+        <!-- Ajouter sanction manuelle -->
+        <div class="card" style="margin-bottom:10px">
+          <div class="card-title">Ajouter une sanction</div>
+          <div class="two-eq">
+            <div class="form-group"><label>Élève</label><select id="sanc-eleve"><option value="">-- Choisir --</option></select></div>
+            <div class="form-group"><label>Date</label><input type="date" id="sanc-date"></div>
+          </div>
+          <div class="form-group"><label>Motif</label>
+            <select id="sanc-motif">
+              <option>Rappel de cours non effectué</option>
+              <option>Cahier non à jour</option>
+              <option>Perturbation de cours</option>
+              <option>Distraction des amis</option>
+              <option>Devoir non rendu</option>
+              <option>Téléphone en classe</option>
+              <option>Absence non justifiée</option>
+              <option>Retard répété</option>
+              <option>Manque de respect</option>
+              <option>Autre</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Précisions (optionnel)</label><input id="sanc-detail" placeholder="Détails supplémentaires..."></div>
+          <button class="btn btn-warn btn-sm" onclick="ajouterSanction()">+ Ajouter</button>
+        </div>
+      </div>
+      <!-- Liste imprimable -->
+      <div id="liste-sanctions-classe">
+        <div class="empty">Aucune sanction enregistrée</div>
+      </div>
+    </div>
+
+    <!-- BONUS -->
+    <div id="cj-bonus" class="sub-content">
+      <div class="card no-print" style="margin-bottom:10px">
+        <div class="card-title">⭐ Ajouter des points de bonus</div>
+        <div class="three-col">
+          <div class="form-group"><label>Élève</label><select id="bon-eleve"><option value="">-- Choisir --</option></select></div>
+          <div class="form-group"><label>Points</label>
+            <select id="bon-points">
+              <option value="1">+1 point</option>
+              <option value="2">+2 points</option>
+              <option value="3">+3 points</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Motif</label><input id="bon-motif" placeholder="Excellent rappel de cours..."></div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="ajouterBonus()">+ Ajouter le bonus</button>
+      </div>
+      <div class="card">
+        <div class="card-title">⭐ Classement des bonus</div>
+        <div id="liste-bonus-classe"><div class="empty">Aucun bonus enregistré</div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ZONE IMPRESSION SANCTIONS -->
+<div id="print-sanctions" style="display:none">
+  <div style="padding:20px;font-family:Arial,sans-serif">
+    <div style="text-align:center;margin-bottom:16px;border-bottom:2px solid #000;padding-bottom:10px">
+      <h2 id="print-ecole-nom" style="font-size:16px;margin:0"></h2>
+      <h3 id="print-classe-nom" style="font-size:14px;margin:4px 0;color:#555"></h3>
+      <p id="print-date-titre" style="font-size:12px;color:#888;margin:0"></p>
+    </div>
+    <h3 style="font-size:14px;text-align:center;margin-bottom:12px;color:#c0392b">⚠️ LISTE DES ÉLÈVES À SANCTIONNER</h3>
+    <div id="print-sanctions-content"></div>
+    <div style="margin-top:20px;border-top:1px solid #ccc;padding-top:10px;display:flex;justify-content:space-between">
+      <div><p style="font-size:11px">Signature du professeur :</p><div style="margin-top:20px;border-top:1px solid #000;width:150px"></div></div>
+      <div><p style="font-size:11px">Visa du Directeur :</p><div style="margin-top:20px;border-top:1px solid #000;width:150px"></div></div>
+    </div>
+  </div>
+</div>
+
+<header>
+  <h1>📚 Prof. Karim DIOP — Plateforme Pédagogique</h1>
+  <div class="hright">
+    <span style="font-size:10px;opacity:.7" id="date-now"></span>
+    <select id="ecole-selector" onchange="switchEcole(this.value)">
+      <option value="">🏫 Toutes les écoles</option>
+    </select>
+    <button id="notif-btn" onclick="activerNotifs()">🔔</button>
+  </div>
+</header>
+
+<nav class="nav">
+  <button class="active" onclick="showTab('accueil')">🏠 Accueil</button>
+  <button onclick="showTab('ecoles')">🏫 Écoles</button>
+  <button onclick="showTab('classes')">👥 Classes</button>
+  <button onclick="showTab('cours')">📖 Cours</button>
+  <button onclick="showTab('notes')">📊 Notes</button>
+  <button onclick="showTab('devoirs')">📋 Devoirs</button>
+  <button onclick="showTab('ressources')">📁 Ressources</button>
+  <button onclick="showTab('edt')">🗓️ EDT</button>
+  <button onclick="showTab('alertes')">🔔 Alertes</button>
+</nav>
+
+<div class="main">
+
+<!-- ACCUEIL -->
+<div id="accueil" class="section active">
+  <div class="stats">
+    <div class="stat"><div class="stat-val" id="s-ecoles">0</div><div class="stat-lbl">Écoles</div></div>
+    <div class="stat"><div class="stat-val" id="s-classes">0</div><div class="stat-lbl">Classes</div></div>
+    <div class="stat"><div class="stat-val" id="s-eleves">0</div><div class="stat-lbl">Élèves</div></div>
+    <div class="stat"><div class="stat-val" id="s-cours">0</div><div class="stat-lbl">Cours</div></div>
+    <div class="stat"><div class="stat-val" id="s-devoirs">0</div><div class="stat-lbl">Devoirs</div></div>
+    <div class="stat"><div class="stat-val" id="s-ressources">0</div><div class="stat-lbl">Ressources</div></div>
+  </div>
+  <div id="rappel-demain"></div>
+  <div class="card">
+    <div class="card-title">📅 Planning semaine <span id="semaine-label" style="font-size:10px;color:#aaa;font-weight:400"></span></div>
+    <div class="week-grid" id="week-grid"></div>
+  </div>
+  <div class="two-eq">
+    <div class="card"><div class="card-title">📊 Dernières notes</div><div id="recent-notes"><div class="empty">Aucune note</div></div></div>
+    <div class="card"><div class="card-title">📋 Devoirs récents</div><div id="recent-devoirs"><div class="empty">Aucun devoir</div></div></div>
+  </div>
+</div>
+
+<!-- ÉCOLES -->
+<div id="ecoles" class="section">
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">➕ Nouvelle école</div>
+      <div class="form-group"><label>Nom</label><input id="ec-nom" placeholder="École Internationale Maloum"></div>
+      <div class="form-group"><label>Abréviation</label><input id="ec-abr" placeholder="EIM"></div>
+      <div class="form-group"><label>Localité</label><input id="ec-loc" placeholder="Conakry"></div>
+      <div class="form-group"><label>Type</label>
+        <select id="ec-type"><option>Collège & Lycée</option><option>Collège</option><option>Lycée</option><option>Supérieur / Université</option><option>École professionnelle</option></select>
+      </div>
+      <div class="form-group"><label>Couleur</label>
+        <select id="ec-couleur"><option value="#0F6E56">Vert</option><option value="#1565C0">Bleu</option><option value="#6A1B9A">Violet</option><option value="#B71C1C">Rouge</option><option value="#E65100">Orange</option></select>
+      </div>
+      <button class="btn btn-primary" onclick="addEcole()">+ Ajouter</button>
+    </div>
+    <div class="card"><div class="card-title">Mes écoles</div><div id="liste-ecoles"><div class="empty">Aucune école</div></div></div>
+  </div>
+</div>
+
+<!-- CLASSES -->
+<div id="classes" class="section">
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="showSubTab('classes','cl-liste')">📋 Liste des classes</button>
+    <button class="sub-tab" onclick="showSubTab('classes','cl-add')">➕ Ajouter</button>
+    <button class="sub-tab" onclick="showSubTab('classes','cl-eleves')">👥 Élèves</button>
+    <button class="sub-tab" onclick="showSubTab('classes','cl-import')">📥 Import Excel</button>
+  </div>
+
+  <div id="cl-liste" class="sub-content active">
+    <div style="margin-bottom:8px"><select id="filter-ecole-cl" onchange="renderClasses()" style="width:220px"><option value="">Toutes les écoles</option></select></div>
+    <div id="liste-classes"><div class="empty">Aucune classe</div></div>
+  </div>
+
+  <div id="cl-add" class="sub-content">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Nouvelle classe</div>
+        <div class="form-group"><label>École</label><select id="cl-ecole"><option value="">--</option></select></div>
+        <div class="two-eq">
+          <div class="form-group"><label>Cycle</label>
+            <select id="cl-cycle" onchange="updateClasseOptions()">
+              <option value="Collège">Collège</option><option value="Lycée">Lycée</option><option value="Supérieur">Supérieur</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Niveau</label>
+            <select id="cl-niveau"><option>7ème</option><option>8ème</option><option>9ème</option><option>10ème</option></select>
+          </div>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>Lettre/Groupe</label>
+            <select id="cl-lettre"><option value="">— Aucune</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select>
+          </div>
+          <div class="form-group"><label>Effectif</label><input id="cl-eff" type="number" placeholder="35"></div>
+        </div>
+        <div class="form-group"><label>Année scolaire</label><input id="cl-annee" value="2026-2027"></div>
+        <button class="btn btn-primary" onclick="addClasse()">+ Ajouter la classe</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Nouvel élève</div>
+        <div class="form-group"><label>Nom complet</label><input id="el-nom" placeholder="Fatoumata Diallo"></div>
+        <div class="form-group"><label>Classe</label><select id="el-classe"><option value="">--</option></select></div>
+        <div class="form-group"><label>Date de naissance</label><input id="el-ddn" type="date"></div>
+        <div class="form-group"><label>Email (pour devoirs)</label><input id="el-email" type="email" placeholder="eleve@gmail.com"></div>
+        <div class="form-group"><label>WhatsApp</label><input id="el-wa" placeholder="+224 621 000 000"></div>
+        <div class="form-group"><label>Mot de passe devoir</label><input id="el-pwd" placeholder="motdepasse123"></div>
+        <div class="form-group">
+          <label>Photo de l'élève</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="photo-preview" id="el-photo-preview">👤</div>
+            <div>
+              <input type="file" id="el-photo-file" accept="image/*" capture="camera" onchange="previewPhoto(this,'el-photo-preview','el-photo-data')" style="display:none">
+              <button class="btn btn-sm" onclick="document.getElementById('el-photo-file').click()">📷 Photo / Galerie</button>
+              <input type="hidden" id="el-photo-data">
+            </div>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="addEleve()">+ Ajouter l'élève</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="cl-eleves" class="sub-content">
+    <div style="display:flex;gap:7px;margin-bottom:9px;flex-wrap:wrap">
+      <select id="filter-ecole-el" onchange="filterClassesByEcole();renderEleves()" style="flex:1"><option value="">Toutes les écoles</option></select>
+      <select id="filter-classe-el" onchange="renderEleves()" style="flex:1"><option value="">Toutes les classes</option></select>
+      <input id="search-eleve" placeholder="🔍 Chercher un élève..." onkeyup="renderEleves()" style="flex:1">
+    </div>
+    <div id="liste-eleves"><div class="empty">Aucun élève</div></div>
+  </div>
+
+  <div id="cl-import" class="sub-content">
+    <div class="card">
+      <div class="card-title">📥 Import liste élèves depuis Excel</div>
+      <div class="alert-info alert-box">
+        <strong>Format attendu :</strong> colonnes dans cet ordre : <code>Nom complet | Email | WhatsApp | Mot de passe</code><br>
+        La 1ère ligne doit être l'en-tête. Les colonnes supplémentaires sont ignorées.
+      </div>
+      <div class="form-group"><label>Classe cible</label><select id="import-classe"><option value="">-- Choisir la classe --</option></select></div>
+      <div class="import-zone" onclick="document.getElementById('import-file').click()">
+        <input type="file" id="import-file" accept=".xlsx,.xls,.csv" onchange="importExcelEleves(this)">
+        <div class="iz-icon">📊</div>
+        <div class="iz-text">Clique pour importer le fichier Excel</div>
+        <div class="iz-sub">Formats acceptés : .xlsx, .xls, .csv</div>
+      </div>
+      <div id="import-preview" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- COURS -->
+<div id="cours" class="section">
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="showSubTab('cours','co-liste')">📖 Cours</button>
+    <button class="sub-tab" onclick="showSubTab('cours','co-add')">➕ Ajouter</button>
+    <button class="sub-tab" onclick="showSubTab('cours','co-journal')">📔 Cahier journal</button>
+    <button class="sub-tab" onclick="showSubTab('cours','co-planning')">📅 Planification annuelle</button>
+  </div>
+
+  <div id="co-liste" class="sub-content active">
+    <div style="display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap">
+      <select id="filter-ecole-cours" onchange="renderCours()" style="flex:1"><option value="">Toutes écoles</option></select>
+      <select id="filter-classe-cours" onchange="renderCours()" style="flex:1"><option value="">Toutes classes</option></select>
+      <select id="filter-statut-cours" onchange="renderCours()" style="flex:1"><option value="">Tous statuts</option><option>En cours</option><option>Terminé</option><option>Planifié</option></select>
+    </div>
+    <div id="liste-cours"><div class="empty">Aucun cours</div></div>
+  </div>
+
+  <div id="co-add" class="sub-content">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Nouveau cours</div>
+        <div class="form-group"><label>Titre du cours</label><input id="co-titre" placeholder="La cellule vivante"></div>
+        <div class="two-eq">
+          <div class="form-group"><label>École</label><select id="co-ecole" onchange="filterClassesByCours()"><option value="">--</option></select></div>
+          <div class="form-group"><label>Classe</label><select id="co-classe"><option value="">--</option></select></div>
+        </div>
+        <div class="form-group"><label>Matière</label><input id="co-mat" placeholder="Biologie, Géologie, SVT..."></div>
+        <div class="two-eq">
+          <div class="form-group"><label>Date</label><input id="co-debut" type="date"></div>
+          <div class="form-group"><label>Durée (min)</label><input id="co-duree" type="number" placeholder="60"></div>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>N° dans programme</label><input id="co-num" placeholder="Chap. 1"></div>
+          <div class="form-group"><label>Statut</label><select id="co-statut"><option>En cours</option><option>Terminé</option><option>Planifié</option></select></div>
+        </div>
+        <div class="form-group"><label>Objectifs</label><textarea id="co-obj" placeholder="L'élève doit être capable de..."></textarea></div>
+        <div class="form-group"><label>Contenu / Résumé</label><textarea id="co-contenu" placeholder="Résumé du cours..."></textarea></div>
+
+        <!-- Fichiers du cours -->
+        <div style="border-top:1px solid #e5e5e0;margin:8px 0;padding-top:8px">
+          <label style="font-weight:600;margin-bottom:6px;display:block">📎 Fichiers du cours (leçon préparée, images, vidéos...)</label>
+          <div id="co-fichiers-list" style="margin-bottom:7px"></div>
+          <div class="drive-link-box">
+            <span style="font-size:14px">🔗</span>
+            <input id="co-fichier-url" placeholder="Lien Google Drive / YouTube / OneDrive...">
+            <input id="co-fichier-nom" placeholder="Nom du fichier" style="width:130px">
+            <select id="co-fichier-type" style="width:90px"><option>PDF</option><option>Word</option><option>PPT</option><option>Excel</option><option>Image</option><option>Vidéo</option><option>Autre</option></select>
+            <button class="btn btn-sm btn-primary" onclick="addFichierCours()">+</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="addCours()">💾 Enregistrer le cours</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Aperçu rapide</div>
+        <div class="alert-info alert-box" style="font-size:11px">
+          💡 Les cours enregistrés avec statut <strong>"Terminé"</strong> sont automatiquement ajoutés au <strong>cahier journal</strong> de la classe et à la <strong>planification annuelle</strong>.
+        </div>
+        <div style="font-size:12px;color:#666;margin-top:8px">
+          <strong>Types de fichiers acceptés via lien Drive :</strong><br>
+          📄 Word (.docx), 📊 Excel (.xlsx), 📊 PowerPoint (.pptx), 📕 PDF, 🖼️ Images, 🎬 Vidéos YouTube/Drive
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:#666">
+          <strong>Comment partager depuis Google Drive :</strong><br>
+          1. Ouvre ton fichier sur Drive<br>
+          2. Clique sur "Partager"<br>
+          3. Change en "Toute personne avec le lien"<br>
+          4. Copie le lien et colle-le ici
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="co-journal" class="sub-content">
+    <div class="card">
+      <div class="card-title">📔 Cahier journal</div>
+      <div style="display:flex;gap:7px;margin-bottom:9px">
+        <select id="journal-ecole" onchange="filterClassesJournal()" style="flex:1"><option value="">Toutes écoles</option></select>
+        <select id="journal-classe" onchange="renderJournal()" style="flex:1"><option value="">Toutes classes</option></select>
+        <select id="journal-mat" onchange="renderJournal()" style="flex:1"><option value="">Toutes matières</option></select>
+      </div>
+      <div id="cahier-journal"><div class="empty">Aucune entrée — les cours "Terminés" apparaissent ici automatiquement</div></div>
+    </div>
+  </div>
+
+  <div id="co-planning" class="sub-content">
+    <div class="card">
+      <div class="card-title">📅 Planification annuelle du programme</div>
+      <div style="display:flex;gap:7px;margin-bottom:9px;flex-wrap:wrap">
+        <select id="planning-ecole" onchange="filterClassesPlanning()" style="flex:1"><option value="">École</option></select>
+        <select id="planning-classe" onchange="renderPlanning()" style="flex:1"><option value="">Classe</option></select>
+        <select id="planning-mat" onchange="renderPlanning()" style="flex:1"><option value="">Matière</option></select>
+      </div>
+      <div id="planning-annuel"><div class="empty">Sélectionne une classe et une matière</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NOTES -->
+<div id="notes" class="section">
+  <div class="sub-tabs">
+    <button class="sub-tab active" onclick="showSubTab('notes','no-liste')">📊 Notes</button>
+    <button class="sub-tab" onclick="showSubTab('notes','no-add')">➕ Saisir</button>
+    <button class="sub-tab" onclick="showSubTab('notes','no-import')">📥 Import</button>
+    <button class="sub-tab" onclick="showSubTab('notes','no-bulletin')">📄 Bulletins</button>
+  </div>
+
+  <div id="no-liste" class="sub-content active">
+    <div style="display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap">
+      <select id="filter-ecole-note" onchange="renderNotes()" style="flex:1"><option value="">Toutes écoles</option></select>
+      <select id="filter-classe-note" onchange="renderNotes()" style="flex:1"><option value="">Toutes classes</option></select>
+      <select id="filter-type-note" onchange="renderNotes()" style="flex:1"><option value="">Tous types</option><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select>
+    </div>
+    <div id="moy-display" style="margin-bottom:7px"></div>
+    <div id="liste-notes"><div class="empty">Aucune note</div></div>
+  </div>
+
+  <div id="no-add" class="sub-content">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title">Saisir une note</div>
+        <div class="form-group"><label>Type</label><select id="no-type"><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select></div>
+        <div class="form-group"><label>Titre</label><input id="no-titre" placeholder="Devoir 1 — Biologie"></div>
+        <div class="form-group"><label>Matière</label><input id="no-mat" placeholder="Biologie"></div>
+        <div class="two-eq">
+          <div class="form-group"><label>École</label><select id="no-ecole" onchange="filterElevesNote()"><option value="">--</option></select></div>
+          <div class="form-group"><label>Classe</label><select id="no-classe" onchange="filterElevesNote()"><option value="">--</option></select></div>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>Date</label><input id="no-date" type="date"></div>
+          <div class="form-group"><label>Barème</label><input id="no-bareme" type="number" value="20"></div>
+        </div>
+        <div class="form-group"><label>Élève</label><select id="no-eleve"><option value="">--</option></select></div>
+        <div class="form-group"><label>Note</label><input id="no-note" type="number" step="0.25" placeholder="15"></div>
+        <div class="form-group"><label>Observation</label><input id="no-obs" placeholder="Très bien, peut mieux faire..."></div>
+        <button class="btn btn-primary" onclick="addNote()">+ Enregistrer</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Saisie rapide (toute une classe)</div>
+        <div class="two-eq">
+          <div class="form-group"><label>École</label><select id="no-rapide-ecole" onchange="loadClasseRapide()"><option value="">--</option></select></div>
+          <div class="form-group"><label>Classe</label><select id="no-rapide-classe" onchange="loadElevesRapide()"><option value="">--</option></select></div>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>Évaluation</label><input id="no-rapide-titre" placeholder="Composition 1"></div>
+          <div class="form-group"><label>Matière</label><input id="no-rapide-mat" placeholder="Biologie"></div>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>Type</label><select id="no-rapide-type"><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select></div>
+          <div class="form-group"><label>Barème</label><input id="no-rapide-bareme" type="number" value="20"></div>
+        </div>
+        <div class="form-group"><label>Date</label><input id="no-rapide-date" type="date"></div>
+        <div id="eleves-rapide-list"><div class="empty">Sélectionne une classe</div></div>
+        <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="saveNotesRapide()">💾 Enregistrer toutes les notes</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="no-import" class="sub-content">
+    <div class="card">
+      <div class="card-title">📥 Import fichier de notes (Excel)</div>
+      <div class="alert-info alert-box">
+        <strong>Format attendu :</strong> colonnes <code>Nom élève | Note | Observation</code><br>
+        Ou importe un fichier Excel déjà calculé — il sera synchronisé automatiquement.
+      </div>
+      <div class="three-col">
+        <div class="form-group"><label>École</label><select id="no-imp-ecole"><option value="">--</option></select></div>
+        <div class="form-group"><label>Classe</label><select id="no-imp-classe"><option value="">--</option></select></div>
+        <div class="form-group"><label>Type évaluation</label><select id="no-imp-type"><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select></div>
+      </div>
+      <div class="two-eq">
+        <div class="form-group"><label>Titre</label><input id="no-imp-titre" placeholder="Composition 1"></div>
+        <div class="form-group"><label>Matière</label><input id="no-imp-mat" placeholder="Biologie"></div>
+      </div>
+      <div class="two-eq">
+        <div class="form-group"><label>Date</label><input id="no-imp-date" type="date"></div>
+        <div class="form-group"><label>Barème</label><input id="no-imp-bareme" type="number" value="20"></div>
+      </div>
+      <div class="import-zone" onclick="document.getElementById('notes-import-file').click()">
+        <input type="file" id="notes-import-file" accept=".xlsx,.xls,.csv" onchange="importExcelNotes(this)">
+        <div class="iz-icon">📊</div>
+        <div class="iz-text">Clique pour importer le fichier Excel des notes</div>
+        <div class="iz-sub">.xlsx, .xls, .csv</div>
+      </div>
+      <div id="notes-import-preview" style="margin-top:10px"></div>
+
+      <!-- Import via lien Drive -->
+      <div style="margin-top:12px">
+        <div class="card-title" style="margin-bottom:6px">📁 Ou importer via lien (fichier déjà calculé)</div>
+        <div class="drive-link-box">
+          <input id="no-drive-link" placeholder="Lien Google Drive vers le fichier de notes...">
+          <button class="btn btn-sm btn-info" onclick="addDriveLinkNote()">+ Ajouter</button>
+        </div>
+        <div id="no-drive-files" style="margin-top:6px"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="no-bulletin" class="sub-content">
+    <div class="card">
+      <div class="card-title">📄 Bulletins de notes</div>
+      <div style="display:flex;gap:7px;margin-bottom:9px">
+        <select id="bull-ecole" onchange="filterClassesBull()" style="flex:1"><option value="">École</option></select>
+        <select id="bull-classe" onchange="renderBulletin()" style="flex:1"><option value="">Classe</option></select>
+        <select id="bull-eleve" onchange="renderBulletin()" style="flex:1"><option value="">Tous les élèves</option></select>
+      </div>
+      <div id="bulletin-content"><div class="empty">Sélectionne une classe</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- DEVOIRS -->
+<div id="devoirs" class="section">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+    <div>
+      <strong style="font-size:14px">📋 Devoirs, Évaluations & Compositions</strong>
+      <span style="font-size:11px;color:#888;margin-left:6px">Tous cycles</span>
+    </div>
+    <button class="btn btn-primary" onclick="openModal('modal-devoir')">+ Créer / Importer</button>
+  </div>
+  <div style="display:flex;gap:7px;margin-bottom:10px;flex-wrap:wrap">
+    <select id="filter-ecole-dv" onchange="renderDevoirs()" style="flex:1"><option value="">Toutes écoles</option></select>
+    <select id="filter-classe-dv" onchange="renderDevoirs()" style="flex:1"><option value="">Toutes classes</option></select>
+    <select id="filter-type-dv" onchange="renderDevoirs()" style="flex:1"><option value="">Tous types</option><option>Devoir</option><option>Évaluation</option><option>Composition</option><option>Examen</option></select>
+    <select id="filter-statut-dv" onchange="renderDevoirs()" style="flex:1"><option value="">Tous statuts</option><option value="ouvert">Ouvert</option><option value="cloture">Clôturé</option></select>
+  </div>
+  <div id="liste-devoirs"><div class="empty">Aucun devoir créé</div></div>
+</div>
+
+<!-- RESSOURCES -->
+<div id="ressources" class="section">
+  <div class="two-col">
+    <div class="card">
+      <div class="card-title">➕ Nouvelle ressource</div>
+      <div class="form-group"><label>Titre</label><input id="re-titre" placeholder="Livre de Biologie Terminale"></div>
+      <div class="two-eq">
+        <div class="form-group"><label>Type</label>
+          <select id="re-type">
+            <option>Document PDF</option><option>Livre</option><option>Cours (Word/PPT)</option>
+            <option>Exercice</option><option>Corrigé</option><option>Image/Schéma</option>
+            <option>Vidéo</option><option>Lien web</option><option>Autre</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Matière</label><input id="re-mat" placeholder="Biologie"></div>
+      </div>
+      <div class="form-group"><label>École</label><select id="re-ecole"><option value="">Toutes</option></select></div>
+      <div class="form-group"><label>Classe</label><select id="re-classe"><option value="">Toutes</option></select></div>
+
+      <!-- Lien Drive principal -->
+      <div class="form-group">
+        <label>🔗 Lien vers le fichier (Google Drive, YouTube, etc.)</label>
+        <div class="drive-link-box">
+          <input id="re-url" placeholder="https://drive.google.com/...">
+          <button class="btn btn-sm btn-info" onclick="previewDriveLink('re-url','re-preview')">👁</button>
+        </div>
+        <div id="re-preview" style="margin-top:4px"></div>
+      </div>
+
+      <!-- Import fichier local (pour images) -->
+      <div class="form-group">
+        <label>📷 Ou importer une image directement</label>
+        <div class="import-zone" onclick="document.getElementById('re-file').click()" style="padding:10px">
+          <input type="file" id="re-file" accept="image/*,application/pdf" onchange="previewRessourceFile(this)">
+          <div class="iz-text">Clique pour importer une image ou PDF</div>
+        </div>
+        <div id="re-file-preview" style="margin-top:4px"></div>
+      </div>
+
+      <div class="form-group"><label>Description</label><textarea id="re-desc" placeholder="Description de la ressource..."></textarea></div>
+      <button class="btn btn-primary" style="width:100%" onclick="addRessource()">+ Ajouter la ressource</button>
+    </div>
+    <div class="card">
+      <div class="card-title">📚 Mes ressources</div>
+      <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+        <select id="filter-type-res" onchange="renderRessources()" style="flex:1"><option value="">Tous types</option><option>Document PDF</option><option>Livre</option><option>Cours (Word/PPT)</option><option>Exercice</option><option>Corrigé</option><option>Image/Schéma</option><option>Vidéo</option><option>Lien web</option><option>Autre</option></select>
+        <input id="search-res" placeholder="🔍 Rechercher..." onkeyup="renderRessources()" style="flex:1">
+      </div>
+      <div id="liste-ressources"><div class="empty">Aucune ressource</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- EDT -->
+<div id="edt" class="section">
+  <div class="card">
+    <div class="card-title">Ajouter un créneau</div>
+    <div class="three-col" style="margin-bottom:6px">
+      <div class="form-group"><label>École</label><select id="et-ecole"><option value="">--</option></select></div>
+      <div class="form-group"><label>Jour</label>
+        <select id="et-jour"><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option></select>
+      </div>
+      <div class="form-group"><label>Matière</label><input id="et-mat" placeholder="Biologie"></div>
+    </div>
+    <div class="three-col" style="margin-bottom:6px">
+      <div class="form-group"><label>Heure début</label>
+        <select id="et-hdeb"><option>07h00</option><option>08h00</option><option>09h00</option><option>10h00</option><option>11h00</option><option>12h00</option><option>13h00</option><option>14h00</option><option>15h00</option><option>16h00</option><option>17h00</option></select>
+      </div>
+      <div class="form-group"><label>Heure fin</label>
+        <select id="et-hfin"><option>08h00</option><option>09h00</option><option>10h00</option><option>11h00</option><option>12h00</option><option>13h00</option><option>14h00</option><option>15h00</option><option>16h00</option><option>17h00</option><option>18h00</option></select>
+      </div>
+      <div class="form-group"><label>Salle</label><input id="et-salle" placeholder="Salle 12"></div>
+    </div>
+    <div class="three-col">
+      <div class="form-group"><label>Classe</label><input id="et-classe" placeholder="9ème A"></div>
+      <div class="form-group"><label>Leçon</label><input id="et-lecon" placeholder="La cellule vivante"></div>
+      <div class="form-group"><label>Note programme</label><input id="et-note" placeholder="Apporter TP..."></div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn btn-primary" onclick="addSlot()">+ Ajouter</button>
+      <span id="et-err" style="font-size:11px;color:#c0392b"></span>
+      <button class="btn btn-danger" onclick="clearEdt()" style="margin-left:auto">🗑 Effacer tout</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Grille horaire</div>
+    <div style="margin-bottom:7px"><select id="filter-ecole-edt" onchange="renderEdt()" style="width:220px"><option value="">Toutes les écoles</option></select></div>
+    <div class="grid-wrap">
+      <table class="edt">
+        <thead><tr><th style="width:52px">Heure</th><th>Lundi</th><th>Mardi</th><th>Mercredi</th><th>Jeudi</th><th>Vendredi</th><th>Samedi</th></tr></thead>
+        <tbody id="edt-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ALERTES -->
+<div id="alertes" class="section">
+  <div class="card">
+    <div class="card-title">🔔 Alertes de rappel</div>
+    <div class="alert-info alert-box">Rappel automatique la veille de chaque cours.</div>
+    <div class="two-eq" style="max-width:500px">
+      <div class="form-group"><label>Email</label><input id="email-rappel" type="email" value="abdoulkarimdiop77@gmail.com"></div>
+      <div style="display:flex;align-items:flex-end;gap:6px;padding-bottom:7px">
+        <button class="btn btn-primary" onclick="sauvegarderEmail()">💾 Sauvegarder</button>
+        <button class="btn btn-primary" onclick="activerNotifs()">🔔 Activer</button>
+      </div>
+    </div>
+    <div id="notif-status" class="alert-warn alert-box">Non activées</div>
+    <div class="card-title" style="margin-top:10px">📧 EmailJS</div>
+    <div class="three-col" style="max-width:600px">
+      <div class="form-group"><label>Service ID</label><input id="ejs-service" placeholder="service_xxx"></div>
+      <div class="form-group"><label>Template ID</label><input id="ejs-template" placeholder="template_xxx"></div>
+      <div class="form-group"><label>Public Key</label><input id="ejs-pubkey" placeholder="xxxxxxx"></div>
+    </div>
+    <button class="btn btn-primary" onclick="sauvegarderEmailJS()">💾 Sauvegarder EmailJS</button>
+    <div id="ejs-status" style="margin-top:6px;font-size:11px;color:#0F6E56"></div>
+  </div>
+  <div class="card"><div class="card-title">Cours de demain</div><div id="demain-liste"><div class="empty">Aucun cours</div></div></div>
+</div>
+
+</div><!-- /main -->
+
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>
+const JOURS=['Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const JOURS_FR=['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'];
+const HEURES=['07h00','08h00','09h00','10h00','11h00','12h00','13h00','14h00','15h00','16h00','17h00','18h00'];
+const MOIS_FR=['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'];
+
+let db={ecoles:[],classes:[],eleves:[],cours:[],notes:[],devoirs:[],copies:[],ressources:[],slots:[],rappels:[],presences:{}};
+let nid={ec:1,cl:1,el:1,co:1,no:1,dv:1,cp:1,re:1,sl:1};
+let cfg={email:'abdoulkarimdiop77@gmail.com',ejsService:'',ejsTemplate:'',ejsPubKey:''};
+let currentEcoleFilter='';
+let dvQuestions=[];
+let coBuf=[];// fichiers cours buffer
+let currentDevoirId=null;
+let currentEleve=null;
+
+function save(){try{localStorage.setItem('profkarim_v3',JSON.stringify({db,nid,cfg}));}catch(e){alert('Stockage plein — supprime des données ou vide le cache.');}}
+function load(){
+  try{
+    const d=localStorage.getItem('profkarim_v3');
+    if(d){const p=JSON.parse(d);db=p.db||db;nid=p.nid||nid;cfg=p.cfg||cfg;}
+    if(!db.presences)db.presences={};
+    if(!db.seances)db.seances={};
+    if(!db.sanctions)db.sanctions={};
+    if(!db.bonus)db.bonus={};
+    if(!db.rappelsClasse)db.rappelsClasse={};
+    if(cfg.email)document.getElementById('email-rappel').value=cfg.email;
+    if(cfg.ejsService)document.getElementById('ejs-service').value=cfg.ejsService;
+    if(cfg.ejsTemplate)document.getElementById('ejs-template').value=cfg.ejsTemplate;
+    if(cfg.ejsPubKey){document.getElementById('ejs-pubkey').value=cfg.ejsPubKey;try{emailjs.init(cfg.ejsPubKey);}catch(e){}}
+  }catch(e){}
+}
+function toast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+function showTab(t){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(t).classList.add('active');
+  const tabs=['accueil','ecoles','classes','cours','notes','devoirs','ressources','edt','alertes'];
+  document.querySelectorAll('.nav button')[tabs.indexOf(t)].classList.add('active');
+  if(t==='accueil')updateAccueil();
+  if(t==='edt')renderEdt();
+  if(t==='devoirs')renderDevoirs();
+  if(t==='alertes'){renderDemain();updateNotifStatus();}
+  if(t==='cours'){filterClassesJournal();filterClassesPlanning();}
+}
+function showSubTab(section,id){
+  const els=document.querySelectorAll(`#${section} .sub-content`);
+  const tabs=document.querySelectorAll(`#${section} .sub-tab`);
+  els.forEach(e=>e.classList.remove('active'));
+  tabs.forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const idx=[...els].indexOf(document.getElementById(id));
+  if(tabs[idx])tabs[idx].classList.add('active');
+}
+function switchEcole(id){currentEcoleFilter=id;updateAccueil();}
+
+/* Helpers */
+function getEcoleNom(id){const e=db.ecoles.find(x=>x.id==id);return e?e.nom:'—';}
+function getEcoleAbr(id){const e=db.ecoles.find(x=>x.id==id);return e?e.abr:'?';}
+function getEcoleCouleur(id){const e=db.ecoles.find(x=>x.id==id);return e?e.couleur:'#0F6E56';}
+function getClasseNom(id){const c=db.classes.find(x=>x.id==id);return c?c.nom:'—';}
+function getEleveNom(id){const e=db.eleves.find(x=>x.id==id);return e?e.nom:'—';}
+function noteStyle(n,b){const p=n/b;if(p>=0.7)return 'background:#E1F5EE;color:#085041';if(p>=0.5)return 'background:#FAEEDA;color:#633806';return 'background:#FCEBEB;color:#791F1F';}
+function hIdx(h){return HEURES.indexOf(h);}
+function genCode(){return Math.random().toString(36).substr(2,8).toUpperCase();}
+function genMatricule(ecoleId,classeId){
+  const e=db.ecoles.find(x=>x.id==ecoleId);
+  const c=db.classes.find(x=>x.id==classeId);
+  const prefix=(e?e.abr.substr(0,3):'XXX')+(c?c.nom.replace(/[^0-9]/g,'').substr(0,2)||'00':'00');
+  const num=String(nid.el).padStart(4,'0');
+  return prefix+'-'+num;
+}
+function typeIcon(type){
+  const icons={PDF:'📕',Word:'📄','Word/PPT':'📊',PPT:'📊',Excel:'📊',Image:'🖼️','Image/Schéma':'🖼️',Vidéo:'🎬','Lien web':'🔗',Livre:'📚',Cours:'📖','Cours (Word/PPT)':'📊',Exercice:'✏️',Corrigé:'✅',Document:'📄','Document PDF':'📕',Autre:'📎'};
+  return icons[type]||'📎';
+}
+function makeDriveEmbed(url){
+  if(!url)return '';
+  if(url.includes('youtube.com')||url.includes('youtu.be')){
+    const id=url.match(/(?:v=|youtu\.be\/)([a-zA-Z0-9_-]+)/)?.[1];
+    if(id)return `<iframe width="100%" height="200" src="https://www.youtube.com/embed/${id}" frameborder="0" allowfullscreen style="border-radius:6px;margin-top:5px"></iframe>`;
+  }
+  if(url.includes('drive.google.com')){
+    const fileId=url.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+    if(fileId)return `<iframe src="https://drive.google.com/file/d/${fileId}/preview" width="100%" height="200" style="border-radius:6px;margin-top:5px;border:none"></iframe>`;
+  }
+  return `<a href="${url}" target="_blank" class="btn btn-sm btn-info" style="margin-top:4px">🔗 Ouvrir le fichier</a>`;
+}
+function previewDriveLink(inputId,previewId){
+  const url=document.getElementById(inputId).value.trim();
+  document.getElementById(previewId).innerHTML=makeDriveEmbed(url);
+}
+function previewPhoto(input,previewId,dataId){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const data=e.target.result;
+    const prev=document.getElementById(previewId);
+    prev.innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    if(dataId)document.getElementById(dataId).value=data;
+  };reader.readAsDataURL(file);
+}
+function previewRessourceFile(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const data=e.target.result;
+    const prev=document.getElementById('re-file-preview');
+    if(file.type.startsWith('image/')){
+      prev.innerHTML=`<img src="${data}" style="max-width:200px;max-height:120px;border-radius:6px;margin-top:4px">`;
+      // Stocker dans URL si pas de lien Drive
+      if(!document.getElementById('re-url').value)document.getElementById('re-url').value=data;
+    }else{
+      prev.innerHTML=`<span class="file-chip"><a href="${data}" target="_blank">${file.name}</a></span>`;
+      if(!document.getElementById('re-url').value)document.getElementById('re-url').value=data;
+    }
+  };reader.readAsDataURL(file);
+}
+
+/* Refresh selects */
+function refreshAllSelects(){
+  const ecoleOpts=db.ecoles.map(e=>`<option value="${e.id}">${e.abr} — ${e.nom}</option>`).join('');
+  document.getElementById('ecole-selector').innerHTML='<option value="">🏫 Toutes les écoles</option>'+ecoleOpts;
+  ['cl-ecole','co-ecole','no-ecole','et-ecole','re-ecole','dv-ecole','no-rapide-ecole','no-imp-ecole','bull-ecole','journal-ecole','planning-ecole'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const first=el.options[0].cloneNode(true);el.innerHTML='';el.appendChild(first);
+    el.insertAdjacentHTML('beforeend',ecoleOpts);
+  });
+  ['filter-ecole-cl','filter-ecole-el','filter-ecole-cours','filter-ecole-note','filter-ecole-edt','filter-ecole-dv'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const first=el.options[0].cloneNode(true);el.innerHTML='';el.appendChild(first);
+    el.insertAdjacentHTML('beforeend',ecoleOpts);
+  });
+  const classOpts=db.classes.map(c=>`<option value="${c.id}">${c.nom} (${getEcoleAbr(c.ecoleId)})</option>`).join('');
+  ['el-classe','filter-classe-el','filter-classe-cours','filter-classe-note','filter-classe-dv','import-classe','no-imp-classe'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    const first=el.options[0].cloneNode(true);el.innerHTML='';el.appendChild(first);
+    el.insertAdjacentHTML('beforeend',classOpts);
+  });
+  ['re-classe'].forEach(id=>{
+    const el=document.getElementById(id);if(!el)return;
+    el.innerHTML='<option value="">Toutes</option>'+classOpts;
+  });
+  filterElevesNote();
+}
+function filterClassesByCours(){
+  const ecoleId=document.getElementById('co-ecole').value;
+  const arr=ecoleId?db.classes.filter(c=>c.ecoleId==ecoleId):db.classes;
+  document.getElementById('co-classe').innerHTML='<option value="">--</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+}
+function filterClassesDevoir(){
+  const ecoleId=document.getElementById('dv-ecole').value;
+  const arr=ecoleId?db.classes.filter(c=>c.ecoleId==ecoleId):db.classes;
+  document.getElementById('dv-classe').innerHTML='<option value="">--</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+}
+function filterClassesByEcole(){
+  const ecoleId=document.getElementById('filter-ecole-el').value;
+  const arr=ecoleId?db.classes.filter(c=>c.ecoleId==ecoleId):db.classes;
+  document.getElementById('filter-classe-el').innerHTML='<option value="">Toutes les classes</option>'+arr.map(c=>`<option value="${c.id}">${c.nom} (${getEcoleAbr(c.ecoleId)})</option>`).join('');
+}
+function filterElevesNote(){
+  const ecoleId=document.getElementById('no-ecole').value;
+  const cid=document.getElementById('no-classe').value;
+  let arrC=ecoleId?db.classes.filter(c=>c.ecoleId==ecoleId):db.classes;
+  document.getElementById('no-classe').innerHTML='<option value="">--</option>'+arrC.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+  if(cid)document.getElementById('no-classe').value=cid;
+  const classeId=document.getElementById('no-classe').value;
+  let arrE=classeId?db.eleves.filter(e=>e.classeId==classeId):[];
+  document.getElementById('no-eleve').innerHTML='<option value="">--</option>'+arrE.map(e=>`<option value="${e.id}">${e.nom}</option>`).join('');
+}
+function filterClassesJournal(){
+  const eid=document.getElementById('journal-ecole').value;
+  const arr=eid?db.classes.filter(c=>c.ecoleId==eid):db.classes;
+  document.getElementById('journal-classe').innerHTML='<option value="">Toutes classes</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+  // Matières
+  const mats=[...new Set(db.cours.map(c=>c.mat).filter(Boolean))];
+  document.getElementById('journal-mat').innerHTML='<option value="">Toutes matières</option>'+mats.map(m=>`<option>${m}</option>`).join('');
+  renderJournal();
+}
+function filterClassesPlanning(){
+  const eid=document.getElementById('planning-ecole').value;
+  const arr=eid?db.classes.filter(c=>c.ecoleId==eid):db.classes;
+  document.getElementById('planning-classe').innerHTML='<option value="">Classe</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+  const mats=[...new Set(db.cours.map(c=>c.mat).filter(Boolean))];
+  document.getElementById('planning-mat').innerHTML='<option value="">Matière</option>'+mats.map(m=>`<option>${m}</option>`).join('');
+  renderPlanning();
+}
+function filterClassesBull(){
+  const eid=document.getElementById('bull-ecole').value;
+  const arr=eid?db.classes.filter(c=>c.ecoleId==eid):db.classes;
+  document.getElementById('bull-classe').innerHTML='<option value="">Classe</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+  document.getElementById('bull-eleve').innerHTML='<option value="">Tous les élèves</option>';
+  renderBulletin();
+}
+
+/* ===== ÉCOLES ===== */
+function addEcole(){
+  const nom=document.getElementById('ec-nom').value.trim();
+  const abr=document.getElementById('ec-abr').value.trim().toUpperCase();
+  if(!nom||!abr)return toast('Nom et abréviation requis');
+  db.ecoles.push({id:nid.ec++,nom,abr,loc:document.getElementById('ec-loc').value.trim(),type:document.getElementById('ec-type').value,couleur:document.getElementById('ec-couleur').value});
+  document.getElementById('ec-nom').value='';document.getElementById('ec-abr').value='';document.getElementById('ec-loc').value='';
+  save();refreshAllSelects();renderEcoles();updateStats();toast('École ajoutée ✓');
+}
+function delEcole(id){if(!confirm('Supprimer ?'))return;db.ecoles=db.ecoles.filter(x=>x.id!==id);save();refreshAllSelects();renderEcoles();updateStats();}
+function renderEcoles(){
+  const el=document.getElementById('liste-ecoles');
+  if(!db.ecoles.length){el.innerHTML='<div class="empty">Aucune école</div>';return;}
+  el.innerHTML=db.ecoles.map(e=>`
+    <div style="border:1px solid ${e.couleur}40;border-left:4px solid ${e.couleur};border-radius:8px;padding:9px 13px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <span style="font-size:15px;font-weight:700;color:${e.couleur}">${e.abr}</span>
+        <strong style="margin-left:7px">${e.nom}</strong>
+        <span class="badge-stat" style="margin-left:5px">${e.type}</span>
+        ${e.loc?`<span style="font-size:10px;color:#aaa;margin-left:5px">📍${e.loc}</span>`:''}
+        <div style="margin-top:3px;font-size:10px;color:#888">${db.classes.filter(c=>c.ecoleId===e.id).length} classes · ${db.eleves.filter(ev=>{const c=db.classes.find(x=>x.id==ev.classeId);return c&&c.ecoleId==e.id;}).length} élèves</div>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="delEcole(${e.id})">✕</button>
+    </div>`).join('');
+}
+
+/* ===== CLASSES ===== */
+function updateClasseOptions(){
+  const cycle=document.getElementById('cl-cycle').value;
+  let opts='';
+  if(cycle==='Collège')opts='<option>7ème</option><option>8ème</option><option>9ème</option><option>10ème</option>';
+  else if(cycle==='Lycée')opts='<option>11ème</option><option>12ème</option><option>Terminale</option>';
+  else opts='<option>1ère année</option><option>2ème année</option><option>3ème année</option><option>4ème année</option><option>5ème année</option>';
+  document.getElementById('cl-niveau').innerHTML=opts;
+}
+function addClasse(){
+  const ecoleId=parseInt(document.getElementById('cl-ecole').value);
+  if(!ecoleId)return toast('Choisir une école');
+  const niveau=document.getElementById('cl-niveau').value;
+  const lettre=document.getElementById('cl-lettre').value;
+  const cycle=document.getElementById('cl-cycle').value;
+  const nom=niveau+(lettre?' '+lettre:'');
+  db.classes.push({id:nid.cl++,nom,niveau,cycle,ecoleId,effectif:document.getElementById('cl-eff').value||'?',annee:document.getElementById('cl-annee').value||'2026-2027'});
+  document.getElementById('cl-lettre').value='';document.getElementById('cl-eff').value='';
+  save();refreshAllSelects();renderClasses();updateStats();toast('Classe ajoutée ✓');
+}
+function delClasse(id){if(!confirm('Supprimer ?'))return;db.classes=db.classes.filter(x=>x.id!==id);db.eleves=db.eleves.filter(x=>x.classeId!==id);save();refreshAllSelects();renderClasses();renderEleves();updateStats();}
+function renderClasses(){
+  const el=document.getElementById('liste-classes');
+  const fe=document.getElementById('filter-ecole-cl').value;
+  let arr=fe?db.classes.filter(c=>c.ecoleId==fe):db.classes;
+  if(!arr.length){el.innerHTML='<div class="empty">Aucune classe</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Classe</th><th>École</th><th>Cycle</th><th>Eff.</th><th>Élèves</th><th>Actions</th></tr></thead><tbody>'+
+    arr.map(c=>{
+      const badgeCls=c.cycle==='Lycée'?'badge-lycee':c.cycle==='Supérieur'?'badge-sup':'badge-college';
+      const nbEl=db.eleves.filter(e=>e.classeId===c.id).length;
+      return `<tr>
+        <td><strong>${c.nom}</strong></td>
+        <td><span style="font-size:10px;padding:1px 6px;border-radius:20px;background:${getEcoleCouleur(c.ecoleId)}20;color:${getEcoleCouleur(c.ecoleId)};font-weight:600">${getEcoleAbr(c.ecoleId)}</span></td>
+        <td><span class="${badgeCls} badge">${c.cycle}</span></td>
+        <td>${c.effectif}</td><td>${nbEl}</td>
+        <td>
+          <button class="btn btn-sm btn-primary" onclick="ouvrirCahierClasse(${c.id})" style="margin-right:3px">📔 Cahier</button>
+          <button class="btn btn-sm btn-info" onclick="ouvrirRegistre(${c.id})" style="margin-right:3px">📋 Présences</button>
+          <button class="btn btn-danger btn-sm" onclick="delClasse(${c.id})">✕</button>
+        </td>
+      </tr>`;}).join('')+'</tbody></table>';
+}
+
+/* ===== ÉLÈVES ===== */
+function addEleve(){
+  const nom=document.getElementById('el-nom').value.trim();
+  const classeId=parseInt(document.getElementById('el-classe').value);
+  if(!nom||!classeId)return toast('Nom et classe requis');
+  const cl=db.classes.find(x=>x.id===classeId);
+  const ecoleId=cl?cl.ecoleId:null;
+  const pwd=document.getElementById('el-pwd').value.trim()||nom.split(' ')[0].toLowerCase()+'123';
+  const mat=genMatricule(ecoleId,classeId);
+  db.eleves.push({id:nid.el++,nom,classeId,ecoleId,matricule:mat,ddn:document.getElementById('el-ddn').value,email:document.getElementById('el-email').value.trim(),wa:document.getElementById('el-wa').value.trim(),pwd,photo:document.getElementById('el-photo-data').value,observations:[]});
+  document.getElementById('el-nom').value='';document.getElementById('el-email').value='';document.getElementById('el-wa').value='';document.getElementById('el-pwd').value='';document.getElementById('el-ddn').value='';
+  document.getElementById('el-photo-data').value='';document.getElementById('el-photo-preview').innerHTML='👤';
+  nid.el++;save();refreshAllSelects();renderEleves();updateStats();toast('Élève ajouté ✓ — Matricule : '+mat);
+}
+function delEleve(id){db.eleves=db.eleves.filter(x=>x.id!==id);save();refreshAllSelects();renderEleves();updateStats();}
+function renderEleves(){
+  const el=document.getElementById('liste-eleves');
+  const fc=document.getElementById('filter-classe-el').value;
+  const fe=document.getElementById('filter-ecole-el').value;
+  const search=document.getElementById('search-eleve').value.toLowerCase();
+  let arr=db.eleves;
+  if(fc)arr=arr.filter(e=>e.classeId==fc);
+  else if(fe)arr=arr.filter(e=>e.ecoleId==fe||(db.classes.find(x=>x.id==e.classeId)||{}).ecoleId==fe);
+  if(search)arr=arr.filter(e=>e.nom.toLowerCase().includes(search)||(e.matricule||'').toLowerCase().includes(search));
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun élève</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Photo</th><th>Matricule</th><th>Nom</th><th>Classe</th><th>Email</th><th>WA</th><th>Actions</th></tr></thead><tbody>'+
+    arr.map(e=>`<tr>
+      <td><div style="width:34px;height:34px;border-radius:50%;overflow:hidden;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:16px">${e.photo?`<img src="${e.photo}" style="width:34px;height:34px;object-fit:cover">`:'👤'}</div></td>
+      <td><span class="matricule-badge" style="font-size:9px">${e.matricule||'—'}</span></td>
+      <td><strong>${e.nom}</strong></td>
+      <td>${getClasseNom(e.classeId)}</td>
+      <td style="font-size:10px">${e.email||'—'}</td>
+      <td style="font-size:10px">${e.wa||'—'}</td>
+      <td>
+        <button class="btn btn-sm btn-primary" onclick="ouvrirFicheEleve(${e.id})" style="margin-right:2px">👤 Fiche</button>
+        <button class="btn btn-danger btn-sm" onclick="delEleve(${e.id})">✕</button>
+      </td>
+    </tr>`).join('')+'</tbody></table>';
+}
+
+/* ===== FICHE ÉLÈVE ===== */
+function ouvrirFicheEleve(id){
+  const e=db.eleves.find(x=>x.id===id);if(!e)return;
+  const cl=db.classes.find(x=>x.id==e.classeId);
+  const notes=db.notes.filter(n=>n.eleveId===id);
+  const absences=Object.values(db.presences).filter(p=>p[id]==='A');
+  const moyNotes=notes.length?(notes.reduce((s,n)=>s+n.note/n.bareme*20,0)/notes.length).toFixed(2):'—';
+
+  let html=`
+    <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap">
+      <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:34px;flex-shrink:0;border:2px solid #0F6E56">
+        ${e.photo?`<img src="${e.photo}" style="width:80px;height:80px;object-fit:cover">`:'👤'}
+      </div>
+      <div>
+        <h2 style="font-size:16px;margin-bottom:4px">${e.nom}</h2>
+        <div class="matricule-badge">${e.matricule||'—'}</div>
+        <div style="font-size:12px;color:#666;margin-top:5px">${cl?cl.nom:''} · ${getEcoleAbr(e.ecoleId)}</div>
+        ${e.ddn?`<div style="font-size:11px;color:#888">Né(e) le : ${e.ddn}</div>`:''}
+        ${e.email?`<div style="font-size:11px;color:#888">✉️ ${e.email}</div>`:''}
+        ${e.wa?`<div style="font-size:11px;color:#888">📱 ${e.wa}</div>`:''}
+      </div>
+      <div style="margin-left:auto;text-align:center;background:#E1F5EE;border-radius:8px;padding:8px 14px">
+        <div style="font-size:22px;font-weight:700;color:#0F6E56">${moyNotes}</div>
+        <div style="font-size:10px;color:#0F6E56">/20 — Moyenne</div>
+        <div style="font-size:11px;color:#c0392b;margin-top:4px">🚫 ${absences.length} absence(s)</div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div style="margin-bottom:12px">
+      <div style="font-weight:600;font-size:13px;margin-bottom:7px;border-bottom:1px solid #e5e5e0;padding-bottom:5px">📊 Notes & Évaluations</div>
+      ${notes.length?`<table><thead><tr><th>Évaluation</th><th>Type</th><th>Matière</th><th>Date</th><th>Note</th><th>Obs.</th></tr></thead><tbody>`+
+        notes.map(n=>`<tr><td>${n.titre}</td><td style="font-size:10px">${n.type||'—'}</td><td style="font-size:10px">${n.mat||'—'}</td><td style="font-size:10px">${n.date||'—'}</td><td><span class="note-pill" style="${noteStyle(n.note,n.bareme)}">${n.note}/${n.bareme}</span></td><td style="font-size:10px">${n.obs||'—'}</td></tr>`).join('')+'</tbody></table>':
+        '<div class="empty" style="padding:10px">Aucune note enregistrée</div>'}
+    </div>
+
+    <!-- Absences -->
+    <div style="margin-bottom:12px">
+      <div style="font-weight:600;font-size:13px;margin-bottom:7px;border-bottom:1px solid #e5e5e0;padding-bottom:5px">🚫 Absences (${absences.length})</div>
+      ${absences.length?`<div style="display:flex;flex-wrap:wrap;gap:4px">`+
+        Object.entries(db.presences).filter(([k,v])=>v[id]==='A').map(([dateSlot])=>{
+          const [date,slotId]=dateSlot.split('__');
+          const slot=db.slots.find(s=>s.id==slotId);
+          return `<span class="badge" style="background:#FCEBEB;color:#791F1F;font-size:10px">${date}${slot?' · '+slot.mat+' '+slot.classe:''}</span>`;
+        }).join('')+'</div>':
+        '<div class="empty" style="padding:8px">Aucune absence enregistrée</div>'}
+    </div>
+
+    <!-- Observations -->
+    <div>
+      <div style="font-weight:600;font-size:13px;margin-bottom:7px;border-bottom:1px solid #e5e5e0;padding-bottom:5px">📝 Observations</div>
+      <div style="margin-bottom:8px">
+        ${(e.observations||[]).map((obs,i)=>`
+          <div style="background:#f9f9f7;border-radius:6px;padding:7px 9px;margin-bottom:5px;font-size:12px;display:flex;justify-content:space-between">
+            <div><span style="font-size:10px;color:#888">${obs.date}</span><br>${obs.texte}</div>
+            <button class="btn btn-danger btn-xs" onclick="delObs(${id},${i})">✕</button>
+          </div>`).join('')||'<div class="empty" style="padding:8px">Aucune observation</div>'}
+      </div>
+      <div style="display:flex;gap:6px">
+        <input id="obs-new-${id}" placeholder="Nouvelle observation..." style="flex:1">
+        <button class="btn btn-primary btn-sm" onclick="addObs(${id})">+ Ajouter</button>
+      </div>
+    </div>`;
+
+  document.getElementById('fiche-eleve-content').innerHTML=html;
+  openModal('modal-eleve');
+}
+function addObs(eleveId){
+  const el=db.eleves.find(x=>x.id===eleveId);if(!el)return;
+  const txt=document.getElementById('obs-new-'+eleveId).value.trim();if(!txt)return;
+  if(!el.observations)el.observations=[];
+  el.observations.push({date:new Date().toLocaleDateString('fr-FR'),texte:txt});
+  save();ouvrirFicheEleve(eleveId);toast('Observation ajoutée ✓');
+}
+function delObs(eleveId,idx){
+  const el=db.eleves.find(x=>x.id===eleveId);if(!el)return;
+  el.observations.splice(idx,1);save();ouvrirFicheEleve(eleveId);
+}
+
+/* ===== REGISTRE PRÉSENCE ===== */
+function ouvrirRegistre(classeId){
+  const cl=db.classes.find(x=>x.id===classeId);if(!cl)return;
+  document.getElementById('registre-titre').textContent=`Registre de présence — ${cl.nom} (${getEcoleAbr(cl.ecoleId)})`;
+  renderRegistre(classeId);
+  openModal('modal-registre');
+}
+function renderRegistre(classeId){
+  const eleves=db.eleves.filter(e=>e.classeId===classeId);
+  if(!eleves.length){document.getElementById('registre-content').innerHTML='<div class="empty">Aucun élève dans cette classe</div>';return;}
+  
+  // Générer les dates de l'année scolaire (Oct 2026 – Juin 2027) selon EDT
+  const slotsClasse=db.slots.filter(s=>{
+    // chercher si la classe correspond
+    const cl=db.classes.find(x=>x.id===classeId);
+    return cl&&s.classe===cl.nom&&s.ecoleId===cl.ecoleId;
+  });
+  
+  // Générer toutes les séances Oct 2026 - Juin 2027
+  const seances=[];
+  const start=new Date(2026,9,1);// Oct 2026
+  const end=new Date(2027,5,30);// Juin 2027
+  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+    const jourNom=JOURS_FR[d.getDay()];
+    slotsClasse.filter(s=>s.jour===jourNom).forEach(s=>{
+      seances.push({date:new Date(d),slot:s,key:`${d.toISOString().split('T')[0]}__${s.id}`});
+    });
+  }
+
+  // Si pas de séances EDT, générer des dates génériques (lun-ven)
+  const seancesAfficher=seances.length?seances.slice(0,60):[];
+
+  if(!seancesAfficher.length){
+    document.getElementById('registre-content').innerHTML=`
+      <div class="alert-warn alert-box">Configure d'abord l'emploi du temps pour cette classe dans l'onglet EDT, puis reviens ici.</div>
+      <div style="margin-top:10px">
+        <strong>Registre simplifié — saisie manuelle</strong>
+        ${renderRegistreSimple(classeId,eleves)}
+      </div>`;
+    return;
+  }
+
+  let html=`<div style="margin-bottom:8px;font-size:11px;color:#666">${seancesAfficher.length} séances affichées (Oct 2026 – Juin 2027). Clique P/A pour marquer.</div>
+    <div style="overflow-x:auto"><table class="registre-table">
+      <thead><tr>
+        <th class="nom-col">Nom élève</th>
+        <th class="nom-col">Matricule</th>
+        ${seancesAfficher.map(s=>`<th class="date-col" title="${s.slot.mat} ${s.date.toLocaleDateString('fr-FR')}">${s.date.getDate()}/${s.date.getMonth()+1}<br>${(s.slot.mat||'').substr(0,3)}</th>`).join('')}
+        <th>Total A</th>
+      </tr></thead>
+      <tbody>
+        ${eleves.map(e=>{
+          const totalA=seancesAfficher.filter(s=>(db.presences[s.key]||{})[e.id]==='A').length;
+          return `<tr>
+            <td class="nom-col">${e.nom}</td>
+            <td class="nom-col" style="font-size:9px">${e.matricule||'—'}</td>
+            ${seancesAfficher.map(s=>{
+              const val=(db.presences[s.key]||{})[e.id]||'';
+              return `<td><button class="pres-btn ${val}" onclick="togglePresence('${s.key}',${e.id},'${classeId}')" title="${s.date.toLocaleDateString('fr-FR')} ${s.slot.mat}">${val||'·'}</button></td>`;
+            }).join('')}
+            <td style="font-weight:700;color:${totalA>3?'#c0392b':'#085041'}">${totalA}</td>
+          </tr>`;}).join('')}
+      </tbody>
+    </table></div>
+    <div style="margin-top:8px;display:flex;gap:8px;font-size:11px">
+      <span class="badge-p badge">P = Présent</span>
+      <span class="badge-a badge">A = Absent</span>
+      <span style="color:#666">Clique pour basculer P → A → (vide)</span>
+    </div>`;
+  document.getElementById('registre-content').innerHTML=html;
+}
+function renderRegistreSimple(classeId,eleves){
+  return `<table><thead><tr><th>Élève</th><th>Date</th><th>Statut</th><th>Leçon</th></tr></thead><tbody>
+    ${eleves.slice(0,5).map(e=>`<tr><td>${e.nom}</td><td>—</td><td>—</td><td>—</td></tr>`).join('')}
+  </tbody></table><div class="empty">Configure l'EDT pour activer le registre complet</div>`;
+}
+function togglePresence(key,eleveId,classeId){
+  if(!db.presences[key])db.presences[key]={};
+  const current=db.presences[key][eleveId]||'';
+  db.presences[key][eleveId]=current===''?'P':current==='P'?'A':'';
+  save();
+  // Update button directly
+  const btn=event.target;
+  btn.className='pres-btn '+(db.presences[key][eleveId]||'');
+  btn.textContent=db.presences[key][eleveId]||'·';
+}
+
+/* ===== IMPORT EXCEL ÉLÈVES ===== */
+function importExcelEleves(input){
+  const classeId=parseInt(document.getElementById('import-classe').value);
+  if(!classeId)return toast('Choisir la classe d\'abord');
+  const cl=db.classes.find(x=>x.id===classeId);
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      if(rows.length<2)return toast('Fichier vide ou format incorrect');
+      // Skip header row
+      const data=rows.slice(1).filter(r=>r[0]);
+      let preview=`<div class="alert-success alert-box">${data.length} élève(s) détecté(s). <button class="btn btn-primary btn-sm" onclick="confirmImportEleves(${classeId})">✓ Confirmer l'import</button></div>`;
+      preview+=`<table><thead><tr><th>Nom</th><th>Email</th><th>WhatsApp</th><th>Mot de passe</th></tr></thead><tbody>`;
+      data.slice(0,5).forEach(r=>{preview+=`<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td><td>${r[3]||'auto'}</td></tr>`;});
+      if(data.length>5)preview+=`<tr><td colspan="4" style="text-align:center;color:#888">...et ${data.length-5} autres</td></tr>`;
+      preview+='</tbody></table>';
+      // Stocker temporairement
+      window._importData=data;window._importClasseId=classeId;
+      document.getElementById('import-preview').innerHTML=preview;
+    }catch(err){toast('Erreur de lecture du fichier : '+err.message);}
+  };
+  reader.readAsBinaryString(file);
+}
+function confirmImportEleves(classeId){
+  const cl=db.classes.find(x=>x.id===classeId);
+  const data=window._importData||[];
+  let added=0;
+  data.forEach(r=>{
+    const nom=(r[0]||'').trim();if(!nom)return;
+    const email=(r[1]||'').trim();
+    const wa=(r[2]||'').toString().trim();
+    const pwd=(r[3]||'').toString().trim()||(nom.split(' ')[0].toLowerCase()+'123');
+    const mat=genMatricule(cl?cl.ecoleId:null,classeId);
+    db.eleves.push({id:nid.el++,nom,classeId,ecoleId:cl?cl.ecoleId:null,matricule:mat,email,wa,pwd,photo:'',observations:[]});
+    nid.el++;added++;
+  });
+  save();refreshAllSelects();renderEleves();updateStats();
+  document.getElementById('import-preview').innerHTML=`<div class="alert-success alert-box">✓ ${added} élève(s) importé(s) avec succès !</div>`;
+  toast(`${added} élèves importés ✓`);
+}
+
+/* ===== COURS ===== */
+let coFichiers=[];
+function addFichierCours(){
+  const url=document.getElementById('co-fichier-url').value.trim();
+  const nom=document.getElementById('co-fichier-nom').value.trim()||'Fichier';
+  const type=document.getElementById('co-fichier-type').value;
+  if(!url)return;
+  coFichiers.push({url,nom,type});
+  document.getElementById('co-fichier-url').value='';document.getElementById('co-fichier-nom').value='';
+  renderCoFichiers();
+}
+function renderCoFichiers(){
+  const el=document.getElementById('co-fichiers-list');
+  el.innerHTML=coFichiers.map((f,i)=>`
+    <span class="file-chip">
+      ${typeIcon(f.type)} <a href="${f.url}" target="_blank">${f.nom}</a>
+      <span onclick="coFichiers.splice(${i},1);renderCoFichiers()" style="cursor:pointer;opacity:.6;margin-left:3px">✕</span>
+    </span>`).join('');
+}
+function addCours(){
+  const titre=document.getElementById('co-titre').value.trim();
+  const classeId=parseInt(document.getElementById('co-classe').value);
+  const ecoleId=parseInt(document.getElementById('co-ecole').value);
+  const mat=document.getElementById('co-mat').value.trim();
+  if(!titre||!classeId||!ecoleId||!mat)return toast('Remplis tous les champs obligatoires');
+  const statut=document.getElementById('co-statut').value;
+  const co={id:nid.co++,titre,mat,ecoleId,classeId,debut:document.getElementById('co-debut').value,duree:document.getElementById('co-duree').value,num:document.getElementById('co-num').value,statut,obj:document.getElementById('co-obj').value.trim(),contenu:document.getElementById('co-contenu').value.trim(),fichiers:[...coFichiers],dateAjout:new Date().toLocaleDateString('fr-FR')};
+  db.cours.push(co);
+  coFichiers=[];renderCoFichiers();
+  document.getElementById('co-titre').value='';document.getElementById('co-obj').value='';document.getElementById('co-contenu').value='';document.getElementById('co-mat').value='';document.getElementById('co-num').value='';
+  save();renderCours();renderJournal();renderPlanning();updateStats();toast('Cours enregistré ✓'+(statut==='Terminé'?' et ajouté au cahier journal':' — Marque "Terminé" pour le cahier journal'));
+}
+function delCours(id){db.cours=db.cours.filter(x=>x.id!==id);save();renderCours();renderJournal();renderPlanning();updateStats();}
+function renderCours(){
+  const el=document.getElementById('liste-cours');
+  const fe=document.getElementById('filter-ecole-cours').value;
+  const fc=document.getElementById('filter-classe-cours').value;
+  const fs=document.getElementById('filter-statut-cours').value;
+  let arr=db.cours;
+  if(fe)arr=arr.filter(c=>c.ecoleId==fe);
+  if(fc)arr=arr.filter(c=>c.classeId==fc);
+  if(fs)arr=arr.filter(c=>c.statut===fs);
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun cours</div>';return;}
+  el.innerHTML=arr.map(co=>`
+    <div style="border:1px solid #e5e5e0;border-left:3px solid ${getEcoleCouleur(co.ecoleId)};border-radius:8px;padding:10px 13px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <span style="font-size:10px;padding:1px 6px;border-radius:20px;background:${getEcoleCouleur(co.ecoleId)}20;color:${getEcoleCouleur(co.ecoleId)};font-weight:700">${getEcoleAbr(co.ecoleId)}</span>
+          <span class="badge-stat" style="margin-left:4px">${co.mat}</span>
+          <span class="badge-stat" style="margin-left:3px;background:${co.statut==='Terminé'?'#E1F5EE':co.statut==='En cours'?'#E6F1FB':'#f0f0eb'};color:${co.statut==='Terminé'?'#085041':co.statut==='En cours'?'#0C447C':'#555'}">${co.statut}</span>
+          ${co.num?`<span class="badge-stat" style="margin-left:3px">${co.num}</span>`:''}
+          <div style="font-size:14px;font-weight:600;margin-top:3px">${co.titre}</div>
+          <div style="font-size:11px;color:#888">${getClasseNom(co.classeId)} · ${co.debut||'—'} ${co.duree?'· '+co.duree+' min':''}</div>
+          ${co.obj?`<div style="font-size:11px;color:#666;margin-top:2px">${co.obj}</div>`:''}
+          ${co.fichiers&&co.fichiers.length?`<div style="margin-top:5px">${co.fichiers.map(f=>`<span class="file-chip">${typeIcon(f.type)} <a href="${f.url}" target="_blank">${f.nom}</a></span>`).join('')}</div>`:''}
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="delCours(${co.id})">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ===== CAHIER JOURNAL ===== */
+function renderJournal(){
+  const el=document.getElementById('cahier-journal');
+  const fe=document.getElementById('journal-ecole').value;
+  const fc=document.getElementById('journal-classe').value;
+  const fm=document.getElementById('journal-mat').value;
+  let arr=db.cours.filter(c=>c.statut==='Terminé');
+  if(fe)arr=arr.filter(c=>c.ecoleId==fe);
+  if(fc)arr=arr.filter(c=>c.classeId==fc);
+  if(fm)arr=arr.filter(c=>c.mat===fm);
+  arr.sort((a,b)=>(a.debut||'').localeCompare(b.debut||''));
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun cours terminé — les cours validés apparaissent ici</div>';return;}
+  let html='';let lastDate='';
+  arr.forEach((co,i)=>{
+    if(co.debut!==lastDate){html+=`<div style="font-size:10px;font-weight:700;color:#888;text-transform:uppercase;margin:${i>0?'12px':0} 0 4px">${co.debut||'Date non définie'}</div>`;lastDate=co.debut;}
+    html+=`<div class="journal-entry">
+      <div class="je-date">${co.num||''} · ${co.mat} · ${getClasseNom(co.classeId)} (${getEcoleAbr(co.ecoleId)})</div>
+      <div class="je-titre">${co.titre}</div>
+      ${co.duree?`<div class="je-meta">⏱ ${co.duree} min</div>`:''}
+      ${co.obj?`<div class="je-meta">🎯 ${co.obj}</div>`:''}
+      ${co.contenu?`<div class="je-meta" style="margin-top:3px">${co.contenu}</div>`:''}
+      ${co.fichiers&&co.fichiers.length?`<div style="margin-top:4px">${co.fichiers.map(f=>`<span class="file-chip">${typeIcon(f.type)} <a href="${f.url}" target="_blank">${f.nom}</a></span>`).join('')}</div>`:''}
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+/* ===== PLANIFICATION ANNUELLE ===== */
+function renderPlanning(){
+  const el=document.getElementById('planning-annuel');
+  const fe=document.getElementById('planning-ecole').value;
+  const fc=document.getElementById('planning-classe').value;
+  const fm=document.getElementById('planning-mat').value;
+  if(!fc&&!fm){el.innerHTML='<div class="empty">Sélectionne une classe et/ou une matière</div>';return;}
+  let arr=db.cours;
+  if(fe)arr=arr.filter(c=>c.ecoleId==fe);
+  if(fc)arr=arr.filter(c=>c.classeId==fc);
+  if(fm)arr=arr.filter(c=>c.mat===fm);
+  arr.sort((a,b)=>(a.debut||'').localeCompare(b.debut||'')||(a.num||'').localeCompare(b.num||''));
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun cours enregistré pour cette sélection</div>';return;}
+  const done=arr.filter(c=>c.statut==='Terminé').length;
+  const pct=arr.length?Math.round(done/arr.length*100):0;
+  let html=`
+    <div style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px">
+        <span>Progression : <strong>${done}/${arr.length} cours</strong></span>
+        <span style="color:${pct>=80?'#085041':pct>=50?'#633806':'#791F1F'};font-weight:700">${pct}%</span>
+      </div>
+      <div style="background:#e5e5e0;border-radius:20px;height:7px"><div style="background:#0F6E56;height:7px;border-radius:20px;width:${pct}%"></div></div>
+    </div>
+    <div class="planning-row" style="font-weight:600;font-size:10px;color:#888;border-bottom:2px solid #e5e5e0">
+      <div>N° / Date</div><div>Titre du cours</div><div>Classe</div><div>Statut</div>
+    </div>`;
+  arr.forEach(co=>{
+    const statusColor=co.statut==='Terminé'?'#085041':co.statut==='En cours'?'#0C447C':'#aaa';
+    html+=`<div class="planning-row">
+      <div style="font-size:10px;color:#888">${co.num||'—'}<br>${co.debut||'—'}</div>
+      <div>
+        <strong style="font-size:12px">${co.titre}</strong>
+        ${co.obj?`<div style="font-size:10px;color:#888">${co.obj.substr(0,60)}${co.obj.length>60?'...':''}</div>`:''}
+        ${co.fichiers&&co.fichiers.length?`<span style="font-size:10px;color:#0C447C">📎 ${co.fichiers.length} fichier(s)</span>`:''}
+      </div>
+      <div style="font-size:11px">${getClasseNom(co.classeId)}</div>
+      <div><span class="badge-stat" style="color:${statusColor}">${co.statut}</span></div>
+    </div>`;
+  });
+  el.innerHTML=html;
+}
+
+/* ===== NOTES ===== */
+function addNote(){
+  const titre=document.getElementById('no-titre').value.trim();
+  const classeId=parseInt(document.getElementById('no-classe').value);
+  const eleveId=parseInt(document.getElementById('no-eleve').value);
+  const note=parseFloat(document.getElementById('no-note').value);
+  const ecoleId=parseInt(document.getElementById('no-ecole').value);
+  if(!titre||!classeId||!eleveId||isNaN(note)||!ecoleId)return toast('Remplis tous les champs');
+  const bareme=parseFloat(document.getElementById('no-bareme').value)||20;
+  db.notes.push({id:nid.no++,titre,type:document.getElementById('no-type').value,mat:document.getElementById('no-mat').value,ecoleId,classeId,eleveId,date:document.getElementById('no-date').value,bareme,note,obs:document.getElementById('no-obs').value});
+  document.getElementById('no-note').value='';document.getElementById('no-obs').value='';
+  save();renderNotes();updateStats();toast('Note enregistrée ✓');
+}
+function loadClasseRapide(){
+  const eid=document.getElementById('no-rapide-ecole').value;
+  const arr=eid?db.classes.filter(c=>c.ecoleId==eid):db.classes;
+  document.getElementById('no-rapide-classe').innerHTML='<option value="">--</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
+}
+function loadElevesRapide(){
+  const cid=document.getElementById('no-rapide-classe').value;
+  const eleves=cid?db.eleves.filter(e=>e.classeId==cid):[];
+  const el=document.getElementById('eleves-rapide-list');
+  if(!eleves.length){el.innerHTML='<div class="empty">Aucun élève</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Élève</th><th>Note</th></tr></thead><tbody>'+
+    eleves.map(e=>`<tr><td>${e.nom}</td><td><input type="number" step="0.25" id="rapide_${e.id}" placeholder="—" style="width:70px"></td></tr>`).join('')+'</tbody></table>';
+}
+function saveNotesRapide(){
+  const cid=parseInt(document.getElementById('no-rapide-classe').value);
+  const titre=document.getElementById('no-rapide-titre').value.trim();
+  const mat=document.getElementById('no-rapide-mat').value.trim();
+  const type=document.getElementById('no-rapide-type').value;
+  const bareme=parseFloat(document.getElementById('no-rapide-bareme').value)||20;
+  const date=document.getElementById('no-rapide-date').value;
+  if(!cid||!titre)return toast('Titre et classe requis');
+  const cl=db.classes.find(x=>x.id===cid);
+  let added=0;
+  db.eleves.filter(e=>e.classeId===cid).forEach(e=>{
+    const inp=document.getElementById('rapide_'+e.id);
+    if(!inp||inp.value==='')return;
+    const note=parseFloat(inp.value);
+    if(isNaN(note))return;
+    db.notes.push({id:nid.no++,titre,type,mat,ecoleId:cl?cl.ecoleId:null,classeId:cid,eleveId:e.id,date,bareme,note,obs:''});
+    added++;
+  });
+  save();renderNotes();updateStats();toast(`${added} note(s) enregistrée(s) ✓`);
+}
+function delNote(id){db.notes=db.notes.filter(x=>x.id!==id);save();renderNotes();updateStats();}
+function renderNotes(){
+  const el=document.getElementById('liste-notes');
+  const fc=document.getElementById('filter-classe-note').value;
+  const fe=document.getElementById('filter-ecole-note').value;
+  const ft=document.getElementById('filter-type-note').value;
+  let arr=db.notes;
+  if(fc)arr=arr.filter(n=>n.classeId==fc);
+  if(fe)arr=arr.filter(n=>n.ecoleId==fe);
+  if(ft)arr=arr.filter(n=>n.type===ft);
+  const moy=document.getElementById('moy-display');
+  if(arr.length){const avg=(arr.reduce((s,n)=>s+n.note/n.bareme*20,0)/arr.length).toFixed(2);moy.innerHTML=`<span style="font-size:11px;color:#666">Moyenne : <strong style="color:#0F6E56">${avg}/20</strong> (${arr.length} note${arr.length>1?'s':''})</span>`;}else moy.innerHTML='';
+  if(!arr.length){el.innerHTML='<div class="empty">Aucune note</div>';return;}
+  el.innerHTML='<table><thead><tr><th>Évaluation</th><th>Type</th><th>Élève</th><th>Mat.</th><th>Note</th><th>Obs.</th><th></th></tr></thead><tbody>'+
+    arr.map(n=>`<tr>
+      <td>${n.titre}<br><span style="font-size:9px;color:#aaa">${n.date||''} · ${getClasseNom(n.classeId)} · ${getEcoleAbr(n.ecoleId)}</span></td>
+      <td style="font-size:10px">${n.type||'—'}</td>
+      <td>${getEleveNom(n.eleveId)}</td>
+      <td style="font-size:10px">${n.mat||'—'}</td>
+      <td><span class="note-pill" style="${noteStyle(n.note,n.bareme)}">${n.note}/${n.bareme}</span></td>
+      <td style="font-size:10px">${n.obs||'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="delNote(${n.id})">✕</button></td>
+    </tr>`).join('')+'</tbody></table>';
+}
+
+/* ===== IMPORT EXCEL NOTES ===== */
+function importExcelNotes(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary'});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      const data=rows.slice(1).filter(r=>r[0]);
+      let preview=`<div class="alert-success alert-box">${data.length} ligne(s) détectée(s). <button class="btn btn-primary btn-sm" onclick="confirmImportNotes()">✓ Confirmer</button></div>`;
+      preview+=`<table><thead><tr><th>Nom élève</th><th>Note</th><th>Observation</th></tr></thead><tbody>`;
+      data.slice(0,5).forEach(r=>{preview+=`<tr><td>${r[0]||''}</td><td>${r[1]||''}</td><td>${r[2]||''}</td></tr>`;});
+      if(data.length>5)preview+=`<tr><td colspan="3" style="text-align:center;color:#888">...et ${data.length-5} autres</td></tr>`;
+      preview+='</tbody></table>';
+      window._importNotesData=data;
+      document.getElementById('notes-import-preview').innerHTML=preview;
+    }catch(err){toast('Erreur : '+err.message);}
+  };
+  reader.readAsBinaryString(file);
+}
+function confirmImportNotes(){
+  const data=window._importNotesData||[];
+  const classeId=parseInt(document.getElementById('no-imp-classe').value);
+  const titre=document.getElementById('no-imp-titre').value.trim();
+  const mat=document.getElementById('no-imp-mat').value.trim();
+  const type=document.getElementById('no-imp-type').value;
+  const date=document.getElementById('no-imp-date').value;
+  const bareme=parseFloat(document.getElementById('no-imp-bareme').value)||20;
+  if(!classeId||!titre)return toast('Classe et titre requis');
+  const cl=db.classes.find(x=>x.id===classeId);
+  let added=0;
+  data.forEach(r=>{
+    const nomRecherche=(r[0]||'').trim().toLowerCase();
+    const eleve=db.eleves.find(e=>e.classeId===classeId&&e.nom.toLowerCase().includes(nomRecherche));
+    const note=parseFloat(r[1]);
+    if(!eleve||isNaN(note))return;
+    db.notes.push({id:nid.no++,titre,type,mat,ecoleId:cl?cl.ecoleId:null,classeId,eleveId:eleve.id,date,bareme,note,obs:(r[2]||'').toString()});
+    added++;
+  });
+  save();renderNotes();updateStats();
+  document.getElementById('notes-import-preview').innerHTML=`<div class="alert-success alert-box">✓ ${added} note(s) importée(s) !</div>`;
+  toast(`${added} notes importées ✓`);
+}
+function addDriveLinkNote(){
+  const url=document.getElementById('no-drive-link').value.trim();if(!url)return;
+  const el=document.getElementById('no-drive-files');
+  el.innerHTML+='<span class="file-chip">📊 <a href="'+url+'" target="_blank">Fichier de notes</a></span>';
+  document.getElementById('no-drive-link').value='';
+  toast('Lien ajouté ✓');
+}
+
+/* ===== BULLETINS ===== */
+function renderBulletin(){
+  const fc=document.getElementById('bull-classe').value;
+  const fe=document.getElementById('bull-eleve').value;
+  const el=document.getElementById('bulletin-content');
+  if(!fc){el.innerHTML='<div class="empty">Sélectionne une classe</div>';return;}
+  // Mettre à jour la liste d'élèves
+  const elevesClasse=db.eleves.filter(e=>e.classeId==fc);
+  document.getElementById('bull-eleve').innerHTML='<option value="">Tous les élèves</option>'+elevesClasse.map(e=>`<option value="${e.id}">${e.nom}</option>`).join('');
+  const arr=fe?elevesClasse.filter(e=>e.id==fe):elevesClasse;
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun élève</div>';return;}
+  el.innerHTML=arr.map(e=>{
+    const notes=db.notes.filter(n=>n.eleveId===e.id&&n.classeId==fc);
+    const moy=notes.length?(notes.reduce((s,n)=>s+n.note/n.bareme*20,0)/notes.length).toFixed(2):'—';
+    const absences=Object.values(db.presences).filter(p=>p[e.id]==='A').length;
+    return `<div style="border:1px solid #e5e5e0;border-radius:8px;padding:11px 14px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <strong style="font-size:14px">${e.nom}</strong>
+          <span class="matricule-badge" style="margin-left:7px">${e.matricule||'—'}</span>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:22px;font-weight:700;color:#0F6E56">${moy}</div>
+          <div style="font-size:10px;color:#888">/20 — Moyenne générale</div>
+          <div style="font-size:11px;color:#c0392b">🚫 ${absences} absence(s)</div>
+        </div>
+      </div>
+      ${notes.length?`<table><thead><tr><th>Évaluation</th><th>Type</th><th>Matière</th><th>Note</th></tr></thead><tbody>`+
+        notes.map(n=>`<tr><td>${n.titre}</td><td style="font-size:10px">${n.type||'—'}</td><td style="font-size:10px">${n.mat||'—'}</td><td><span class="note-pill" style="${noteStyle(n.note,n.bareme)}">${n.note}/${n.bareme}</span></td></tr>`).join('')+'</tbody></table>':
+        '<div class="empty" style="padding:8px">Aucune note</div>'}
+    </div>`;
+  }).join('');
+}
+
+/* ===== DEVOIRS ===== */
+function ajouterQuestion(type){
+  dvQuestions.push({id:Date.now(),type,enonce:'',options:type==='qcm'?['','','','']:null,reponse:''});
+  renderQBuilder();
+}
+function renderQBuilder(){
+  const el=document.getElementById('questions-builder');
+  if(!dvQuestions.length){el.innerHTML='';return;}
+  el.innerHTML=dvQuestions.map((q,i)=>`
+    <div class="q-block ${q.type}" style="margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
+        <span style="font-size:10px;font-weight:600">${q.type==='qcm'?'🔵 QCM':'🟢 Ouverte'} — Q${i+1}</span>
+        <button class="btn btn-danger btn-xs" onclick="dvQuestions.splice(${i},1);renderQBuilder()">✕</button>
+      </div>
+      <textarea onchange="dvQuestions[${i}].enonce=this.value" placeholder="Énoncé..." style="min-height:40px;margin-bottom:5px">${q.enonce}</textarea>
+      ${q.type==='qcm'?q.options.map((opt,oi)=>`
+        <div style="display:flex;align-items:center;gap:5px;margin-bottom:3px">
+          <input type="radio" name="c_${q.id}" value="${oi}" ${q.reponse==oi?'checked':''} onchange="dvQuestions[${i}].reponse='${oi}'" style="width:auto">
+          <input type="text" value="${opt}" placeholder="Option ${oi+1}" onchange="dvQuestions[${i}].options[${oi}]=this.value" style="flex:1">
+        </div>`).join(''):`<textarea onchange="dvQuestions[${i}].reponse=this.value" placeholder="Réponse attendue...">${q.reponse}</textarea>`}
+    </div>`).join('');
+}
+function saveDevoir(){
+  const titre=document.getElementById('dv-titre').value.trim();
+  const classeId=parseInt(document.getElementById('dv-classe').value);
+  const ecoleId=parseInt(document.getElementById('dv-ecole').value);
+  if(!titre||!classeId||!ecoleId)return toast('Remplis les champs obligatoires');
+  const code=genCode();
+  db.devoirs.push({id:nid.dv++,titre,type:document.getElementById('dv-type').value,ecoleId,classeId,mat:document.getElementById('dv-mat').value,deadline:document.getElementById('dv-deadline').value,duree:document.getElementById('dv-duree').value,bareme:parseFloat(document.getElementById('dv-bareme').value)||20,consignes:document.getElementById('dv-consignes').value,driveLink:document.getElementById('dv-drive-link').value,questions:JSON.parse(JSON.stringify(dvQuestions)),code,statut:'ouvert',dateCreation:new Date().toLocaleDateString('fr-FR')});
+  dvQuestions=[];
+  ['dv-titre','dv-consignes','dv-mat','dv-drive-link'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('questions-builder').innerHTML='';
+  closeModal('modal-devoir');save();renderDevoirs();updateStats();toast('Devoir créé ✓ — Partage le lien !',4000);
+}
+function getLien(code){return window.location.href.split('?')[0]+'?devoir='+code;}
+function partagerWA(code,titre){const l=getLien(code);window.open('https://wa.me/?text='+encodeURIComponent(`📚 *${titre}*\n\n${l}`),'_blank');}
+function copierLien(code){navigator.clipboard.writeText(getLien(code)).then(()=>toast('Lien copié ✓'));}
+function cloturerDevoir(id){const dv=db.devoirs.find(x=>x.id===id);if(dv){dv.statut='cloture';save();renderDevoirs();toast('Clôturé');}}
+function voirResultats(id){
+  const dv=db.devoirs.find(x=>x.id===id);if(!dv)return;
+  const copies=db.copies.filter(c=>c.devoirId===id);
+  document.getElementById('res-titre').textContent='Résultats — '+dv.titre;
+  let html=`<div style="font-size:12px;color:#666;margin-bottom:9px">${copies.length} copie(s) reçue(s)</div>`;
+  if(!copies.length){html+='<div class="empty">Aucune copie</div>';}
+  else copies.forEach(cp=>{
+    const el=db.eleves.find(e=>e.id==cp.eleveId);
+    html+=`<div style="border:1px solid #e5e5e0;border-radius:7px;padding:9px 12px;margin-bottom:7px">
+      <div style="font-weight:600;margin-bottom:5px">${el?el.nom:'Élève'} <span style="font-size:10px;color:#888">${cp.date}</span></div>`;
+    dv.questions.forEach((q,i)=>{
+      const rep=cp.reponses[i]||'—';
+      const ok=q.type==='qcm'?q.reponse==rep:null;
+      html+=`<div style="background:#f9f9f7;border-radius:5px;padding:6px 8px;margin-bottom:4px;font-size:11px">
+        <div style="font-weight:600">Q${i+1} : ${q.enonce}</div>
+        <div>→ ${q.type==='qcm'?`<span style="color:${ok?'#085041':'#c0392b'}">${q.options?.[parseInt(rep)]||rep} ${ok?'✓':'✗'}</span>`:rep}</div>
+        ${q.type==='qcm'&&!ok?`<div style="color:#085041;font-size:10px">Bonne réponse : ${q.options?.[parseInt(q.reponse)]}</div>`:''}
+      </div>`;
+    });
+    html+='</div>';
+  });
+  document.getElementById('res-content').innerHTML=html;
+  openModal('modal-resultats');
+}
+function renderDevoirs(){
+  const el=document.getElementById('liste-devoirs');
+  const fe=document.getElementById('filter-ecole-dv').value;
+  const fc=document.getElementById('filter-classe-dv').value;
+  const ft=document.getElementById('filter-type-dv').value;
+  const fs=document.getElementById('filter-statut-dv').value;
+  let arr=db.devoirs;
+  if(fe)arr=arr.filter(d=>d.ecoleId==fe);if(fc)arr=arr.filter(d=>d.classeId==fc);
+  if(ft)arr=arr.filter(d=>d.type===ft);if(fs)arr=arr.filter(d=>d.statut===fs);
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun devoir</div>';return;}
+  el.innerHTML=arr.map(dv=>{
+    const copies=db.copies.filter(c=>c.devoirId===dv.id).length;
+    const nbEl=db.eleves.filter(e=>e.classeId==dv.classeId).length;
+    const ec=db.ecoles.find(e=>e.id==dv.ecoleId);const col=ec?ec.couleur:'#0F6E56';
+    const lien=getLien(dv.code);
+    return `<div class="devoir-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <span style="font-size:10px;font-weight:700;color:${col};background:${col}20;padding:1px 6px;border-radius:20px">${getEcoleAbr(dv.ecoleId)}</span>
+          <span class="badge-stat" style="margin-left:4px">${dv.type}</span>
+          ${dv.mat?`<span class="badge-stat" style="margin-left:3px">${dv.mat}</span>`:''}
+          <span class="badge-stat" style="margin-left:3px;background:${dv.statut==='ouvert'?'#E1F5EE':'#f0f0eb'};color:${dv.statut==='ouvert'?'#085041':'#555'}">${dv.statut==='ouvert'?'✓ Ouvert':'Clôturé'}</span>
+          <div style="font-size:13px;font-weight:600;margin-top:3px">${dv.titre}</div>
+          <div style="font-size:10px;color:#888">${getClasseNom(dv.classeId)} · ${dv.dateCreation}${dv.deadline?' · Limite : '+dv.deadline:''} · ${dv.questions.length} question(s)</div>
+          <div style="font-size:11px;color:#0F6E56;font-weight:600;margin-top:2px">📥 ${copies}/${nbEl} copie(s)</div>
+          ${dv.driveLink?`<div style="margin-top:4px"><span class="file-chip">📎 <a href="${dv.driveLink}" target="_blank">Fichier sujet</a></span></div>`:''}
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
+          <button class="btn btn-primary btn-sm" onclick="voirResultats(${dv.id})">📊 Résultats</button>
+          ${dv.statut==='ouvert'?`<button class="btn btn-warn btn-sm" onclick="cloturerDevoir(${dv.id})">🔒 Clôturer</button>`:''}
+          <button class="btn btn-danger btn-sm" onclick="db.devoirs=db.devoirs.filter(x=>x.id!==${dv.id});save();renderDevoirs();updateStats()">✕</button>
+        </div>
+      </div>
+      <div class="share-box">
+        <div style="font-size:11px;font-weight:600;margin-bottom:5px">📤 Partager aux élèves</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">
+          <button class="btn btn-primary btn-sm" onclick="partagerWA('${dv.code}','${dv.titre.replace(/'/g,"\\'")}')">💬 WhatsApp</button>
+          <button class="btn btn-sm" onclick="copierLien('${dv.code}')">🔗 Copier lien</button>
+        </div>
+        <input value="${lien}" readonly style="font-size:10px;color:#555;width:100%">
+      </div>
+    </div>`;}).join('');
+}
+
+/* ===== PAGE ÉLÈVE ===== */
+function checkDevoirParam(){
+  const code=new URLSearchParams(window.location.search).get('devoir');if(!code)return;
+  const dv=db.devoirs.find(d=>d.code===code);
+  if(!dv){alert('Devoir introuvable.');return;}
+  currentDevoirId=dv.id;
+  document.getElementById('ep-titre').textContent=dv.titre;
+  document.getElementById('ep-meta').textContent=getClasseNom(dv.classeId)+' · '+getEcoleAbr(dv.ecoleId)+(dv.mat?' · '+dv.mat:'');
+  document.getElementById('eleve-page').classList.add('show');
+}
+function eleveLogin(){
+  const nom=document.getElementById('ep-nom').value.trim();
+  const pwd=document.getElementById('ep-pwd').value.trim();
+  const dv=db.devoirs.find(d=>d.id===currentDevoirId);
+  const e=db.eleves.find(e=>e.nom.toLowerCase()===nom.toLowerCase()&&e.pwd===pwd&&e.classeId==dv.classeId);
+  const err=document.getElementById('ep-err');
+  if(!e){err.textContent='Nom ou mot de passe incorrect.';return;}
+  if(db.copies.find(c=>c.devoirId===currentDevoirId&&c.eleveId===e.id)){err.textContent='Tu as déjà soumis ce devoir.';return;}
+  if(dv.statut!=='ouvert'){err.textContent='Ce devoir est clôturé.';return;}
+  currentEleve=e;
+  document.getElementById('ep-login').style.display='none';
+  let html=`<div class="card" style="margin-bottom:9px"><div style="font-weight:600;font-size:13px;margin-bottom:5px">${dv.titre}</div>${dv.consignes?`<div style="font-size:12px;color:#555;background:#f9f9f7;border-radius:6px;padding:7px">${dv.consignes}</div>`:''}${dv.driveLink?`<div style="margin-top:6px"><a href="${dv.driveLink}" target="_blank" class="btn btn-info btn-sm">📎 Ouvrir le sujet</a></div>`:''}</div>`;
+  dv.questions.forEach((q,i)=>{
+    html+=`<div class="card" style="margin-bottom:7px"><div style="font-size:11px;font-weight:600;color:${q.type==='qcm'?'#0C447C':'#085041'};margin-bottom:5px">Q${i+1} — ${q.type==='qcm'?'QCM':'Question ouverte'}</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">${q.enonce}</div>
+      ${q.type==='qcm'?q.options.map((opt,oi)=>`<label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:12px"><input type="radio" name="q_${i}" value="${oi}" style="width:auto"> ${opt}</label>`).join(''):`<textarea id="rep_${i}" placeholder="Ta réponse..." style="min-height:70px"></textarea>`}</div>`;
+  });
+  document.getElementById('ep-questions').innerHTML=html;
+  document.getElementById('ep-form').style.display='block';
+}
+function eleveSubmit(){
+  const dv=db.devoirs.find(d=>d.id===currentDevoirId);
+  const reps=dv.questions.map((q,i)=>q.type==='qcm'?(document.querySelector(`input[name="q_${i}"]:checked`)||{}).value||'':(document.getElementById('rep_'+i)||{}).value||'');
+  if(reps.some(r=>r==='')){if(!confirm('Questions incomplètes. Envoyer quand même ?'))return;}
+  db.copies.push({id:nid.cp++,devoirId:currentDevoirId,eleveId:currentEleve.id,reponses:reps,date:new Date().toLocaleString('fr-FR')});
+  save();
+  document.getElementById('ep-form').style.display='none';
+  document.getElementById('ep-done').style.display='block';
+}
+
+/* ===== RESSOURCES ===== */
+function addRessource(){
+  const titre=document.getElementById('re-titre').value.trim();if(!titre)return;
+  db.ressources.push({id:nid.re++,titre,type:document.getElementById('re-type').value,mat:document.getElementById('re-mat').value.trim(),ecoleId:document.getElementById('re-ecole').value,classeId:document.getElementById('re-classe').value,url:document.getElementById('re-url').value.trim(),desc:document.getElementById('re-desc').value.trim()});
+  ['re-titre','re-desc','re-url','re-mat'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('re-preview').innerHTML='';document.getElementById('re-file-preview').innerHTML='';
+  save();renderRessources();updateStats();toast('Ressource ajoutée ✓');
+}
+function delRessource(id){db.ressources=db.ressources.filter(x=>x.id!==id);save();renderRessources();updateStats();}
+function renderRessources(){
+  const el=document.getElementById('liste-ressources');
+  const ft=document.getElementById('filter-type-res').value;
+  const search=document.getElementById('search-res').value.toLowerCase();
+  let arr=db.ressources;
+  if(ft)arr=arr.filter(r=>r.type===ft);
+  if(search)arr=arr.filter(r=>r.titre.toLowerCase().includes(search)||(r.mat||'').toLowerCase().includes(search)||(r.desc||'').toLowerCase().includes(search));
+  if(!arr.length){el.innerHTML='<div class="empty">Aucune ressource</div>';return;}
+  el.innerHTML=arr.map(r=>`
+    <div style="border:1px solid #e5e5e0;border-radius:7px;padding:9px 12px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div style="flex:1">
+        <span style="font-size:18px">${typeIcon(r.type)}</span>
+        <strong style="margin-left:5px;font-size:13px">${r.titre}</strong>
+        <span class="badge-stat" style="margin-left:5px">${r.type}</span>
+        ${r.mat?`<span style="font-size:10px;color:#888;margin-left:4px">${r.mat}</span>`:''}
+        ${r.ecoleId?`<span style="font-size:10px;color:#888;margin-left:4px">${getEcoleAbr(r.ecoleId)}</span>`:''}
+        ${r.desc?`<div style="font-size:11px;color:#666;margin-top:2px">${r.desc}</div>`:''}
+        ${r.url?`<div style="margin-top:5px">
+          ${r.url.startsWith('data:image')?`<img src="${r.url}" style="max-width:180px;max-height:100px;border-radius:5px">`:
+            r.url.includes('youtube')||r.url.includes('youtu.be')?makeDriveEmbed(r.url):
+            `<a href="${r.url}" target="_blank" class="btn btn-sm btn-info">${typeIcon(r.type)} Ouvrir</a>`}
+        </div>`:''}
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="delRessource(${r.id})">✕</button>
+    </div>`).join('');
+}
+
+/* ===== EDT ===== */
+function addSlot(){
+  const hdeb=document.getElementById('et-hdeb').value,hfin=document.getElementById('et-hfin').value;
+  const classe=document.getElementById('et-classe').value.trim(),ecoleId=document.getElementById('et-ecole').value;
+  const err=document.getElementById('et-err');
+  if(hIdx(hdeb)>=hIdx(hfin)){err.textContent='Fin après début.';return;}
+  if(!classe){err.textContent='Classe requise.';return;}
+  if(!ecoleId){err.textContent='École requise.';return;}
+  err.textContent='';
+  db.slots.push({id:nid.sl++,jour:document.getElementById('et-jour').value,hdeb,hfin,mat:document.getElementById('et-mat').value,ecoleId:parseInt(ecoleId),classe,lecon:document.getElementById('et-lecon').value.trim(),salle:document.getElementById('et-salle').value.trim(),noteProg:document.getElementById('et-note').value.trim(),span:hIdx(hfin)-hIdx(hdeb)});
+  ['et-classe','et-lecon','et-salle','et-note'].forEach(id=>document.getElementById(id).value='');
+  save();renderEdt();toast('Créneau ajouté ✓');
+}
+function delSlot(id){db.slots=db.slots.filter(s=>s.id!==id);save();renderEdt();}
+function clearEdt(){if(!confirm('Effacer tout ?'))return;db.slots=[];save();renderEdt();}
+function renderEdt(){
+  const body=document.getElementById('edt-body');
+  const fe=document.getElementById('filter-ecole-edt').value;
+  let slots=fe?db.slots.filter(s=>s.ecoleId==fe):db.slots;
+  const occ={};
+  slots.forEach(s=>{const ji=JOURS.indexOf(s.jour),hi=hIdx(s.hdeb);for(let r=hi;r<hi+s.span;r++){if(!occ[r])occ[r]={};occ[r][ji]=r===hi?{slot:s,first:true}:{skip:true};}});
+  let html='';
+  for(let r=0;r<HEURES.length-1;r++){
+    html+=`<tr><td class="heure">${HEURES[r]}<br><span style="font-size:8px;opacity:.6">→${HEURES[r+1]}</span></td>`;
+    for(let j=0;j<6;j++){
+      const cell=occ[r]?occ[r][j]:null;
+      if(cell&&cell.skip)continue;
+      if(cell&&cell.first){
+        const s=cell.slot;const ec=db.ecoles.find(e=>e.id==s.ecoleId);const col=ec?ec.couleur:'#0F6E56';
+        html+=`<td rowspan="${s.span}"><div class="slot" style="min-height:${s.span*42}px;border-left:3px solid ${col};background:${col}15;border-radius:5px;padding:3px 4px;font-size:9px;position:relative">
+          <button class="del-btn" onclick="delSlot(${s.id})">✕</button>
+          ${ec?`<span style="font-weight:700;color:${col}">${ec.abr}</span> `:''}
+          <strong>${s.mat}</strong><br><span style="font-weight:600">${s.classe}</span>
+          ${s.lecon?`<br><span style="opacity:.8">${s.lecon}</span>`:''}
+          ${s.noteProg?`<br><span style="background:#FFF9E6;border-radius:2px;padding:0 2px;color:#633806">📌</span>`:''}
+        </div></td>`;
+      }else html+=`<td><span class="slot-empty"></span></td>`;
+    }html+='</tr>';
+  }
+  body.innerHTML=html;
+}
+
+/* ===== PLANNING SEMAINE ===== */
+function renderWeekGrid(){
+  const today=new Date();const todayNom=JOURS_FR[today.getDay()];
+  const lundi=new Date(today);lundi.setDate(today.getDate()-(today.getDay()===0?6:today.getDay()-1));
+  document.getElementById('semaine-label').textContent=lundi.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})+' – '+new Date(lundi.getTime()+5*86400000).toLocaleDateString('fr-FR',{day:'numeric',month:'short',year:'numeric'});
+  const fe=currentEcoleFilter;
+  let slots=fe?db.slots.filter(s=>s.ecoleId==fe):db.slots;
+  document.getElementById('week-grid').innerHTML=JOURS.map((jour,ji)=>{
+    const isToday=jour===todayNom;
+    const jourSlots=slots.filter(s=>s.jour===jour).sort((a,b)=>hIdx(a.hdeb)-hIdx(b.hdeb));
+    const dateJ=new Date(lundi);dateJ.setDate(lundi.getDate()+ji);
+    return `<div class="day-col"><div class="day-header${isToday?' today':''}">${jour}<br><span style="font-size:9px;opacity:.8">${dateJ.toLocaleDateString('fr-FR',{day:'numeric',month:'short'})}</span></div>
+      ${jourSlots.length?jourSlots.map(s=>{const ec=db.ecoles.find(e=>e.id==s.ecoleId);const col=ec?ec.couleur:'#0F6E56';
+        return `<div class="cours-card" style="border-left-color:${col}">
+          <div style="font-size:9px;color:#999">${s.hdeb}–${s.hfin}</div>
+          ${ec?`<div style="font-size:9px;font-weight:700;color:${col}">${ec.abr}</div>`:''}
+          <div style="font-weight:600;font-size:11px">${s.classe} <span style="font-size:9px;font-weight:400;color:#888">${s.mat}</span></div>
+          ${s.lecon?`<div style="font-size:9px;color:#666;font-style:italic">${s.lecon}</div>`:''}
+          ${s.noteProg?`<div style="font-size:9px;color:#633806;background:#FFF9E6;border-radius:3px;padding:1px 3px;margin-top:2px">📌 ${s.noteProg}</div>`:''}
+        </div>`;}).join(''):'<div style="font-size:10px;color:#ccc;text-align:center;padding:5px">—</div>'}
+    </div>`;
+  }).join('');
+}
+
+/* ===== ALERTES ===== */
+function sauvegarderEmail(){cfg.email=document.getElementById('email-rappel').value.trim();save();toast('Email sauvegardé ✓');}
+function sauvegarderEmailJS(){
+  cfg.ejsService=document.getElementById('ejs-service').value.trim();
+  cfg.ejsTemplate=document.getElementById('ejs-template').value.trim();
+  cfg.ejsPubKey=document.getElementById('ejs-pubkey').value.trim();
+  if(cfg.ejsPubKey){try{emailjs.init(cfg.ejsPubKey);}catch(e){}}
+  save();document.getElementById('ejs-status').textContent='✓ Sauvegardé !';toast('EmailJS configuré ✓');
+}
+function getCoursDemain(){const d=new Date();d.setDate(d.getDate()+1);return db.slots.filter(s=>s.jour===JOURS_FR[d.getDay()]);}
+function renderDemain(){
+  const el=document.getElementById('demain-liste');const slots=getCoursDemain();
+  if(!slots.length){el.innerHTML='<div class="empty">Aucun cours demain</div>';return;}
+  const d=new Date();d.setDate(d.getDate()+1);
+  el.innerHTML=`<p style="font-size:11px;color:#888;margin-bottom:7px">${d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})} :</p>`+
+    slots.map(s=>{const ec=db.ecoles.find(e=>e.id==s.ecoleId);const col=ec?ec.couleur:'#0F6E56';
+      return `<div style="border:1px solid #e5e5e0;border-left:3px solid ${col};border-radius:7px;padding:7px 11px;margin-bottom:5px;font-size:12px">
+        ${ec?`<strong style="color:${col}">${ec.abr}</strong> · `:''}
+        <strong>${s.classe}</strong> — ${s.mat} — ${s.hdeb}–${s.hfin}
+        ${s.lecon?`<br><span style="font-size:11px;color:#666">📖 ${s.lecon}</span>`:''}
+        ${s.noteProg?`<br><span style="font-size:10px;color:#633806">📌 ${s.noteProg}</span>`:''}
+      </div>`;}).join('');
+}
+async function verifierRappels(){
+  const slots=getCoursDemain();if(!slots.length){toast('Aucun cours demain.');return;}
+  let nb=0;
+  for(const s of slots){
+    const ec=db.ecoles.find(e=>e.id==s.ecoleId);
+    if(cfg.ejsService&&cfg.ejsTemplate&&cfg.ejsPubKey){
+      try{await emailjs.send(cfg.ejsService,cfg.ejsTemplate,{to_email:cfg.email,ecole:ec?ec.nom:'',classe:s.classe,matiere:s.mat,lecon:s.lecon||'—',horaire:s.hdeb+'–'+s.hfin,note_programme:s.noteProg||''});nb++;}catch(e){}
+    }
+    if(Notification.permission==='granted'){new Notification(`🔔 Cours demain — ${s.classe}`,{body:`${s.mat} · ${s.hdeb}–${s.hfin}${s.lecon?' · '+s.lecon:''}`});nb++;}
+    db.rappels.push({date:new Date().toLocaleString('fr-FR'),mat:s.mat,classe:s.classe,ok:nb>0});
+  }
+  save();toast(nb>0?`${nb} rappel(s) envoyé(s) ✓`:'Aucun canal configuré — active EmailJS ou les notifications',4000);
+}
+function activerNotifs(){
+  if(!('Notification'in window)){toast('Non supporté');return;}
+  Notification.requestPermission().then(p=>{updateNotifStatus();if(p==='granted')toast('Notifications activées ✓');});
+}
+function updateNotifStatus(){
+  const el=document.getElementById('notif-status');if(!el)return;
+  const btn=document.getElementById('notif-btn');
+  if(Notification.permission==='granted'){el.className='alert-box alert-success';el.textContent='✓ Notifications activées.';if(btn)btn.textContent='✓ 🔔';}
+  else{el.className='alert-box alert-warn';el.textContent='Notifications non activées.';}
+}
+function planifierRappel(){
+  const m=new Date(),p=new Date();p.setHours(20,0,0,0);
+  if(p<=m)p.setDate(p.getDate()+1);
+  setTimeout(()=>{verifierRappels();setInterval(verifierRappels,86400000);},p-m);
+}
+
+/* ===== ACCUEIL ===== */
+function updateStats(){
+  document.getElementById('s-ecoles').textContent=db.ecoles.length;
+  document.getElementById('s-classes').textContent=db.classes.length;
+  document.getElementById('s-eleves').textContent=db.eleves.length;
+  document.getElementById('s-cours').textContent=db.cours.length;
+  document.getElementById('s-devoirs').textContent=db.devoirs.length;
+  document.getElementById('s-ressources').textContent=db.ressources.length;
+}
+function updateAccueil(){
+  updateStats();renderWeekGrid();
+  const fe=currentEcoleFilter;
+  const demain=JOURS_FR[new Date(Date.now()+86400000).getDay()];
+  let ds=db.slots.filter(s=>s.jour===demain);if(fe)ds=ds.filter(s=>s.ecoleId==fe);
+  const rd=document.getElementById('rappel-demain');
+  if(ds.length){rd.innerHTML=`<div class="alert-box alert-info" style="margin-bottom:9px;font-size:12px">🔔 <strong>Demain (${demain}) :</strong> ${ds.map(s=>{const ec=db.ecoles.find(e=>e.id==s.ecoleId);return `${ec?`<span style="font-weight:700;color:${ec.couleur}">${ec.abr}</span> · `:''}<strong>${s.classe}</strong> ${s.mat} ${s.hdeb}–${s.hfin}`;}).join(' | ')}</div>`;}
+  else rd.innerHTML='';
+  let notes=db.notes;if(fe)notes=notes.filter(n=>n.ecoleId==fe);
+  const rn=document.getElementById('recent-notes');
+  if(!notes.length)rn.innerHTML='<div class="empty">Aucune note</div>';
+  else{const arr=[...notes].reverse().slice(0,4);rn.innerHTML='<table><tbody>'+arr.map(n=>`<tr><td>${n.titre}</td><td>${getEleveNom(n.eleveId)}</td><td><span class="note-pill" style="${noteStyle(n.note,n.bareme)}">${n.note}/${n.bareme}</span></td></tr>`).join('')+'</tbody></table>';}
+  let devoirs=db.devoirs;if(fe)devoirs=devoirs.filter(d=>d.ecoleId==fe);
+  const rd2=document.getElementById('recent-devoirs');
+  if(!devoirs.length)rd2.innerHTML='<div class="empty">Aucun devoir</div>';
+  else{const arr=[...devoirs].reverse().slice(0,4);rd2.innerHTML='<table><tbody>'+arr.map(d=>`<tr><td>${d.titre}</td><td style="font-size:10px">${d.type}</td><td><span style="font-size:10px;color:#0F6E56">${db.copies.filter(c=>c.devoirId===d.id).length} copie(s)</span></td></tr>`).join('')+'</tbody></table>';}
+}
+
+/* ===== CAHIER JOURNAL DE CLASSE ===== */
+let currentCahierClasseId=null;
+
+function ouvrirCahierClasse(classeId){
+  currentCahierClasseId=classeId;
+  const cl=db.classes.find(x=>x.id===classeId);
+  if(!cl)return;
+  document.getElementById('cahier-classe-titre').textContent=`📔 Cahier journal — ${cl.nom} (${getEcoleAbr(cl.ecoleId)})`;
+  // Init données si besoin
+  if(!db.seances)db.seances={};
+  if(!db.seances[classeId])db.seances[classeId]=[];
+  if(!db.sanctions)db.sanctions={};
+  if(!db.sanctions[classeId])db.sanctions[classeId]=[];
+  if(!db.bonus)db.bonus={};
+  if(!db.bonus[classeId])db.bonus[classeId]=[];
+  if(!db.rappelsClasse)db.rappelsClasse={};
+  if(!db.rappelsClasse[classeId])db.rappelsClasse[classeId]=[];
+  // Remplir les selects élèves
+  const eleves=db.eleves.filter(e=>e.classeId===classeId);
+  const opts='<option value="">-- Choisir --</option>'+eleves.map(e=>`<option value="${e.id}">${e.nom}</option>`).join('');
+  document.getElementById('sanc-eleve').innerHTML=opts;
+  document.getElementById('bon-eleve').innerHTML=opts;
+  // Date par défaut
+  document.getElementById('sj-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('sanc-date').value=new Date().toISOString().split('T')[0];
+  // Afficher
+  showCahierTab('cj-seances');
+  renderSeancesClasse();
+  renderSanctionsClasse();
+  renderBonusClasse();
+  renderHistoriqueRappels();
+  openModal('modal-cahier-classe');
+}
+
+function showCahierTab(id){
+  document.querySelectorAll('#modal-cahier-classe .sub-content').forEach(e=>e.classList.remove('active'));
+  document.querySelectorAll('#cahier-subtabs .sub-tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  const tabs=['cj-seances','cj-rappel','cj-sanctions','cj-bonus'];
+  const idx=tabs.indexOf(id);
+  document.querySelectorAll('#cahier-subtabs .sub-tab')[idx].classList.add('active');
+}
+
+/* --- SÉANCES --- */
+function ouvrirNouvelleSeance(){
+  const f=document.getElementById('form-nouvelle-seance');
+  f.style.display=f.style.display==='none'?'block':'none';
+}
+function enregistrerSeance(){
+  const classeId=currentCahierClasseId;
+  const date=document.getElementById('sj-date').value;
+  const mat=document.getElementById('sj-mat').value.trim();
+  const lecon=document.getElementById('sj-lecon').value.trim();
+  if(!date||!mat||!lecon)return toast('Date, matière et leçon requis');
+  const seance={id:Date.now(),date,mat,lecon,hdeb:document.getElementById('sj-hdeb').value,hfin:document.getElementById('sj-hfin').value,contenu:document.getElementById('sj-contenu').value.trim(),obs:document.getElementById('sj-obs').value.trim(),presences:{}};
+  // Présences : tous présents par défaut
+  db.eleves.filter(e=>e.classeId===classeId).forEach(e=>{seance.presences[e.id]='P';});
+  db.seances[classeId].push(seance);
+  save();
+  document.getElementById('form-nouvelle-seance').style.display='none';
+  ['sj-mat','sj-lecon','sj-hdeb','sj-hfin','sj-contenu','sj-obs'].forEach(id=>document.getElementById(id).value='');
+  renderSeancesClasse();
+  toast('Séance enregistrée ✓');
+}
+function togglePresenceSeance(seanceId,eleveId){
+  const classeId=currentCahierClasseId;
+  const seance=db.seances[classeId].find(s=>s.id===seanceId);
+  if(!seance)return;
+  const cur=seance.presences[eleveId]||'P';
+  seance.presences[eleveId]=cur==='P'?'A':'P';
+  save();
+  const btn=event.target;
+  btn.className='pres-btn '+(seance.presences[eleveId]);
+  btn.textContent=seance.presences[eleveId];
+}
+function delSeance(seanceId){
+  const classeId=currentCahierClasseId;
+  db.seances[classeId]=db.seances[classeId].filter(s=>s.id!==seanceId);
+  save();renderSeancesClasse();
+}
+function renderSeancesClasse(){
+  const classeId=currentCahierClasseId;
+  const el=document.getElementById('liste-seances-classe');
+  const seances=(db.seances[classeId]||[]).slice().reverse();
+  const eleves=db.eleves.filter(e=>e.classeId===classeId);
+  if(!seances.length){el.innerHTML='<div class="empty">Aucune séance — clique sur "+ Démarrer une séance"</div>';return;}
+  el.innerHTML=seances.map(s=>{
+    const nbA=eleves.filter(e=>s.presences[e.id]==='A').length;
+    const nbP=eleves.filter(e=>s.presences[e.id]==='P').length;
+    return `<div class="seance-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+        <div>
+          <span style="font-size:11px;font-weight:700;color:#0F6E56">${s.date}</span>
+          ${s.hdeb?`<span style="font-size:10px;color:#888;margin-left:6px">${s.hdeb}–${s.hfin}</span>`:''}
+          <span class="badge-stat" style="margin-left:6px">${s.mat}</span>
+          <div style="font-size:14px;font-weight:600;margin-top:3px">${s.lecon}</div>
+          ${s.contenu?`<div style="font-size:11px;color:#666;margin-top:2px">${s.contenu}</div>`:''}
+          ${s.obs?`<div style="font-size:11px;color:#888;font-style:italic;margin-top:2px">💬 ${s.obs}</div>`:''}
+        </div>
+        <div style="display:flex;gap:5px;flex-shrink:0">
+          <span style="font-size:11px;background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:20px">✓ ${nbP}</span>
+          <span style="font-size:11px;background:#FCEBEB;color:#791F1F;padding:2px 7px;border-radius:20px">✗ ${nbA}</span>
+          <button class="btn btn-danger btn-sm no-print" onclick="delSeance(${s.id})">✕</button>
+        </div>
+      </div>
+      <!-- Présences élèves -->
+      <div style="border-top:1px solid #f0f0eb;padding-top:8px">
+        <div style="font-size:10px;font-weight:600;color:#888;margin-bottom:6px">PRÉSENCES — clique pour basculer P/A</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px">
+          ${eleves.map(e=>{
+            const val=s.presences[e.id]||'P';
+            return `<div style="display:flex;align-items:center;gap:4px;background:${val==='P'?'#E1F5EE':'#FCEBEB'};border-radius:6px;padding:3px 7px">
+              <button class="pres-btn ${val}" onclick="togglePresenceSeance(${s.id},${e.id})" style="width:20px;height:20px;font-size:9px">${val}</button>
+              <span style="font-size:11px">${e.nom.split(' ')[0]}</span>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* --- SÉANCE DE RAPPEL --- */
+let elevesInterroges=[];
+function tiragAleatoire(){
+  const classeId=currentCahierClasseId;
+  const nb=parseInt(document.getElementById('rp-nb').value)||5;
+  const lecon=document.getElementById('rp-lecon').value.trim();
+  if(!lecon)return toast('Indique la leçon à rappeler');
+  const eleves=db.eleves.filter(e=>e.classeId===classeId);
+  if(!eleves.length)return toast('Aucun élève dans cette classe');
+  // Tirage aléatoire
+  const shuffled=[...eleves].sort(()=>Math.random()-0.5);
+  elevesInterroges=shuffled.slice(0,Math.min(nb,eleves.length)).map(e=>({eleveId:e.id,nom:e.nom,statut:'pending',bonus:0,note:''}));
+  document.getElementById('rp-lecon-titre').textContent=lecon;
+  document.getElementById('zone-tirage').style.display='block';
+  document.getElementById('zone-choix-manuel').style.display='none';
+  renderInterroges();
+}
+function choixManuel(){
+  const classeId=currentCahierClasseId;
+  const lecon=document.getElementById('rp-lecon').value.trim();
+  if(!lecon)return toast('Indique la leçon à rappeler');
+  const eleves=db.eleves.filter(e=>e.classeId===classeId);
+  const el=document.getElementById('liste-choix-manuel');
+  el.innerHTML=eleves.map(e=>`
+    <label style="display:flex;align-items:center;gap:8px;padding:6px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:12px">
+      <input type="checkbox" value="${e.id}" data-nom="${e.nom}" style="width:auto">
+      ${e.nom}
+    </label>`).join('');
+  document.getElementById('zone-choix-manuel').style.display='block';
+  document.getElementById('zone-tirage').style.display='none';
+}
+function confirmerChoixManuel(){
+  const lecon=document.getElementById('rp-lecon').value.trim();
+  const checked=[...document.querySelectorAll('#liste-choix-manuel input:checked')];
+  if(!checked.length)return toast('Sélectionne au moins un élève');
+  elevesInterroges=checked.map(c=>({eleveId:parseInt(c.value),nom:c.dataset.nom,statut:'pending',bonus:0,note:''}));
+  document.getElementById('rp-lecon-titre').textContent=lecon;
+  document.getElementById('zone-tirage').style.display='block';
+  document.getElementById('zone-choix-manuel').style.display='none';
+  renderInterroges();
+}
+function renderInterroges(){
+  const el=document.getElementById('liste-interroges');
+  el.innerHTML=elevesInterroges.map((ei,i)=>`
+    <div class="eleve-rappel ${ei.statut}" id="ei-${i}">
+      <div style="flex:1">
+        <strong style="font-size:13px">${ei.nom}</strong>
+        ${ei.statut==='bon'?`<span style="color:#0F6E56;font-size:11px;margin-left:6px">✓ Bon récitant ${ei.bonus>0?'(+'+ei.bonus+' pts)':''}</span>`:''}
+        ${ei.statut==='sanction'?`<span style="color:#c0392b;font-size:11px;margin-left:6px">✗ N'a pas répondu</span>`:''}
+      </div>
+      <div style="display:flex;gap:5px;align-items:center">
+        ${ei.statut==='pending'?`
+          <button class="btn btn-primary btn-sm" onclick="marquerBon(${i})">✓ Bon</button>
+          <button class="btn btn-sm" style="background:#FCEBEB;color:#791F1F;border-color:#f5b8b8" onclick="marquerSanction(${i})">✗ Pas répondu</button>
+        `:''}
+        ${ei.statut==='bon'?`
+          <button class="bonus-btn" onclick="ajouterBonusRapide(${i},1)">+1</button>
+          <button class="bonus-btn" onclick="ajouterBonusRapide(${i},2)">+2</button>
+          <button class="bonus-btn" onclick="ajouterBonusRapide(${i},3)">+3</button>
+        `:''}
+        <button class="btn btn-danger btn-xs" onclick="elevesInterroges[${i}].statut='pending';elevesInterroges[${i}].bonus=0;renderInterroges()">↺</button>
+      </div>
+    </div>`).join('');
+}
+function marquerBon(i){
+  elevesInterroges[i].statut='bon';
+  renderInterroges();
+}
+function marquerSanction(i){
+  elevesInterroges[i].statut='sanction';
+  renderInterroges();
+}
+function ajouterBonusRapide(i,pts){
+  elevesInterroges[i].bonus=pts;
+  renderInterroges();
+  toast(`+${pts} point(s) de bonus pour ${elevesInterroges[i].nom} ✓`);
+}
+function sauvegarderRappel(){
+  const classeId=currentCahierClasseId;
+  const lecon=document.getElementById('rp-lecon').value.trim();
+  const date=new Date().toLocaleDateString('fr-FR');
+  // Enregistrer le rappel
+  db.rappelsClasse[classeId].push({date,lecon,eleves:JSON.parse(JSON.stringify(elevesInterroges))});
+  // Ajouter bonus aux élèves
+  elevesInterroges.filter(ei=>ei.statut==='bon'&&ei.bonus>0).forEach(ei=>{
+    db.bonus[classeId].push({eleveId:ei.eleveId,nom:ei.nom,points:ei.bonus,motif:`Rappel du cours : ${lecon}`,date});
+  });
+  // Ajouter sanctions aux élèves qui n'ont pas répondu
+  elevesInterroges.filter(ei=>ei.statut==='sanction').forEach(ei=>{
+    db.sanctions[classeId].push({eleveId:ei.eleveId,nom:ei.nom,motif:'Rappel de cours non effectué',detail:`Leçon : ${lecon}`,date});
+  });
+  save();
+  elevesInterroges=[];
+  document.getElementById('zone-tirage').style.display='none';
+  document.getElementById('rp-lecon').value='';
+  renderHistoriqueRappels();
+  renderSanctionsClasse();
+  renderBonusClasse();
+  showCahierTab('cj-sanctions');
+  toast('Résultats enregistrés ✓ — Sanctions et bonus mis à jour !',4000);
+}
+function renderHistoriqueRappels(){
+  const classeId=currentCahierClasseId;
+  const el=document.getElementById('historique-rappels-classe');
+  const rappels=(db.rappelsClasse[classeId]||[]).slice().reverse();
+  if(!rappels.length){el.innerHTML='<div class="empty">Aucune séance de rappel</div>';return;}
+  el.innerHTML=rappels.map(r=>{
+    const bons=r.eleves.filter(e=>e.statut==='bon').length;
+    const sanc=r.eleves.filter(e=>e.statut==='sanction').length;
+    return `<div style="border:1px solid #e5e5e0;border-radius:7px;padding:8px 11px;margin-bottom:7px;font-size:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <div><strong>${r.lecon}</strong> <span style="color:#888;font-size:10px">${r.date}</span></div>
+        <div style="display:flex;gap:5px">
+          <span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:20px;font-size:10px">✓ ${bons} bon(s)</span>
+          <span style="background:#FCEBEB;color:#791F1F;padding:2px 7px;border-radius:20px;font-size:10px">✗ ${sanc} sanction(s)</span>
+        </div>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">
+        ${r.eleves.map(e=>`<span style="font-size:10px;padding:1px 7px;border-radius:20px;background:${e.statut==='bon'?'#E1F5EE':e.statut==='sanction'?'#FCEBEB':'#f0f0eb'};color:${e.statut==='bon'?'#085041':e.statut==='sanction'?'#791F1F':'#555'}">${e.nom.split(' ')[0]} ${e.statut==='bon'?(e.bonus>0?'+'+e.bonus:'✓'):e.statut==='sanction'?'✗':'·'}</span>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* --- SANCTIONS --- */
+function ajouterSanction(){
+  const classeId=currentCahierClasseId;
+  const eleveId=parseInt(document.getElementById('sanc-eleve').value);
+  const motif=document.getElementById('sanc-motif').value;
+  const date=document.getElementById('sanc-date').value||new Date().toLocaleDateString('fr-FR');
+  const detail=document.getElementById('sanc-detail').value.trim();
+  if(!eleveId)return toast('Choisir un élève');
+  const eleve=db.eleves.find(e=>e.id===eleveId);
+  db.sanctions[classeId].push({eleveId,nom:eleve?eleve.nom:'—',motif,detail,date});
+  document.getElementById('sanc-detail').value='';
+  save();renderSanctionsClasse();toast('Sanction ajoutée ✓');
+}
+function delSanction(idx){
+  const classeId=currentCahierClasseId;
+  db.sanctions[classeId].splice(idx,1);
+  save();renderSanctionsClasse();
+}
+function renderSanctionsClasse(){
+  const classeId=currentCahierClasseId;
+  const el=document.getElementById('liste-sanctions-classe');
+  const sanctions=db.sanctions[classeId]||[];
+  if(!sanctions.length){el.innerHTML='<div class="empty">Aucune sanction</div>';return;}
+  // Grouper par élève
+  const byEleve={};
+  sanctions.forEach((s,i)=>{
+    if(!byEleve[s.nom])byEleve[s.nom]=[];
+    byEleve[s.nom].push({...s,idx:i});
+  });
+  el.innerHTML=Object.entries(byEleve).map(([nom,ss])=>`
+    <div style="border:1px solid #f5b8b8;border-left:3px solid #c0392b;border-radius:7px;padding:9px 12px;margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+        <strong style="font-size:13px">${nom}</strong>
+        <span style="font-size:11px;background:#FCEBEB;color:#791F1F;padding:2px 8px;border-radius:20px">${ss.length} sanction(s)</span>
+      </div>
+      ${ss.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;background:#f9f9f7;border-radius:5px;padding:5px 8px;margin-bottom:3px;font-size:11px">
+        <div>
+          <span class="sanction-chip">${s.motif}</span>
+          ${s.detail?`<span style="color:#666;font-size:10px"> — ${s.detail}</span>`:''}
+          <span style="color:#aaa;font-size:10px;margin-left:5px">${s.date}</span>
+        </div>
+        <button class="btn btn-danger btn-xs no-print" onclick="delSanction(${s.idx})">✕</button>
+      </div>`).join('')}
+    </div>`).join('');
+}
+function imprimerSanctions(){
+  preparerImpressionSanctions();
+  document.getElementById('print-sanctions').style.display='block';
+  window.print();
+  document.getElementById('print-sanctions').style.display='none';
+}
+function telechargerPDFSanctions(){
+  preparerImpressionSanctions();
+  const content=document.getElementById('print-sanctions');
+  content.style.display='block';
+  window.print();
+  content.style.display='none';
+  toast('Utilisez "Enregistrer en PDF" dans la boîte de dialogue d\'impression ✓');
+}
+function preparerImpressionSanctions(){
+  const classeId=currentCahierClasseId;
+  const cl=db.classes.find(x=>x.id===classeId);
+  const ec=db.ecoles.find(x=>x.id==(cl?cl.ecoleId:null));
+  const sanctions=db.sanctions[classeId]||[];
+  document.getElementById('print-ecole-nom').textContent=ec?ec.nom:'';
+  document.getElementById('print-classe-nom').textContent=`Classe : ${cl?cl.nom:''} — Année scolaire ${cl?cl.annee:'2026-2027'}`;
+  document.getElementById('print-date-titre').textContent=`Imprimé le ${new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}`;
+  // Grouper par élève
+  const byEleve={};
+  sanctions.forEach(s=>{if(!byEleve[s.nom])byEleve[s.nom]=[];byEleve[s.nom].push(s);});
+  let html=`<table style="width:100%;border-collapse:collapse;font-size:12px">
+    <thead><tr style="background:#f0f0f0">
+      <th style="border:1px solid #ccc;padding:6px;text-align:left">N°</th>
+      <th style="border:1px solid #ccc;padding:6px;text-align:left">Élève</th>
+      <th style="border:1px solid #ccc;padding:6px;text-align:left">Motif(s)</th>
+      <th style="border:1px solid #ccc;padding:6px;text-align:left">Date</th>
+      <th style="border:1px solid #ccc;padding:6px;text-align:left">Nb</th>
+    </tr></thead><tbody>`;
+  let n=1;
+  Object.entries(byEleve).forEach(([nom,ss])=>{
+    html+=`<tr>
+      <td style="border:1px solid #ccc;padding:5px">${n++}</td>
+      <td style="border:1px solid #ccc;padding:5px;font-weight:600">${nom}</td>
+      <td style="border:1px solid #ccc;padding:5px">${ss.map(s=>s.motif+(s.detail?' ('+s.detail+')':'')).join('<br>')}</td>
+      <td style="border:1px solid #ccc;padding:5px">${ss.map(s=>s.date).join('<br>')}</td>
+      <td style="border:1px solid #ccc;padding:5px;text-align:center;font-weight:700;color:#c0392b">${ss.length}</td>
+    </tr>`;
+  });
+  html+='</tbody></table>';
+  if(!Object.keys(byEleve).length)html='<p style="text-align:center;color:#888">Aucune sanction enregistrée</p>';
+  document.getElementById('print-sanctions-content').innerHTML=html;
+}
+
+/* --- BONUS --- */
+function ajouterBonus(){
+  const classeId=currentCahierClasseId;
+  const eleveId=parseInt(document.getElementById('bon-eleve').value);
+  const points=parseInt(document.getElementById('bon-points').value);
+  const motif=document.getElementById('bon-motif').value.trim()||'Participation en classe';
+  if(!eleveId)return toast('Choisir un élève');
+  const eleve=db.eleves.find(e=>e.id===eleveId);
+  db.bonus[classeId].push({eleveId,nom:eleve?eleve.nom:'—',points,motif,date:new Date().toLocaleDateString('fr-FR')});
+  document.getElementById('bon-motif').value='';
+  save();renderBonusClasse();toast(`+${points} point(s) ajouté(s) ✓`);
+}
+function renderBonusClasse(){
+  const classeId=currentCahierClasseId;
+  const el=document.getElementById('liste-bonus-classe');
+  const bonus=db.bonus[classeId]||[];
+  if(!bonus.length){el.innerHTML='<div class="empty">Aucun bonus enregistré</div>';return;}
+  // Totaliser par élève
+  const totaux={};
+  bonus.forEach(b=>{
+    if(!totaux[b.nom])totaux[b.nom]={nom:b.nom,total:0,details:[]};
+    totaux[b.nom].total+=b.points;
+    totaux[b.nom].details.push(b);
+  });
+  // Trier par total décroissant
+  const sorted=Object.values(totaux).sort((a,b)=>b.total-a.total);
+  el.innerHTML=`<div style="margin-bottom:8px;font-size:11px;color:#666">Les points de bonus seront pris en compte lors des évaluations orales.</div>`+
+  sorted.map((t,i)=>`
+    <div style="border:1px solid #e5e5e0;border-radius:7px;padding:8px 11px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <span style="font-size:12px;font-weight:700;color:#888;margin-right:6px">#${i+1}</span>
+        <strong style="font-size:13px">${t.nom}</strong>
+        <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px">
+          ${t.details.map(d=>`<span style="font-size:10px;background:#E1F5EE;color:#085041;padding:1px 6px;border-radius:20px">+${d.points} — ${d.motif} <span style="color:#aaa">${d.date}</span></span>`).join('')}
+        </div>
+      </div>
+      <div style="text-align:center;background:#0F6E56;color:#fff;border-radius:8px;padding:5px 10px;flex-shrink:0;margin-left:8px">
+        <div style="font-size:20px;font-weight:700">+${t.total}</div>
+        <div style="font-size:9px;opacity:.8">pts bonus</div>
+      </div>
+    </div>`).join('');
+}
+
+/* ===== INIT ===== */
+document.getElementById('date-now').textContent=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+load();refreshAllSelects();renderEcoles();renderClasses();renderEleves();renderCours();renderNotes();renderDevoirs();renderRessources();renderEdt();updateAccueil();updateNotifStatus();planifierRappel();checkDevoirParam();
+</script>
+</body>
+</html>
