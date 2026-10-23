@@ -1066,9 +1066,15 @@ async function initApp(user){
 async function sbGet(table,filters={}){
   let q=sb.from(table).select('*').eq('user_id',currentUser.id);
   Object.entries(filters).forEach(([k,v])=>q=q.eq(k,v));
-  const{data,error}=await q.order('created_at',{ascending:false});
-  if(error){console.error(table,error);throw error;}
-  return data||[];
+  let r=await q.order('created_at',{ascending:false});
+  if(r.error){
+    // nouvelle tentative sans tri (colonne created_at absente, etc.)
+    let q2=sb.from(table).select('*').eq('user_id',currentUser.id);
+    Object.entries(filters).forEach(([k,v])=>q2=q2.eq(k,v));
+    r=await q2;
+  }
+  if(r.error){console.error(table,r.error);r.error.message='['+table+'] '+r.error.message;throw r.error;}
+  return r.data||[];
 }
 let ecrituresEnCours=0;
 async function sbInsert(table,obj){
@@ -1099,10 +1105,10 @@ async function saveExtra(type,classeId,data){
   ecrituresEnCours++;
   try{
     const now=new Date().toISOString();
-    const ex=await sb.from('extras').select('id').eq('user_id',currentUser.id).eq('type',type).eq('classe_id',classeId).order('updated_at',{ascending:false}).limit(1);
+    const ex=await sb.from('extras').select('id').eq('user_id',currentUser.id).eq('type',type).eq('classe_id',classeId).limit(1);
     const id=ex.data&&ex.data[0]?ex.data[0].id:null;
     let r;
-    if(id)r=await sb.from('extras').update({data,updated_at:now}).eq('id',id);
+    if(id){r=await sb.from('extras').update({data,updated_at:now}).eq('id',id);if(r.error)r=await sb.from('extras').update({data}).eq('id',id);}
     else r=await sb.from('extras').insert({user_id:currentUser.id,type,classe_id:classeId,data});
     if(r.error){toast('Erreur de sauvegarde : '+r.error.message);throw r.error;}
     if(!cache.extras[classeId])cache.extras[classeId]={};
@@ -1128,7 +1134,7 @@ async function loadAllData(){
       cache.extras[e.classe_id][e.type]=e.data||[];
     });
     setSyncStatus('');estPremierChargement=false;
-  }catch(e){setSyncStatus('error');console.error(e);return false;}
+  }catch(e){setSyncStatus('error');console.error(e);if(!estPremierChargement||true)toast('Synchronisation impossible : '+(e.message||e),6000);return false;}
   refreshAllSelects();return true;
 }
 
