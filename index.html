@@ -242,6 +242,25 @@ body.dark .stat{background:#0f3460}
   .ecoles-grid{grid-template-columns:1fr 1fr}
   .classes-grid{grid-template-columns:1fr 1fr}
 }
+
+.menu-btn{padding:5px 11px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;color:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}
+.badge-notif{background:#e53935;color:#fff;border-radius:10px;font-size:10px;font-weight:700;padding:1px 6px;margin-left:4px;display:none}
+#menu-drawer{display:none;position:fixed;inset:0;z-index:9500;background:rgba(0,0,0,.45)}
+#menu-drawer .panneau{position:absolute;top:0;left:0;bottom:0;width:285px;max-width:84vw;background:#fff;box-shadow:4px 0 24px rgba(0,0,0,.25);padding:14px 12px;overflow:auto}
+#menu-drawer .m-titre{display:flex;align-items:center;gap:9px;font-weight:700;font-size:16px;color:#0B4FBF;margin-bottom:10px}
+#menu-drawer .m-titre img{width:34px;height:34px;border-radius:9px}
+#menu-drawer .m-item{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:11px 12px;border:none;background:transparent;border-radius:9px;font-size:14px;color:#222;cursor:pointer}
+#menu-drawer .m-item:hover{background:#f0f4fc}
+#menu-drawer .m-item.actif{background:#E6EEFB;color:#0B4FBF;font-weight:600}
+body.admin-mode .nav button[data-r="p"],body.admin-mode .param-menu-btn[data-r="p"]{display:none}
+body:not(.admin-mode) .nav button[data-r="a"]{display:none}
+body.admin-mode #breadcrumb{display:none}
+.msg-item{border:1px solid #e5e5e0;border-radius:9px;padding:9px 12px;margin-bottom:7px;font-size:12px;cursor:pointer;background:#fff}
+.msg-item.nonlu{border-left:4px solid #0B4FBF;background:#f3f7ff}
+.msg-item .m-sujet{font-weight:700;font-size:13px}
+.msg-item .m-meta{font-size:10px;color:#888;margin-top:2px}
+.msg-item .m-corps{display:none;margin-top:7px;white-space:pre-wrap;font-size:12px;color:#333}
+.msg-item.ouvert .m-corps{display:block}
 </style>
 </head>
 <body>
@@ -320,6 +339,23 @@ body.dark .stat{background:#0f3460}
 </div>
 
 <!-- MODAL CAHIER CLASSE -->
+<div class="modal-overlay" id="modal-conv">
+  <div class="modal" style="max-width:640px;display:flex;flex-direction:column;height:88vh">
+    <div class="modal-header" style="margin-bottom:6px">
+      <div><h2 id="conv-titre" style="margin:0"></h2><div id="conv-sous" style="font-size:11px;color:#888"></div></div>
+      <button class="modal-close" onclick="fermerConv()">✕</button>
+    </div>
+    <div id="conv-fil" style="flex:1;overflow-y:auto;padding:6px 2px;border-top:1px solid #eee"></div>
+    <div id="conv-saisie" style="border-top:1px solid #eee;padding-top:8px">
+      <textarea id="conv-texte" rows="2" maxlength="3000" placeholder="Écris ton message…" style="width:100%"></textarea>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap">
+        <label class="btn btn-sm" style="cursor:pointer">📎 Joindre un fichier<input type="file" id="conv-fichier" style="display:none" onchange="document.getElementById('conv-fichier-nom').textContent=this.files[0]?this.files[0].name:''"></label>
+        <span id="conv-fichier-nom" style="font-size:11px;color:#666;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+        <button id="conv-btn" class="btn btn-primary" onclick="envoyerChat()">Envoyer</button>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-cahier" style="padding:8px">
   <div class="modal" style="max-width:900px">
     <div class="modal-header">
@@ -485,7 +521,11 @@ body.dark .stat{background:#0f3460}
 <!-- APP -->
 <div class="app-page" id="app-page">
   <header>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <button id="btn-retour" class="menu-btn" style="display:none" onclick="retour()">← Retour</button>
+      <button class="menu-btn" onclick="ouvrirMenu()">☰ MENU<span id="menu-badge" class="badge-notif"></span></button>
     <h1 style="display:flex;align-items:center;gap:9px"><img src="icon-192.png" alt="" style="width:30px;height:30px;border-radius:8px"> KOTO <span style="font-size:11px;font-weight:400;opacity:.8" class="h-sous">Cahier du Professeur</span></h1>
+    </div>
     <div class="hright">
       <span class="sync-dot" id="sync-dot"></span>
       <div class="user-badge" onclick="showTab('parametres')" style="cursor:pointer">
@@ -504,14 +544,17 @@ body.dark .stat{background:#0f3460}
 
   <!-- NAV -->
   <nav class="nav" id="main-nav">
-    <button class="active" onclick="showTab('dashboard')">🏠 Tableau de bord</button>
-    <button onclick="showTab('ecoles')">🏫 Écoles</button>
-    <button onclick="showTab('devoirs-global')">📋 Devoirs</button>
-    <button onclick="showTab('ressources')">📁 Ressources</button>
-    <button onclick="showTab('edt-global')">🗓️ EDT</button>
-    <button onclick="showTab('alertes')">🔔 Alertes</button>
-    <button onclick="showTab('parametres')">⚙️ Paramètres</button>
-    <button id="nav-admin" style="display:none" onclick="showTab('admin-abo')">💼 Abonnements</button>
+    <button class="active" data-r="p" onclick="showTab('dashboard')">🏠 Tableau de bord</button>
+    <button data-r="p" onclick="showTab('ecoles')">🏫 Écoles</button>
+    <button data-r="p" onclick="showTab('devoirs-global')">📋 Devoirs</button>
+    <button data-r="p" onclick="showTab('ressources')">📁 Ressources</button>
+    <button data-r="p" onclick="showTab('edt-global')">🗓️ EDT</button>
+    <button data-r="p" onclick="showTab('alertes')">🔔 Alertes</button>
+    <button data-r="p" onclick="showTab('messagerie')">💬 Messagerie<span id="nav-chat-badge" class="badge-notif"></span></button>
+    <button data-r="p" onclick="showTab('parametres')">⚙️ Paramètres</button>
+    <button id="nav-admin" data-r="a" onclick="showTab('admin-abo')">💼 Abonnements</button>
+    <button id="nav-admin-msg" data-r="a" onclick="showTab('admin-msg')">📨 Messages<span id="nav-msg-badge" class="badge-notif"></span></button>
+    <button data-r="a" onclick="showTab('parametres')">🔒 Compte</button>
   </nav>
   <div id="abo-banner" style="display:none;padding:7px 14px;font-size:12px;align-items:center;gap:10px;justify-content:space-between"></div>
 
@@ -681,23 +724,11 @@ body.dark .stat{background:#0f3460}
     <div class="card">
       <div class="card-title">🔔 Alertes de rappel</div>
       <div class="alert-info alert-box">Les alertes se basent uniquement sur ton emploi du temps : la veille, tu es prévenu des classes du lendemain.</div>
-      <div class="two-eq" style="max-width:500px">
-        <div class="form-group"><label>Email</label><input id="email-rappel" type="email"></div>
-        <div style="display:flex;align-items:flex-end;gap:6px;padding-bottom:7px">
-          <button class="btn btn-primary" onclick="sauvegarderEmail()">💾</button>
-          <button class="btn btn-primary" onclick="activerNotifs()">🔔 Activer</button>
-          <button class="btn btn-primary" onclick="verifierRappels()">▶ Tester</button>
-        </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+        <button class="btn btn-primary" onclick="activerNotifs()">🔔 Activer les notifications</button>
+        <button class="btn btn-primary" onclick="verifierRappels()">▶ Tester</button>
       </div>
       <div id="notif-status" class="alert-warn alert-box">Non activées</div>
-      <div class="card-title" style="margin-top:10px">📧 EmailJS</div>
-      <div class="three-col" style="max-width:600px">
-        <div class="form-group"><label>Service ID</label><input id="ejs-service" placeholder="service_xxx"></div>
-        <div class="form-group"><label>Template ID</label><input id="ejs-template" placeholder="template_xxx"></div>
-        <div class="form-group"><label>Public Key</label><input id="ejs-pubkey" placeholder="xxxxxxx"></div>
-      </div>
-      <button class="btn btn-primary" onclick="sauvegarderEmailJS()">💾 Sauvegarder EmailJS</button>
-      <div id="ejs-status" style="margin-top:6px;font-size:11px;color:#0B4FBF"></div>
     </div>
     <div class="card"><div class="card-title">🔔 Classes de demain</div><div id="demain-liste"><div class="empty">Aucune classe</div></div></div>
     <div class="card"><div class="card-title">🗓️ Mes classes par jour</div><div id="semaine-liste"></div></div>
@@ -709,6 +740,58 @@ body.dark .stat{background:#0f3460}
     <div class="card"><div class="card-title">👥 Professeurs abonnés</div><div id="admin-abonnes"></div></div>
   </div>
 
+  <!-- MESSAGERIE -->
+  <div id="messagerie" class="section">
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button id="chat-tab-q" class="btn btn-primary" onclick="chatOnglet('q')">❓ Questions</button>
+      <button id="chat-tab-c" class="btn" onclick="chatOnglet('c')">💬 Mes conversations <span id="chat-badge-c" class="badge-notif"></span></button>
+    </div>
+    <div id="chat-pane-q">
+      <div class="card">
+        <div class="card-title">Poser une question aux professeurs</div>
+        <div class="form-group"><label>Titre</label><input id="q-titre" maxlength="150" placeholder="Ex : Comment expliquer la photosynthèse en 4e ?"></div>
+        <div class="form-group"><label>Ta question</label><textarea id="q-corps" rows="3" maxlength="3000"></textarea></div>
+        <div class="form-group"><label>Fichier (facultatif : image, PDF, Word, Excel, PowerPoint — 10 Mo max)</label><input type="file" id="q-fichier"></div>
+        <button id="q-btn" class="btn btn-primary" onclick="poserQuestion()">📤 Publier la question</button>
+        <div style="font-size:11px;color:#888;margin-top:6px">Les professeurs connectés reçoivent une notification. Quand quelqu'un répond, la discussion devient privée entre vous deux (et l'administrateur).</div>
+      </div>
+      <div class="card"><div class="card-title">Questions des professeurs</div><div id="chat-questions"><div class="empty">Chargement…</div></div></div>
+    </div>
+    <div id="chat-pane-c" style="display:none">
+      <div class="card"><div class="card-title">Mes conversations</div><div id="chat-convs"><div class="empty">Aucune conversation</div></div></div>
+    </div>
+  </div>
+
+  <!-- ADMIN MESSAGES -->
+  <div id="admin-msg" class="section">
+    <div class="card">
+      <div class="card-title">📥 Propositions reçues <span id="adm-sug-nb" style="font-size:11px;color:#e53935"></span></div>
+      <div id="adm-sug-liste"><div class="empty">Aucune proposition</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">✉️ Envoyer un message aux professeurs</div>
+      <div class="form-group"><label>Destinataires</label>
+        <select id="adm-dest-mode" onchange="admDestMode()"><option value="tous">👥 Tous les professeurs</option><option value="choix">🎯 Choisir un ou plusieurs professeurs</option></select>
+      </div>
+      <div id="adm-dest-box" style="display:none;margin-bottom:10px">
+        <input id="adm-dest-search" placeholder="🔍 Rechercher un professeur (nom, ID, email)" onkeyup="admRenderProfs()" style="width:100%;margin-bottom:6px">
+        <div id="adm-dest-liste" style="max-height:200px;overflow:auto;border:1px solid #e5e5e0;border-radius:8px;padding:6px"></div>
+        <div id="adm-dest-nb" style="font-size:11px;color:#0B4FBF;margin-top:4px"></div>
+      </div>
+      <div class="form-group"><label>Sujet</label><input id="adm-sujet" maxlength="200" placeholder="Ex : Nouvelle fonction disponible"></div>
+      <div class="form-group"><label>Message</label><textarea id="adm-corps" maxlength="4000" style="min-height:100px"></textarea></div>
+      <button class="btn btn-primary" onclick="admEnvoyer()">📤 Envoyer</button>
+    </div>
+    <div class="card">
+      <div class="card-title">💬 Conversations entre professeurs (lecture seule)</div>
+      <div id="adm-convs"><div class="empty">Aucune conversation</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📤 Messages envoyés</div>
+      <div id="adm-envoyes"><div class="empty">Aucun message envoyé</div></div>
+    </div>
+  </div>
+
   <!-- PARAMÈTRES -->
   <div id="parametres" class="section">
 
@@ -718,10 +801,11 @@ body.dark .stat{background:#0f3460}
       <div>
         <div class="card" style="padding:8px">
           <div id="param-menu">
-            <button class="param-menu-btn active" onclick="showParamTab('p-compte')">👤 Mon compte</button>
-            <button class="param-menu-btn" onclick="showParamTab('p-theme')">🎨 Thème & Apparence</button>
-            <button class="param-menu-btn" onclick="showParamTab('p-corbeille')">🗑️ Corbeille</button>
-            <button class="param-menu-btn" onclick="showParamTab('p-donnees')">📊 Mes données</button>
+            <button class="param-menu-btn active" data-r="p" onclick="showParamTab('p-compte')">👤 Mon compte</button>
+            <button class="param-menu-btn" data-r="p" onclick="showParamTab('p-theme')">🎨 Thème & Apparence</button>
+            <button class="param-menu-btn" data-r="p" onclick="showParamTab('p-corbeille')">🗑️ Corbeille</button>
+            <button class="param-menu-btn" data-r="p" onclick="showParamTab('p-donnees')">📊 Mes données</button>
+            <button class="param-menu-btn" data-r="p" onclick="showParamTab('p-propositions')">💡 Propositions<span id="param-prop-badge" class="badge-notif"></span></button>
             <button class="param-menu-btn" onclick="showParamTab('p-securite')">🔒 Sécurité</button>
             <div style="border-top:1px solid #e5e5e0;margin:8px 0"></div>
             <button class="param-menu-btn" style="color:#c0392b" onclick="logout()">🚪 Déconnexion</button>
@@ -836,6 +920,23 @@ body.dark .stat{background:#0f3460}
               <div class="card-title" style="margin-bottom:8px;color:#c0392b">⚠️ Zone dangereuse</div>
               <button class="btn btn-sm" style="background:#FCEBEB;color:#c0392b;border-color:#f5b8b8" onclick="supprimerToutDemander()">🗑️ Supprimer toutes mes données</button>
             </div>
+          </div>
+        </div>
+
+        <!-- PROPOSITIONS -->
+        <div id="p-propositions" class="param-content">
+          <div class="card">
+            <div class="card-title">📨 Messages de KOTO <span id="prop-nb-nonlus" style="font-size:11px;color:#e53935"></span></div>
+            <div id="prop-recus"><div class="empty">Aucun message</div></div>
+          </div>
+          <div class="card">
+            <div class="card-title">💡 Envoyer une proposition ou une suggestion</div>
+            <p style="font-size:12px;color:#666;margin-bottom:8px">Une idée, un problème, une fonction qui manque ? Écris-nous : ton message arrive directement à l'administrateur.</p>
+            <div class="form-group"><label>Sujet</label><input id="prop-sujet" maxlength="200" placeholder="Ex : Ajouter l'export des bulletins"></div>
+            <div class="form-group"><label>Message</label><textarea id="prop-corps" maxlength="4000" style="min-height:90px" placeholder="Décris ton idée ou ton problème..."></textarea></div>
+            <button class="btn btn-primary" onclick="envoyerProposition()">📤 Envoyer</button>
+            <div class="card-title" style="margin-top:14px">🕘 Mes propositions envoyées</div>
+            <div id="prop-envoyees"><div class="empty">Aucune proposition envoyée</div></div>
           </div>
         </div>
 
@@ -960,6 +1061,14 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
   <div class="modal"><div class="modal-header"><h2 id="res-titre">Résultats</h2><button class="modal-close" onclick="closeModal('modal-resultats')">✕</button></div><div id="res-content"></div></div>
 </div>
 
+<!-- MENU -->
+<div id="menu-drawer" onclick="if(event.target===this)fermerMenu()">
+  <div class="panneau">
+    <div class="m-titre"><img src="icon-192.png" alt=""> KOTO <button class="modal-close" style="margin-left:auto" onclick="fermerMenu()">✕</button></div>
+    <div id="menu-liste"></div>
+  </div>
+</div>
+
 <!-- ABONNEMENT -->
 <div id="abo-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,40,35,.92);overflow:auto;padding:16px">
   <div style="max-width:460px;margin:20px auto;background:#fff;border-radius:14px;padding:20px;color:#222">
@@ -970,19 +1079,18 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
     <p id="abo-texte" style="font-size:13px;margin:8px 0"></p>
     <div style="background:#E6EEFB;border-radius:9px;padding:11px;font-size:13px;margin-bottom:10px">
       <strong>Tarif : 20 000 GNF par mois</strong><br>
-      1. Envoie le montant par <strong>Orange Money</strong> au<br>
-      <span style="font-size:17px;font-weight:700;color:#0B4FBF">+224 621 954 382</span><br>
-      2. Partage le <strong>reçu généré par Maxit</strong>, ou fais une <strong>capture du message de paiement Orange Money</strong>, et envoie-la sur <strong>WhatsApp</strong> au même numéro.<br>
-      3. Remplis le formulaire ci-dessous avec la référence de la transaction.<br>
-      4. Patiente un peu : ton accès est activé après vérification.
+      1. Écris ci-dessous ton <strong>numéro Orange Money</strong> et le nombre de mois.<br>
+      2. Compose sur ton téléphone le code de paiement marchand : <span style="font-size:16px;font-weight:700;color:#0B4FBF">*144*4*2*1</span><br>
+      3. Tu reçois un <strong>code de paiement à 6 chiffres</strong> : saisis-le ci-dessous, puis clique sur <strong>Confirmer</strong>.<br>
+      4. Ton accès est activé après vérification du paiement.
     </div>
     <div class="form-group"><label>Nombre de mois</label>
       <select id="abo-mois" onchange="aboMontant()"><option value="1">1 mois</option><option value="2">2 mois</option><option value="3">3 mois</option><option value="6">6 mois</option><option value="12">12 mois</option></select>
     </div>
-    <div style="font-size:15px;font-weight:700;margin-bottom:8px">Montant à envoyer : <span id="abo-montant">20 000 GNF</span></div>
-    <div class="form-group"><label>Référence / ID de la transaction Orange Money</label><input id="abo-ref" placeholder="Ex: MP2610241234"></div>
-    <div class="form-group"><label>Ton numéro Orange Money (celui qui a payé)</label><input id="abo-tel" placeholder="+224 6.."></div>
-    <button class="btn btn-primary" style="width:100%" onclick="aboEnvoyerPaiement()">✅ J'ai payé — envoyer</button>
+    <div style="font-size:15px;font-weight:700;margin-bottom:8px">Montant à payer : <span id="abo-montant">20 000 GNF</span></div>
+    <div class="form-group"><label>Ton numéro de compte Orange Money</label><input id="abo-tel" type="tel" inputmode="tel" placeholder="+224 6.." autocomplete="tel"></div>
+    <div class="form-group"><label>Code de paiement reçu (6 chiffres)</label><input id="abo-ref" inputmode="numeric" maxlength="6" placeholder="••••••" autocomplete="one-time-code" style="letter-spacing:6px;font-size:18px;text-align:center"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="aboEnvoyerPaiement()">✅ Confirmer le paiement</button>
     <div id="abo-mes-paiements" style="font-size:12px;margin-top:10px"></div>
     <div style="display:flex;gap:8px;margin-top:12px">
       <button class="btn" style="flex:1" onclick="aboRefresh()">🔄 Vérifier mon accès</button>
@@ -1054,15 +1162,13 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
       </div>
       <div id="turnstile-box" style="margin-bottom:8px"></div>
       <div style="background:#E6EEFB;border-radius:9px;padding:10px 12px;font-size:12px;color:#222;margin:4px 0 10px;line-height:1.5">
-        <strong>🎁 2 mois gratuits</strong>, puis <strong>20 000 GNF par mois</strong> par Orange Money au <strong>+224 621 954 382</strong>.<br>
-        <strong>Après ton paiement :</strong> partage le <strong>reçu généré par Maxit</strong>, ou fais une <strong>capture d'écran du message de paiement Orange Money</strong>, et envoie-la sur <strong>WhatsApp au numéro bénéficiaire</strong> (+224 621 954 382). Puis patiente un peu avant la confirmation de ton accès.
+        <strong>🎁 2 mois gratuits</strong>, puis <strong>20 000 GNF par mois</strong>, payables par <strong>Orange Money</strong> directement dans l'application (code de paiement marchand).
       </div>
       <button class="auth-btn" onclick="register()">Créer mon compte</button>
     </div>
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
 // ===== CONFIG SUPABASE =====
 const SURL='https://kkmegpbfmgprujpjnfpk.supabase.co';
@@ -1084,7 +1190,6 @@ let currentCahierClasseId=null;
 let elevesInterroges=[];
 let currentDevoirId=null;
 let currentEleveDevoir=null;
-let cfg={email:'',ejsService:'',ejsTemplate:'',ejsPubKey:''};
 
 // Cache
 let cache={ecoles:[],classes:[],eleves:[],notes:[],devoirs:[],copies:[],ressources:[],slots:[],extras:{}};
@@ -1239,17 +1344,25 @@ async function logout(){
 }
 async function initApp(user){
   currentUser=user;
+  navPile=[];chatConvs=[];chatUnread={};chatQNew=0;chatQConnus=null;msgConnus=null;sugConnues=null;msgNonLus=0;sugNonLues=0;sigAnn='';
   document.getElementById('auth-page').style.display='none';
   document.getElementById('app-page').classList.add('show');
   const m=user.user_metadata||{};
   document.getElementById('user-name').textContent=m.prenom||m.full_name||user.email.split('@')[0];
-  cfg.email=user.email;
-  document.getElementById('email-rappel').value=user.email;
   const accesOk=await verifierAcces();
+  if(aboInfo&&aboInfo.admin){
+    document.body.classList.add('admin-mode');
+    const nm=document.getElementById('user-name');nm.textContent=(nm.textContent||'')+' · Admin';
+    showTab('admin-abo');
+    verifierMessages(true);
+    return;
+  }
+  document.body.classList.remove('admin-mode');
   if(accesOk)await loadAllData();
   showTab('dashboard');
   updateNotifStatus();
   refreshDevoir();
+  verifierMessages(true);
 }
 
 // ===== SUPABASE CRUD =====
@@ -1385,7 +1498,7 @@ function showTab(t){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(t).classList.add('show');
-  const tabs=['dashboard','ecoles','devoirs-global','ressources','edt-global','alertes','parametres','admin-abo'];
+  const tabs=['dashboard','ecoles','devoirs-global','ressources','edt-global','alertes','messagerie','parametres','admin-abo','admin-msg'];
   const idx=tabs.indexOf(t);
   if(idx>=0)document.querySelectorAll('.nav button')[idx].classList.add('active');
   if(t==='devoirs-global')renderDevoirs();
@@ -1394,8 +1507,10 @@ function showTab(t){
   if(t==='alertes')renderDemain();
   if(t==='dashboard')renderDashboard();
   if(t==='admin-abo')renderAdminAbo();
+  if(t==='admin-msg')renderAdminMsg();
+  if(t==='messagerie')renderMessagerie();
   if(t==='ecoles')renderEcoles();
-  if(t==='parametres'){showParamTab('p-compte');}
+  if(t==='parametres'){showParamTab(aboInfo&&aboInfo.admin?'p-securite':'p-compte');}
 }
 
 function goTo(vue,ecole,classe){
@@ -2752,14 +2867,6 @@ function resCopierSQL(){
 }
 
 // ===== ALERTES =====
-function sauvegarderEmail(){cfg.email=document.getElementById('email-rappel').value.trim();toast('Email sauvegardé ✓');}
-function sauvegarderEmailJS(){
-  cfg.ejsService=document.getElementById('ejs-service').value.trim();
-  cfg.ejsTemplate=document.getElementById('ejs-template').value.trim();
-  cfg.ejsPubKey=document.getElementById('ejs-pubkey').value.trim();
-  if(cfg.ejsPubKey){try{emailjs.init(cfg.ejsPubKey);}catch(e){}}
-  document.getElementById('ejs-status').textContent='✓ Sauvegardé !';toast('EmailJS configuré ✓');
-}
 function getCoursDemain(){
   const d=new Date();d.setDate(d.getDate()+1);
   return cache.slots.filter(s=>s.jour===JOURS_FR[d.getDay()]);
@@ -2807,16 +2914,12 @@ function renderDashboard(){
   }).join(''):'<div class="empty">Aucune école — crée-en une dans « Écoles »</div>';
 }
 async function verifierRappels(){
-  const slots=getCoursDemain();if(!slots.length){toast('Aucun cours demain.');return;}
+  const slots=getCoursDemain();if(!slots.length){toast('Aucune classe demain.');return;}
   let nb=0;
-  for(const s of slots){
-    if(cfg.ejsService&&cfg.ejsTemplate&&cfg.ejsPubKey){
-      const ec=cache.ecoles.find(e=>e.id==s.ecole_id);
-      try{await emailjs.send(cfg.ejsService,cfg.ejsTemplate,{to_email:cfg.email,ecole:ec?ec.nom:'',classe:s.classe,matiere:s.mat,lecon:s.lecon||'—',horaire:s.hdeb+'–'+s.hfin});nb++;}catch(e){}
-    }
-    if(Notification.permission==='granted'){new Notification(`🔔 Cours demain — ${s.classe}`,{body:`${s.mat} · ${s.hdeb}–${s.hfin}`});nb++;}
+  if('Notification' in window&&Notification.permission==='granted'){
+    for(const s of slots){new Notification(`🔔 Demain — ${s.classe}`,{body:`${s.mat} · ${s.hdeb}–${s.hfin}`});nb++;}
   }
-  toast(nb>0?`${nb} rappel(s) envoyé(s) ✓`:'Configure EmailJS ou active les notifications',4000);
+  toast(nb>0?`${nb} rappel(s) envoyé(s) ✓`:'Active d\'abord les notifications',4000);
 }
 function activerNotifs(){
   if(!('Notification'in window)){toast('Non supporté');return;}
@@ -2868,13 +2971,14 @@ function showParamTab(id){
   document.querySelectorAll('.param-content').forEach(c=>c.classList.remove('active'));
   document.querySelectorAll('.param-menu-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById(id).classList.add('active');
-  const tabs=['p-compte','p-theme','p-corbeille','p-donnees','p-securite'];
+  const tabs=['p-compte','p-theme','p-corbeille','p-donnees','p-propositions','p-securite'];
   const idx=tabs.indexOf(id);
   document.querySelectorAll('.param-menu-btn')[idx].classList.add('active');
   if(id==='p-corbeille')renderCorbeille();
   if(id==='p-donnees')renderDonnees();
   if(id==='p-theme')renderThemeOptions();
   if(id==='p-compte')chargerProfil();
+  if(id==='p-propositions')renderPropositions();
   if(id==='p-securite')document.getElementById('session-info').textContent=currentUser?currentUser.email:'—';
 }
 
@@ -3226,7 +3330,6 @@ async function verifierAcces(){
     if(error||!data){console.warn('Abonnement indisponible',error);aboInfo=null;return true;}
     aboInfo=data;
     majBanniere();
-    if(data.admin){const b=document.getElementById('nav-admin');if(b)b.style.display='';}
     if(!data.actif){afficherAbo(true);return false;}
     if(document.getElementById('abo-overlay').dataset.bloque==='1')cacherAbo();
     return true;
@@ -3263,12 +3366,12 @@ async function aboEnvoyerPaiement(){
   const mois=+document.getElementById('abo-mois').value;
   const ref=document.getElementById('abo-ref').value.trim();
   const tel=document.getElementById('abo-tel').value.trim();
-  if(!ref)return toast('Entre la référence de la transaction');
-  if(!tel)return toast('Entre ton numéro Orange Money');
+  if(!/^\d{6}$/.test(ref))return toast('Le code de paiement doit avoir 6 chiffres');
+  if(!/^\+?[\d\s]{8,16}$/.test(tel))return toast('Entre ton numéro Orange Money');
   const{error}=await sb.from('paiements').insert({user_id:currentUser.id,email:currentUser.email,mois,montant:mois*ABO_PRIX,reference:ref,telephone:tel,statut:'en_attente'});
   if(error)return toast('Erreur : '+error.message);
   document.getElementById('abo-ref').value='';
-  toast('Paiement envoyé ✓ Il sera vérifié rapidement',5000);
+  toast('Paiement confirmé ✓ Vérification en cours, ton accès sera activé rapidement',6000);
   aboMesPaiements();
 }
 async function aboRefresh(){
@@ -3281,7 +3384,7 @@ async function renderAdminAbo(){
   const r1=await sb.from('paiements').select('*').eq('statut','en_attente').order('created_at');
   p.innerHTML=(r1.data&&r1.data.length)?r1.data.map(x=>`<div style="border:1px solid #e5e5e0;border-radius:8px;padding:9px;margin-bottom:6px;font-size:12px">
     <strong>${resEsc(x.email)}</strong> · ${x.mois} mois · <strong>${x.montant.toLocaleString('fr-FR')} GNF</strong><br>
-    Réf : ${resEsc(x.reference)} · Tél : ${resEsc(x.telephone)} · ${new Date(x.created_at).toLocaleString('fr-FR')}<br>
+    Code paiement : <strong>${resEsc(x.reference)}</strong> · Compte OM : ${resEsc(x.telephone)} · ${new Date(x.created_at).toLocaleString('fr-FR')}<br>
     <button class="btn btn-sm btn-primary" style="margin-top:5px" onclick="adminValider('${x.id}')">✅ Valider</button>
     <button class="btn btn-sm btn-danger" onclick="adminRejeter('${x.id}')">Refuser</button></div>`).join(''):'<div class="empty">Aucun paiement en attente</div>';
   const r2=await sb.rpc('admin_abonnes');
@@ -3297,6 +3400,460 @@ async function adminAjouterMois(uid){
   if(error)return toast('Erreur : '+error.message);toast('Mois ajoutés ✓');renderAdminAbo();
 }
 
+// ===== MENU + BOUTON RETOUR =====
+function sectionActuelle(){const v=document.querySelector('.section.show');return v?v.id:'';}
+function estAdmin(){return !!(aboInfo&&aboInfo.admin);}
+function accueilId(){return estAdmin()?'admin-abo':'dashboard';}
+function nbNonLus(){return estAdmin()?sugNonLues:msgNonLus;}
+function ouvrirMenu(){
+  const adm=estAdmin(),cur=sectionActuelle(),n=nbNonLus();
+  const items=adm
+    ?[['admin-abo','💼 Abonnements'],['admin-msg','📨 Messages',1],['parametres','🔒 Compte']]
+    :[['dashboard','🏠 Tableau de bord'],['ecoles','🏫 Écoles'],['devoirs-global','📋 Devoirs'],['ressources','📁 Ressources'],['edt-global','🗓️ Emploi du temps'],['alertes','🔔 Alertes'],['messagerie','💬 Messagerie',2],['propositions','💡 Propositions',1],['parametres','⚙️ Paramètres']];
+  document.getElementById('menu-liste').innerHTML=items.map(([id,label,b])=>
+    `<button class="m-item${cur===id?' actif':''}" onclick="menuAller('${id}')"><span>${label}</span>${b&&(b===2?chatTotal():n)>0?`<span class="badge-notif" style="display:inline-block">${b===2?chatTotal():n}</span>`:''}</button>`).join('')+
+    `<div style="border-top:1px solid #e5e5e0;margin:8px 0"></div><button class="m-item" style="color:#c0392b" onclick="fermerMenu();logout()">🚪 Déconnexion</button>`;
+  document.getElementById('menu-drawer').style.display='block';
+}
+function fermerMenu(){document.getElementById('menu-drawer').style.display='none';}
+function menuAller(id){
+  fermerMenu();
+  if(id==='propositions'){showTab('parametres');showParamTab('p-propositions');}
+  else showTab(id);
+}
+let navPile=[];
+const _showTab=showTab,_goTo=goTo;
+showTab=function(t){
+  const cur=sectionActuelle();
+  if(cur&&cur!==t&&document.getElementById('app-page').classList.contains('show')){navPile.push(cur);if(navPile.length>25)navPile.shift();}
+  _showTab(t);majRetour();
+};
+goTo=function(...a){_goTo(...a);majRetour();};
+function majRetour(){
+  const b=document.getElementById('btn-retour');if(!b)return;
+  const cur=sectionActuelle();
+  b.style.display=(cur&&cur!==accueilId())?'':'none';
+}
+function allerA(id){
+  if(id==='vue-classes'&&currentEcole)return _goTo('classes',currentEcole);
+  if(id==='vue-eleves'&&currentClasse)return _goTo('eleves',currentEcole,currentClasse);
+  if(id==='vue-notes'&&currentClasse)return ouvrirNotesClasse();
+  if(id.startsWith('vue-'))return _showTab(accueilId());
+  _showTab(id);
+}
+function retour(){
+  const mo=document.querySelector('.modal-overlay.show');
+  if(mo){mo.classList.remove('show');return;}
+  const cur=sectionActuelle();
+  if(cur==='vue-notes'&&currentClasse){_goTo('eleves',currentEcole,currentClasse);}
+  else if(cur==='vue-eleves'){
+    const ec=currentClasse?cache.ecoles.find(e=>e.id===currentClasse.ecole_id):null;
+    if(ec||currentEcole)_goTo('classes',ec||currentEcole);else _goTo('ecoles');
+  }
+  else if(cur==='vue-classes'){_goTo('ecoles');}
+  else{
+    let prev=navPile.pop();
+    while(prev&&prev===cur)prev=navPile.pop();
+    if(prev)allerA(prev);else _showTab(accueilId());
+  }
+  majRetour();
+}
+(function(){
+  const app=document.getElementById('app-page');
+  if(app&&window.MutationObserver)new MutationObserver(majRetour).observe(app,{attributes:true,subtree:true,attributeFilter:['class']});
+})();
+
+// ===== MESSAGES / PROPOSITIONS =====
+let annoncesCache=[],annoncesLues=new Set(),msgNonLus=0,msgConnus=null,sugNonLues=0,sugConnues=null,sigAnn='';
+function notifier(titre,corps){
+  toast('📨 '+titre+(corps?' : '+corps:''),5000);
+  try{if('Notification' in window&&Notification.permission==='granted')new Notification(titre,{body:corps||'',icon:'icon-192.png'});}catch(e){}
+  try{if(navigator.vibrate)navigator.vibrate(200);}catch(e){}
+}
+function majBadgesMessages(){
+  const adm=estAdmin(),n=nbNonLus(),ct=adm?0:chatTotal();
+  [['menu-badge',n+ct],['nav-chat-badge',ct],['nav-msg-badge',adm?n:0],['param-prop-badge',adm?0:n]].forEach(([id,v])=>{
+    const e=document.getElementById(id);if(!e)return;e.textContent=v;e.style.display=v>0?'inline-block':'none';
+  });
+  document.title=(n>0?'('+n+') ':'')+'KOTO — Cahier du Professeur';
+}
+async function verifierMessages(premiere){
+  if(!currentUser)return;
+  if(!estAdmin())verifierChat(premiere);
+  try{
+    if(estAdmin()){
+      const{data,error}=await sb.from('suggestions').select('id').eq('lu_admin',false);
+      if(error)return;
+      const ids=new Set((data||[]).map(x=>x.id));
+      const nouveaux=[...ids].filter(i=>sugConnues&&!sugConnues.has(i));
+      sugNonLues=ids.size;
+      if(premiere&&ids.size)toast('📨 '+ids.size+' proposition(s) non lue(s)',4500);
+      else if(nouveaux.length)notifier('Nouvelle proposition','Un professeur t\'a écrit.');
+      sugConnues=ids;
+    }else{
+      const[a,l]=await Promise.all([
+        sb.from('annonces').select('*').order('created_at',{ascending:false}).limit(60),
+        sb.from('annonces_lues').select('annonce_id').eq('user_id',currentUser.id)]);
+      if(a.error||l.error)return;
+      annoncesCache=a.data||[];annoncesLues=new Set((l.data||[]).map(x=>x.annonce_id));
+      const non=annoncesCache.filter(x=>!annoncesLues.has(x.id));
+      const nouveaux=non.filter(x=>msgConnus&&!msgConnus.has(x.id));
+      msgNonLus=non.length;
+      if(premiere&&non.length)toast('📨 '+non.length+' message(s) de KOTO non lu(s)',4500);
+      else if(nouveaux.length)notifier('Message de KOTO',nouveaux[0].sujet);
+      msgConnus=new Set(non.map(x=>x.id));
+    }
+  }catch(e){console.warn(e);}
+  majBadgesMessages();
+  if(!estAdmin()){
+    const sig=annoncesCache.map(x=>x.id+(annoncesLues.has(x.id)?'1':'0')).join(',');
+    const p=document.getElementById('p-propositions');
+    if(sig!==sigAnn&&p&&p.classList.contains('active')&&sectionActuelle()==='parametres')renderAnnonces();
+    sigAnn=sig;
+  }else if(sectionActuelle()==='admin-msg'&&!document.activeElement.matches('input,textarea,select'))renderAdminSuggestions();
+}
+function renderAnnonces(){
+  const el=document.getElementById('prop-recus');if(!el)return;
+  const nbn=annoncesCache.filter(x=>!annoncesLues.has(x.id)).length;
+  document.getElementById('prop-nb-nonlus').textContent=nbn?'· '+nbn+' non lu(s)':'';
+  el.innerHTML=annoncesCache.length?annoncesCache.map(a=>{
+    const lu=annoncesLues.has(a.id);
+    return `<div class="msg-item${lu?'':' nonlu'}" id="ann-${a.id}" onclick="ouvrirAnnonce('${a.id}')"><div class="m-sujet">${lu?'':'● '}${resEsc(a.sujet)}</div><div class="m-meta">De l'administrateur KOTO · ${new Date(a.created_at).toLocaleString('fr-FR')}${a.destinataires?' · message personnel':''}</div><div class="m-corps">${resEsc(a.corps)}</div></div>`;
+  }).join(''):'<div class="empty">Aucun message pour le moment</div>';
+}
+async function ouvrirAnnonce(id){
+  const el=document.getElementById('ann-'+id);if(!el)return;
+  el.classList.toggle('ouvert');
+  if(!annoncesLues.has(id)){
+    annoncesLues.add(id);
+    el.classList.remove('nonlu');const s=el.querySelector('.m-sujet');if(s)s.textContent=s.textContent.replace(/^● /,'');
+    msgNonLus=Math.max(0,msgNonLus-1);if(msgConnus)msgConnus.delete(id);
+    majBadgesMessages();
+    document.getElementById('prop-nb-nonlus').textContent=msgNonLus?'· '+msgNonLus+' non lu(s)':'';
+    await sb.from('annonces_lues').insert({annonce_id:id,user_id:currentUser.id});
+  }
+}
+async function renderPropositions(){
+  renderAnnonces();
+  const el=document.getElementById('prop-envoyees');if(!el)return;
+  const{data}=await sb.from('suggestions').select('id,sujet,corps,lu_admin,created_at').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(30);
+  el.innerHTML=(data&&data.length)?data.map(x=>`<div class="msg-item" onclick="this.classList.toggle('ouvert')"><div class="m-sujet">${resEsc(x.sujet)}</div><div class="m-meta">${new Date(x.created_at).toLocaleString('fr-FR')} · ${x.lu_admin?'✓ lu par l\'administrateur':'envoyé'}</div><div class="m-corps">${resEsc(x.corps)}</div></div>`).join(''):'<div class="empty">Aucune proposition envoyée</div>';
+}
+async function envoyerProposition(){
+  const sujet=document.getElementById('prop-sujet').value.trim(),corps=document.getElementById('prop-corps').value.trim();
+  if(!sujet||!corps)return toast('Écris un sujet et un message');
+  const m=currentUser.user_metadata||{};
+  const{error}=await sb.from('suggestions').insert({user_id:currentUser.id,nom:m.full_name||((m.prenom||'')+' '+(m.nom||'')).trim(),email:currentUser.email,sujet,corps});
+  if(error)return toast('Envoi impossible : '+error.message,5000);
+  document.getElementById('prop-sujet').value='';document.getElementById('prop-corps').value='';
+  toast('✓ Proposition envoyée. Merci !',4000);
+  renderPropositions();
+}
+
+// ----- Côté administrateur -----
+let admProfs=[],admChoisis=new Set(),admSug=[];
+async function renderAdminMsg(){
+  await Promise.all([renderAdminSuggestions(),admChargerProfs(),renderAdminEnvoyes(),renderAdminConvs()]);
+}
+async function renderAdminSuggestions(){
+  const el=document.getElementById('adm-sug-liste');if(!el)return;
+  const{data,error}=await sb.from('suggestions').select('*').order('created_at',{ascending:false}).limit(100);
+  if(error){el.innerHTML='<div class="empty">Erreur : '+resEsc(error.message)+'</div>';return;}
+  admSug=data||[];
+  const nb=admSug.filter(x=>!x.lu_admin).length;
+  document.getElementById('adm-sug-nb').textContent=nb?'· '+nb+' non lue(s)':'';
+  sugNonLues=nb;majBadgesMessages();
+  el.innerHTML=admSug.length?admSug.map(x=>`<div class="msg-item${x.lu_admin?'':' nonlu'}" id="sug-${x.id}" onclick="admOuvrirSug('${x.id}')">
+    <div class="m-sujet">${x.lu_admin?'':'● '}${resEsc(x.sujet)}</div>
+    <div class="m-meta">${resEsc(x.nom||'')} · ${resEsc(x.email||'')} · ${new Date(x.created_at).toLocaleString('fr-FR')}</div>
+    <div class="m-corps">${resEsc(x.corps)}
+      <div style="margin-top:8px;display:flex;gap:6px"><button class="btn btn-sm btn-primary" onclick="event.stopPropagation();admRepondre('${x.id}')">↩️ Répondre</button><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();admSupprimerSug('${x.id}')">🗑️ Supprimer</button></div>
+    </div></div>`).join(''):'<div class="empty">Aucune proposition reçue</div>';
+}
+async function admOuvrirSug(id){
+  const el=document.getElementById('sug-'+id);if(!el)return;
+  el.classList.toggle('ouvert');
+  const s=admSug.find(x=>x.id===id);
+  if(s&&!s.lu_admin){
+    s.lu_admin=true;el.classList.remove('nonlu');
+    const t=el.querySelector('.m-sujet');if(t)t.textContent=t.textContent.replace(/^● /,'');
+    sugNonLues=Math.max(0,sugNonLues-1);if(sugConnues)sugConnues.delete(id);majBadgesMessages();
+    document.getElementById('adm-sug-nb').textContent=sugNonLues?'· '+sugNonLues+' non lue(s)':'';
+    await sb.from('suggestions').update({lu_admin:true}).eq('id',id);
+  }
+}
+async function admSupprimerSug(id){
+  if(!confirm('Supprimer cette proposition ?'))return;
+  const{error}=await sb.from('suggestions').delete().eq('id',id);
+  if(error)return toast('Erreur : '+error.message);
+  renderAdminSuggestions();
+}
+async function admChargerProfs(){
+  const r=await sb.rpc('admin_abonnes');
+  admProfs=(r.data||[]).filter(x=>x.user_id!==currentUser.id);
+  admRenderProfs();
+}
+function admDestMode(){
+  const choix=document.getElementById('adm-dest-mode').value==='choix';
+  document.getElementById('adm-dest-box').style.display=choix?'block':'none';
+  if(choix)admRenderProfs();
+}
+function admRenderProfs(){
+  const el=document.getElementById('adm-dest-liste');if(!el)return;
+  const q=(document.getElementById('adm-dest-search').value||'').toLowerCase().trim();
+  const l=admProfs.filter(p=>!q||[p.nom,p.email,p.id_connexion,p.contact].join(' ').toLowerCase().includes(q));
+  el.innerHTML=l.length?l.map(p=>`<label style="display:flex;align-items:center;gap:8px;padding:5px 4px;font-size:12px;cursor:pointer;border-bottom:1px solid #f0f0eb"><input type="checkbox" style="width:auto" ${admChoisis.has(p.user_id)?'checked':''} onchange="admToggleProf('${p.user_id}',this.checked)"><span><strong>${resEsc(p.nom||p.email)}</strong><br><span style="color:#888;font-size:10px">${resEsc(p.id_connexion||'')} · ${resEsc(p.email||'')}</span></span></label>`).join(''):'<div class="empty">Aucun professeur</div>';
+  document.getElementById('adm-dest-nb').textContent=admChoisis.size?admChoisis.size+' professeur(s) sélectionné(s)':'';
+}
+function admToggleProf(id,on){if(on)admChoisis.add(id);else admChoisis.delete(id);document.getElementById('adm-dest-nb').textContent=admChoisis.size?admChoisis.size+' professeur(s) sélectionné(s)':'';}
+function admRepondre(sugId){
+  const s=admSug.find(x=>x.id===sugId);if(!s)return;
+  document.getElementById('adm-dest-mode').value='choix';
+  admChoisis=new Set([s.user_id]);admDestMode();admRenderProfs();
+  document.getElementById('adm-sujet').value='Re : '+s.sujet;
+  document.getElementById('adm-corps').focus();
+  document.getElementById('adm-sujet').scrollIntoView({behavior:'smooth',block:'center'});
+}
+async function admEnvoyer(){
+  const mode=document.getElementById('adm-dest-mode').value;
+  const sujet=document.getElementById('adm-sujet').value.trim(),corps=document.getElementById('adm-corps').value.trim();
+  if(!sujet||!corps)return toast('Écris un sujet et un message');
+  let dest=null,txt='TOUS les professeurs ('+admProfs.length+')';
+  if(mode==='choix'){
+    if(!admChoisis.size)return toast('Choisis au moins un professeur');
+    dest=[...admChoisis];txt=dest.length+' professeur(s)';
+  }
+  if(!confirm('Envoyer ce message à '+txt+' ?'))return;
+  const{error}=await sb.from('annonces').insert({sujet,corps,destinataires:dest,from_user:currentUser.id});
+  if(error)return toast('Envoi impossible : '+error.message,5000);
+  document.getElementById('adm-sujet').value='';document.getElementById('adm-corps').value='';
+  admChoisis=new Set();admRenderProfs();
+  toast('✓ Message envoyé',3500);
+  renderAdminEnvoyes();
+}
+async function renderAdminEnvoyes(){
+  const el=document.getElementById('adm-envoyes');if(!el)return;
+  const{data}=await sb.from('annonces').select('*').order('created_at',{ascending:false}).limit(50);
+  el.innerHTML=(data&&data.length)?data.map(a=>{
+    const noms=a.destinataires?a.destinataires.map(id=>{const p=admProfs.find(x=>x.user_id===id);return p?(p.nom||p.email):'?';}).join(', '):'Tous les professeurs';
+    return `<div class="msg-item" onclick="this.classList.toggle('ouvert')"><div class="m-sujet">${resEsc(a.sujet)}</div><div class="m-meta">À : ${resEsc(noms)} · ${new Date(a.created_at).toLocaleString('fr-FR')}</div><div class="m-corps">${resEsc(a.corps)}<div style="margin-top:8px"><button class="btn btn-sm btn-danger" onclick="event.stopPropagation();admSupprimerAnnonce('${a.id}')">🗑️ Supprimer</button></div></div></div>`;
+  }).join(''):'<div class="empty">Aucun message envoyé</div>';
+}
+async function admSupprimerAnnonce(id){
+  if(!confirm('Supprimer ce message ? Il disparaîtra aussi chez les professeurs.'))return;
+  const{error}=await sb.from('annonces').delete().eq('id',id);
+  if(error)return toast('Erreur : '+error.message);
+  renderAdminEnvoyes();
+}
+setInterval(()=>{if(currentUser&&!document.hidden)verifierMessages(false);},45000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&currentUser)verifierMessages(false);});
+
+// ===== MESSAGERIE ENTRE PROFESSEURS =====
+const EXT_OK=['jpg','jpeg','png','gif','webp','pdf','doc','docx','xls','xlsx','ppt','pptx','txt','csv'];
+let chatConvs=[],chatUnread={},chatQNew=0,chatQConnus=null,convOuverte=null,convTimer=null,chatQuestions=[];
+function chatTotal(){return Object.values(chatUnread).reduce((a,b)=>a+b,0)+chatQNew;}
+function qSeen(){try{let v=localStorage.getItem('koto_q_seen_'+currentUser.id);if(!v){v=new Date().toISOString();localStorage.setItem('koto_q_seen_'+currentUser.id,v);}return new Date(v);}catch(e){return new Date();}}
+function qMarkSeen(){try{localStorage.setItem('koto_q_seen_'+currentUser.id,new Date().toISOString());}catch(e){}chatQNew=0;majBadgesMessages();}
+function nomAutre(c){return c.p1===currentUser.id?c.nom2:c.nom1;}
+function fmtD(d){return new Date(d).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});}
+function nomFichierSur(n){return String(n).replace(/[^A-Za-z0-9._-]/g,'_').slice(-80);}
+function fichierOk(f){
+  if(!f)return true;
+  const ext=(f.name.split('.').pop()||'').toLowerCase();
+  if(!EXT_OK.includes(ext)){toast('Type de fichier non accepté (images, PDF, Word, Excel, PowerPoint, texte)',4500);return false;}
+  if(f.size>10*1024*1024){toast('Fichier trop lourd (10 Mo maximum)',4000);return false;}
+  return true;
+}
+async function chargerChatBase(){
+  const me=currentUser.id;
+  const[c,l,q]=await Promise.all([
+    sb.from('conversations').select('*').order('dernier_msg',{ascending:false}).limit(100),
+    sb.from('conv_lectures').select('conv_id,lu_jusqua'),
+    sb.from('questions').select('id,auteur_id,titre,created_at').neq('auteur_id',me).order('created_at',{ascending:false}).limit(40)]);
+  if(c.error||l.error||q.error)return null;
+  return{convs:c.data||[],lect:l.data||[],qs:q.data||[]};
+}
+async function verifierChat(premiere){
+  try{
+    if(!currentUser||estAdmin())return;
+    const b=await chargerChatBase();if(!b)return;
+    chatConvs=b.convs;
+    const lectMap={};b.lect.forEach(x=>lectMap[x.conv_id]=new Date(x.lu_jusqua));
+    const ids=chatConvs.map(c=>c.id);
+    const nouveauxNb={};
+    if(ids.length){
+      const m=await sb.from('messages_prive').select('conv_id,created_at').neq('sender_id',currentUser.id).in('conv_id',ids).order('created_at',{ascending:false}).limit(400);
+      if(!m.error)(m.data||[]).forEach(x=>{if(!lectMap[x.conv_id]||new Date(x.created_at)>lectMap[x.conv_id])nouveauxNb[x.conv_id]=(nouveauxNb[x.conv_id]||0)+1;});
+    }
+    // la conversation ouverte est considérée comme lue
+    if(convOuverte)delete nouveauxNb[convOuverte.id];
+    if(!premiere)for(const id in nouveauxNb){if(nouveauxNb[id]>(chatUnread[id]||0)){const c=chatConvs.find(x=>x.id===id);notifier('Nouveau message',c?'de '+nomAutre(c):'');break;}}
+    chatUnread=nouveauxNb;
+    const vu=qSeen();
+    chatQNew=b.qs.filter(x=>new Date(x.created_at)>vu).length;
+    if(chatQConnus&&!premiere){const n=b.qs.find(x=>!chatQConnus.has(x.id));if(n)notifier('Nouvelle question',n.titre);}
+    chatQConnus=new Set(b.qs.map(x=>x.id));
+    if(premiere&&chatTotal())toast('💬 '+chatTotal()+' nouveauté(s) dans la messagerie',4500);
+    if(sectionActuelle()==='messagerie'){
+      if(chatQNew&&document.getElementById('chat-pane-q').style.display!=='none')qMarkSeen();
+      renderChatConvs();
+    }
+  }catch(e){console.warn(e);}
+  majBadgesMessages();
+}
+function chatOnglet(o){
+  document.getElementById('chat-pane-q').style.display=o==='q'?'block':'none';
+  document.getElementById('chat-pane-c').style.display=o==='c'?'block':'none';
+  document.getElementById('chat-tab-q').classList.toggle('btn-primary',o==='q');
+  document.getElementById('chat-tab-c').classList.toggle('btn-primary',o==='c');
+  if(o==='q'){renderQuestions();qMarkSeen();}else renderChatConvs();
+}
+async function renderMessagerie(){chatOnglet(document.getElementById('chat-pane-c').style.display==='block'?'c':'q');await verifierChat(true);}
+async function renderQuestions(){
+  const el=document.getElementById('chat-questions');
+  const{data,error}=await sb.from('questions').select('*').order('created_at',{ascending:false}).limit(60);
+  if(error){el.innerHTML='<div class="empty">Erreur : '+resEsc(error.message)+'</div>';return;}
+  chatQuestions=data||[];
+  const reps=await Promise.all(chatQuestions.map(q=>sb.rpc('repondants',{q:q.id})));
+  const urls=await urlsFichiers(chatQuestions.map(q=>q.fichier_path).filter(Boolean));
+  el.innerHTML=chatQuestions.length?chatQuestions.map((q,i)=>{
+    const moi=q.auteur_id===currentUser.id;
+    const rl=(reps[i].data||[]);
+    const autres=rl.filter(r=>r.user_id!==currentUser.id);
+    const dejaRep=rl.some(r=>r.user_id===currentUser.id);
+    let btns='';
+    if(moi)btns='<span style="font-size:11px;color:#888">Ta question — les réponses arrivent dans « Mes conversations »</span><button class="btn btn-sm btn-danger" onclick="supprimerQuestion(\''+q.id+'\')">🗑️</button>';
+    else{
+      btns='<button class="btn btn-sm btn-primary" onclick="repondreQuestion(\''+q.id+'\')">💬 '+(dejaRep?'Ouvrir ma conversation':'Répondre')+'</button>';
+      btns+=autres.map(r=>'<button class="btn btn-sm" onclick="discuterAvec(\''+q.id+'\',\''+r.user_id+'\')">🤝 Discuter avec '+resEsc(r.nom)+'</button>').join('');
+    }
+    return `<div class="msg-item" style="cursor:default"><div class="m-sujet">❓ ${resEsc(q.titre)}</div><div class="m-meta">${resEsc(q.auteur_nom||'Professeur')}${moi?' (toi)':''} · ${fmtD(q.created_at)}${rl.length?' · ✅ répondue par '+resEsc(rl.map(r=>r.nom).join(', ')):' · en attente de réponse'}</div><div class="m-corps" style="display:block;margin-top:6px">${resEsc(q.corps)}${q.fichier_path?`<div style="margin-top:6px">${lienFichier(urls[q.fichier_path],q.fichier_nom)}</div>`:''}</div><div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;align-items:center">${btns}</div></div>`;
+  }).join(''):'<div class="empty">Aucune question pour le moment. Sois le premier à en poser une !</div>';
+}
+async function urlsFichiers(paths){
+  const out={};if(!paths.length)return out;
+  try{const r=await sb.storage.from('messagerie').createSignedUrls(paths,3600);(r.data||[]).forEach(x=>{if(x.signedUrl)out[x.path]=x.signedUrl;});}catch(e){}
+  return out;
+}
+function lienFichier(url,nom,type){
+  if(!url)return '<span style="font-size:11px;color:#888">📎 '+resEsc(nom||'fichier')+' (indisponible)</span>';
+  const img=/\.(jpe?g|png|gif|webp)$/i.test(nom||'');
+  if(img)return `<a href="${url}" target="_blank" rel="noopener"><img src="${url}" style="max-width:220px;max-height:180px;border-radius:8px;display:block"></a>`;
+  return `<a href="${url}" target="_blank" rel="noopener" style="color:#0B4FBF;font-weight:600;font-size:12px">📎 ${resEsc(nom||'fichier')}</a>`;
+}
+async function poserQuestion(){
+  const titre=document.getElementById('q-titre').value.trim(),corps=document.getElementById('q-corps').value.trim();
+  const f=document.getElementById('q-fichier').files[0];
+  if(!titre||!corps)return toast('Écris un titre et ta question');
+  if(!fichierOk(f))return;
+  const btn=document.getElementById('q-btn');btn.disabled=true;
+  try{
+    let path=null,nom=null;
+    if(f){path='q/'+currentUser.id+'/'+Date.now()+'_'+nomFichierSur(f.name);nom=f.name;
+      const u=await sb.storage.from('messagerie').upload(path,f,{contentType:f.type||'application/octet-stream'});
+      if(u.error)throw u.error;}
+    const m=currentUser.user_metadata||{};
+    const{error}=await sb.from('questions').insert({auteur_id:currentUser.id,auteur_nom:m.full_name||((m.prenom||'')+' '+(m.nom||'')).trim()||currentUser.email.split('@')[0],titre,corps,fichier_path:path,fichier_nom:nom});
+    if(error)throw error;
+    document.getElementById('q-titre').value='';document.getElementById('q-corps').value='';document.getElementById('q-fichier').value='';
+    toast('✓ Question publiée : les professeurs connectés vont être notifiés',4500);
+    renderQuestions();
+  }catch(e){toast('Impossible : '+(e.message||e),5000);}
+  btn.disabled=false;
+}
+async function supprimerQuestion(id){
+  if(!confirm('Supprimer cette question et les conversations liées ?'))return;
+  const{error}=await sb.from('questions').delete().eq('id',id);
+  if(error)return toast('Erreur : '+error.message);
+  renderQuestions();
+}
+async function repondreQuestion(qid){await ouvrirDepuisRpc(qid,null);}
+async function discuterAvec(qid,uid){await ouvrirDepuisRpc(qid,uid);}
+async function ouvrirDepuisRpc(qid,cible){
+  const{data,error}=await sb.rpc('demarrer_conversation',{q:qid,cible});
+  if(error)return toast('Impossible : '+error.message,5000);
+  const{data:c}=await sb.from('conversations').select('*').eq('id',data).single();
+  if(c)ouvrirConversation(c);
+}
+function renderChatConvs(){
+  const el=document.getElementById('chat-convs');if(!el)return;
+  const n=Object.values(chatUnread).reduce((a,b)=>a+b,0);
+  const bq=document.getElementById('chat-badge-c');if(bq){bq.textContent=n;bq.style.display=n?'inline-block':'none';}
+  el.innerHTML=chatConvs.length?chatConvs.map(c=>{
+    const nb=chatUnread[c.id]||0;
+    return `<div class="msg-item${nb?' nonlu':''}" onclick="ouvrirConvId('${c.id}')"><div class="m-sujet">${nb?'● ':''}💬 ${resEsc(nomAutre(c))}${nb?' <span class="badge-notif" style="display:inline-block">'+nb+'</span>':''}</div><div class="m-meta">Dernier message : ${fmtD(c.dernier_msg)}</div></div>`;
+  }).join(''):'<div class="empty">Aucune conversation. Réponds à une question pour en démarrer une.</div>';
+}
+function ouvrirConvId(id){const c=chatConvs.find(x=>x.id===id)||admConvs.find(x=>x.id===id);if(c)ouvrirConversation(c);}
+async function ouvrirConversation(c,lectureSeule){
+  convOuverte=c;convOuverte.ro=!!lectureSeule||estAdmin();
+  const{data:q}=await sb.from('questions').select('titre').eq('id',c.question_id).maybeSingle();
+  document.getElementById('conv-titre').textContent=convOuverte.ro?(c.nom1+' ⇄ '+c.nom2):('💬 '+nomAutre(c));
+  document.getElementById('conv-sous').textContent=q?'Question : '+q.titre:'';
+  document.getElementById('conv-saisie').style.display=convOuverte.ro?'none':'block';
+  document.getElementById('conv-fil').innerHTML='<div class="empty">Chargement…</div>';
+  openModal('modal-conv');
+  await rafraichirConv(true);
+  clearInterval(convTimer);
+  convTimer=setInterval(()=>{
+    if(!document.getElementById('modal-conv').classList.contains('show')){clearInterval(convTimer);convOuverte=null;return;}
+    if(!document.hidden)rafraichirConv(false);
+  },6000);
+}
+function fermerConv(){closeModal('modal-conv');clearInterval(convTimer);convOuverte=null;if(!estAdmin())verifierChat(false);}
+let convSig='';
+async function rafraichirConv(force){
+  const c=convOuverte;if(!c)return;
+  const{data,error}=await sb.from('messages_prive').select('*').eq('conv_id',c.id).order('created_at',{ascending:true}).limit(500);
+  if(error||!convOuverte||convOuverte.id!==c.id)return;
+  const msgs=data||[];
+  const sig=msgs.map(m=>m.id).join(',');
+  if(!force&&sig===convSig)return;
+  convSig=sig;
+  const urls=await urlsFichiers(msgs.map(m=>m.fichier_path).filter(Boolean));
+  const fil=document.getElementById('conv-fil');
+  const bas=force||fil.scrollTop+fil.clientHeight>=fil.scrollHeight-60;
+  fil.innerHTML=msgs.length?msgs.map(m=>{
+    const moi=m.sender_id===currentUser.id;
+    const qui=moi?'Moi':(c.p1===m.sender_id?c.nom1:c.nom2);
+    return `<div style="display:flex;justify-content:${c.ro?'flex-start':(moi?'flex-end':'flex-start')};margin-bottom:8px"><div style="max-width:82%;padding:8px 11px;border-radius:12px;font-size:13px;${moi&&!c.ro?'background:#0B4FBF;color:#fff':'background:#eef1f6;color:#222'}"><div style="font-size:10px;opacity:.7;margin-bottom:2px">${resEsc(qui)} · ${fmtD(m.created_at)}</div>${m.corps?`<div style="white-space:pre-wrap;word-break:break-word">${resEsc(m.corps)}</div>`:''}${m.fichier_path?`<div style="margin-top:5px">${lienFichier(urls[m.fichier_path],m.fichier_nom)}</div>`:''}</div></div>`;
+  }).join(''):'<div class="empty">Aucun message. Écris le premier !</div>';
+  if(bas)fil.scrollTop=fil.scrollHeight;
+  if(!c.ro&&msgs.length){
+    const last=msgs[msgs.length-1].created_at;
+    await sb.from('conv_lectures').upsert({conv_id:c.id,user_id:currentUser.id,lu_jusqua:last});
+    if(chatUnread[c.id]){delete chatUnread[c.id];majBadgesMessages();renderChatConvs();}
+  }
+}
+async function envoyerChat(){
+  const c=convOuverte;if(!c||c.ro)return;
+  const t=document.getElementById('conv-texte'),fi=document.getElementById('conv-fichier');
+  const corps=t.value.trim(),f=fi.files[0];
+  if(!corps&&!f)return;
+  if(!fichierOk(f))return;
+  const btn=document.getElementById('conv-btn');btn.disabled=true;
+  try{
+    let path=null,nom=null,type=null;
+    if(f){path='c/'+c.id+'/'+Date.now()+'_'+nomFichierSur(f.name);nom=f.name;type=f.type||null;
+      const u=await sb.storage.from('messagerie').upload(path,f,{contentType:f.type||'application/octet-stream'});
+      if(u.error)throw u.error;}
+    const{error}=await sb.from('messages_prive').insert({conv_id:c.id,sender_id:currentUser.id,corps,fichier_path:path,fichier_nom:nom,fichier_type:type});
+    if(error)throw error;
+    t.value='';fi.value='';document.getElementById('conv-fichier-nom').textContent='';
+    await rafraichirConv(true);
+  }catch(e){toast('Envoi impossible : '+(e.message||e),5000);}
+  btn.disabled=false;
+}
+// ----- Administrateur : voir toutes les conversations (lecture seule) -----
+let admConvs=[];
+async function renderAdminConvs(){
+  const el=document.getElementById('adm-convs');if(!el)return;
+  const{data,error}=await sb.from('conversations').select('*').order('dernier_msg',{ascending:false}).limit(100);
+  if(error){el.innerHTML='<div class="empty">Erreur : '+resEsc(error.message)+'</div>';return;}
+  admConvs=data||[];
+  el.innerHTML=admConvs.length?admConvs.map(c=>`<div class="msg-item" onclick="ouvrirConvId('${c.id}')"><div class="m-sujet">💬 ${resEsc(c.nom1)} ⇄ ${resEsc(c.nom2)}</div><div class="m-meta">Dernier message : ${fmtD(c.dernier_msg)}</div></div>`).join(''):'<div class="empty">Aucune conversation</div>';
+}
+
 // ===== SYNCHRONISATION AUTOMATIQUE (téléphone <-> ordinateur) =====
 let syncEnCours=false;
 async function synchroniser(){
@@ -3309,6 +3866,7 @@ async function synchroniser(){
     const{data:{session}}=await sb.auth.getSession();
     if(!session){return;}
     if(!(await verifierAcces()))return;
+    if(aboInfo&&aboInfo.admin){return;}
     const ok=await loadAllData();
     if(!ok)return;
     const vue=document.querySelector('.section.show');const id=vue?vue.id:'';
