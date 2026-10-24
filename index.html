@@ -558,6 +558,8 @@ body.dark .stat{background:#0f3460}
         <button class="btn btn-primary" onclick="openModal('modal-add-eleve')">+ Ajouter un élève</button>
         <button class="btn btn-info btn-sm" onclick="ouvrirCahier()">📔 Cahier journal</button>
         <button class="btn btn-sm" onclick="ouvrirNotesClasse()">📊 Fiche de notes</button>
+        <button class="btn btn-sm" onclick="regenererCodesClasse()" title="Nouveaux mots de passe de devoir pour tous les élèves">🔑 Régénérer les codes</button>
+        <button class="btn btn-sm" onclick="exporterCodesClasse()">⬇️ Exporter les codes</button>
       </div>
     </div>
     <!-- Import Excel -->
@@ -969,8 +971,9 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
       <strong>Tarif : 20 000 GNF par mois</strong><br>
       1. Envoie le montant par <strong>Orange Money</strong> au<br>
       <span style="font-size:17px;font-weight:700;color:#0B4FBF">+224 621 954 382</span><br>
-      2. Remplis le formulaire ci-dessous avec la référence de la transaction.<br>
-      3. Ton accès est activé après vérification.
+      2. Partage le <strong>reçu généré par Maxit</strong>, ou fais une <strong>capture du message de paiement Orange Money</strong>, et envoie-la sur <strong>WhatsApp</strong> au même numéro.<br>
+      3. Remplis le formulaire ci-dessous avec la référence de la transaction.<br>
+      4. Patiente un peu : ton accès est activé après vérification.
     </div>
     <div class="form-group"><label>Nombre de mois</label>
       <select id="abo-mois" onchange="aboMontant()"><option value="1">1 mois</option><option value="2">2 mois</option><option value="3">3 mois</option><option value="6">6 mois</option><option value="12">12 mois</option></select>
@@ -1002,6 +1005,7 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
     </div>
     <div class="auth-form active" id="auth-login">
       <div class="auth-err" id="login-err"></div>
+      <a id="resend-link" onclick="renvoyerConfirmation()" style="display:none;text-align:center;font-size:12px;color:#0B4FBF;cursor:pointer;margin-bottom:8px;text-decoration:underline">Renvoyer l'email de confirmation</a>
       <input class="auth-input" id="login-email" type="email" placeholder="Votre adresse email">
       <input class="auth-input" id="login-pwd" type="password" placeholder="Mot de passe">
       <button class="auth-btn" onclick="login()">Se connecter</button>
@@ -1013,6 +1017,10 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
       <input class="auth-input" id="reg-email" type="email" placeholder="Adresse email">
       <input class="auth-input" id="reg-pwd" type="password" placeholder="Mot de passe (min. 6 caractères)">
       <input class="auth-input" id="reg-pwd2" type="password" placeholder="Confirmer le mot de passe">
+      <div style="background:#E6EEFB;border-radius:9px;padding:10px 12px;font-size:12px;color:#222;margin:4px 0 10px;line-height:1.5">
+        <strong>🎁 2 mois gratuits</strong>, puis <strong>20 000 GNF par mois</strong> par Orange Money au <strong>+224 621 954 382</strong>.<br>
+        <strong>Après ton paiement :</strong> partage le <strong>reçu généré par Maxit</strong>, ou fais une <strong>capture d'écran du message de paiement Orange Money</strong>, et envoie-la sur <strong>WhatsApp au numéro bénéficiaire</strong> (+224 621 954 382). Puis patiente un peu avant la confirmation de ton accès.
+      </div>
       <button class="auth-btn" onclick="register()">Créer mon compte</button>
     </div>
   </div>
@@ -1051,6 +1059,7 @@ function openModal(id){document.getElementById(id).classList.add('show');}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 function setSyncStatus(s){const d=document.getElementById('sync-dot');if(!d)return;d.className='sync-dot'+(s==='syncing'?' syncing':s==='error'?' error':'');}
 function hIdx(h){return HEURES.indexOf(h);}
+function genPwd(){const c='abcdefghjkmnpqrstuvwxyz23456789';let r='';const a=new Uint32Array(6);(window.crypto||{getRandomValues:x=>x.forEach((_,i)=>x[i]=Math.random()*4e9)}).getRandomValues(a);for(const v of a)r+=c[v%c.length];return r;}
 function genCode(){return Math.random().toString(36).substr(2,8).toUpperCase();}
 function genMatricule(ecoleAbr,classeNom){
   const p=(ecoleAbr||'XXX').substr(0,3).toUpperCase()+(classeNom||'00').replace(/[^0-9]/g,'').substr(0,2)||'00';
@@ -1077,11 +1086,23 @@ async function register(){
   if(pwd!==pwd2){err.textContent='Mots de passe différents.';return;}
   if(pwd.length<6){err.textContent='Mot de passe trop court (min. 6).';return;}
   err.textContent='Création en cours...';
-  const{error}=await sb.auth.signUp({email,password:pwd,options:{data:{prenom,nom,full_name:prenom+' '+nom}}});
+  const{data,error}=await sb.auth.signUp({email,password:pwd,options:{emailRedirectTo:location.origin+location.pathname,data:{prenom,nom,full_name:prenom+' '+nom}}});
   if(error){err.textContent=error.message;return;}
+  if(data&&data.user&&data.user.identities&&data.user.identities.length===0){err.textContent='Cette adresse email est déjà utilisée. Connecte-toi.';return;}
   err.style.color='#0B4FBF';
-  err.textContent='✓ Compte créé ! Connecte-toi maintenant.';
+  if(data&&data.session){err.textContent='✓ Compte créé ! Connecte-toi maintenant.';}
+  else{err.textContent='✓ Compte créé ! Un email de confirmation t\'a été envoyé : clique sur le lien dans le message (regarde aussi dans les spams), puis connecte-toi.';}
   showAuthTab('login');
+  document.getElementById('login-email').value=email;
+  const el=document.getElementById('login-err');el.style.color='#0B4FBF';el.textContent=err.textContent;
+}
+async function renvoyerConfirmation(){
+  const email=document.getElementById('login-email').value.trim();
+  const el=document.getElementById('login-err');
+  if(!email){el.textContent='Entre ton adresse email ci-dessus.';return;}
+  const{error}=await sb.auth.resend({type:'signup',email,options:{emailRedirectTo:location.origin+location.pathname}});
+  el.style.color=error?'#c0392b':'#0B4FBF';
+  el.textContent=error?('Envoi impossible : '+error.message):'✓ Email de confirmation renvoyé. Regarde aussi dans les spams.';
 }
 async function login(){
   const email=document.getElementById('login-email').value.trim();
@@ -1090,7 +1111,13 @@ async function login(){
   if(!email||!pwd){err.textContent='Email et mot de passe requis.';return;}
   err.textContent='Connexion...';
   const{data,error}=await sb.auth.signInWithPassword({email,password:pwd});
-  if(error){err.textContent='Email ou mot de passe incorrect.';return;}
+  err.style.color='#c0392b';
+  if(error){
+    const nonConf=/confirm/i.test(error.message||'');
+    err.textContent=nonConf?'Confirme d\'abord ton adresse email : clique sur le lien reçu par email (vérifie aussi les spams).':'Email ou mot de passe incorrect.';
+    document.getElementById('resend-link').style.display=nonConf?'block':'none';
+    return;
+  }
   err.textContent='';
   await initApp(data.user);
 }
@@ -1405,7 +1432,7 @@ async function saveNewEleve(){
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
   const nomComplet=prenom+' '+nom;
   const mat=genMatricule(ec?ec.abr:'',currentClasse.nom);
-  const pwd=prenom.toLowerCase().slice(0,3)+nom.toLowerCase().slice(0,3)+'123';
+  const pwd=genPwd();
   const obj={nom:nomComplet,prenom,nom_famille:nom,classe_id:currentClasse.id,ecole_id:currentClasse.ecole_id,matricule:mat,pwd,photo:addPhotoData||'',observations:[]};
   const data=await sbInsert('eleves',obj);
   if(!data)return;
@@ -1491,6 +1518,34 @@ function renderElevesClasse(classeId){
     </div>`).join('');
 }
 
+// ===== CODES DEVOIR DES ÉLÈVES =====
+function exporterCodesClasse(){
+  if(!currentClasse)return;
+  const els=cache.eleves.filter(e=>e.classe_id===currentClasse.id).sort((a,b)=>(a.nom||'').localeCompare(b.nom||''));
+  if(!els.length)return toast('Aucun élève dans cette classe');
+  const ws=XLSX.utils.aoa_to_sheet([['N°','Nom','Matricule','Code devoir (mot de passe)'],...els.map((e,i)=>[i+1,e.nom,e.matricule||'',e.pwd||''])]);
+  ws['!cols']=[{wch:5},{wch:30},{wch:16},{wch:26}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Codes');
+  XLSX.writeFile(wb,'codes_'+currentClasse.nom.replace(/[^A-Za-z0-9_-]+/g,'_')+'.xlsx');
+}
+async function regenererCodesClasse(){
+  if(!currentClasse)return;
+  const els=cache.eleves.filter(e=>e.classe_id===currentClasse.id);
+  if(!els.length)return toast('Aucun élève dans cette classe');
+  if(!confirm(`Créer de nouveaux codes pour les ${els.length} élève(s) de ${currentClasse.nom} ?\n\nLes anciens codes ne fonctionneront plus. Un fichier Excel avec les nouveaux codes sera téléchargé pour que tu puisses les donner aux élèves.`))return;
+  setSyncStatus('syncing');
+  let ok=0;
+  for(const e of els){
+    const pwd=genPwd();
+    const d=await sbUpdate('eleves',e.id,{pwd});
+    if(d){e.pwd=pwd;ok++;}
+  }
+  setSyncStatus('');
+  renderElevesClasse(currentClasse.id);
+  toast(ok===els.length?`${ok} codes régénérés ✓`:`${ok}/${els.length} codes régénérés (erreurs)`,4000);
+  if(ok)exporterCodesClasse();
+}
+
 // ===== IMPORT EXCEL ÉLÈVES =====
 function importExcelEleves(input){
   const file=input.files[0];if(!file)return;
@@ -1521,7 +1576,7 @@ function importExcelEleves(input){
         if(mat&&matUtilises.has(mat.toLowerCase())){ignores++;continue;}
         if(!mat){do{mat=genMatricule(ec?ec.abr:'',currentClasse.nom)+Math.floor(Math.random()*10);}while(matUtilises.has(mat.toLowerCase()));}
         matUtilises.add(mat.toLowerCase());
-        const pwd=prenom.toLowerCase().slice(0,3)+(nom.toLowerCase().slice(0,3)||'123');
+        const pwd=genPwd();
         const obj={nom:nomComplet,prenom,nom_famille:nom,classe_id:currentClasse.id,ecole_id:currentClasse.ecole_id,matricule:mat,pwd,photo:'',observations:[]};
         const d=await sbInsert('eleves',obj);
         if(d){cache.eleves.unshift(d);added++;}
@@ -2287,14 +2342,14 @@ async function voirResultats(id){
   else(copies||[]).forEach(cp=>{
     const el=cache.eleves.find(e=>e.id==cp.eleve_id);
     html+=`<div style="border:1px solid #e5e5e0;border-radius:7px;padding:9px 12px;margin-bottom:7px">
-      <div style="font-weight:600;margin-bottom:5px">${el?el.nom:'Élève'}</div>`;
+      <div style="font-weight:600;margin-bottom:5px">${el?resEsc(el.nom):'Élève'}</div>`;
     (dv.questions||[]).forEach((q,i)=>{
       const rep=(cp.reponses||[])[i]||'—';
       const ok=q.type==='qcm'?q.reponse==rep:null;
       html+=`<div style="background:#f9f9f7;border-radius:5px;padding:5px 8px;margin-bottom:4px;font-size:11px">
-        <div style="font-weight:600">Q${i+1} : ${q.enonce}</div>
-        <div>→ ${q.type==='qcm'?`<span style="color:${ok?'#085041':'#c0392b'}">${(q.options||[])[parseInt(rep)]||rep} ${ok?'✓':'✗'}</span>`:rep}</div>
-        ${q.type==='qcm'&&!ok?`<div style="color:#085041;font-size:10px">✓ ${(q.options||[])[parseInt(q.reponse)]}</div>`:''}
+        <div style="font-weight:600">Q${i+1} : ${resEsc(q.enonce)}</div>
+        <div>→ ${q.type==='qcm'?`<span style="color:${ok?'#085041':'#c0392b'}">${resEsc((q.options||[])[parseInt(rep)]||rep)} ${ok?'✓':'✗'}</span>`:resEsc(rep)}</div>
+        ${q.type==='qcm'&&!ok?`<div style="color:#085041;font-size:10px">✓ ${resEsc((q.options||[])[parseInt(q.reponse)])}</div>`:''}
       </div>`;
     });
     html+='</div>';
@@ -2352,36 +2407,33 @@ function renderDevoirs(){
 // ===== PAGE ÉLÈVE DEVOIR =====
 async function refreshDevoir(){
   const code=new URLSearchParams(window.location.search).get('devoir');if(!code)return;
-  const{data:dv}=await sb.from('devoirs').select('*').eq('code',code).single();
-  if(!dv){alert('Devoir introuvable.');return;}
+  const{data:dv,error}=await sb.rpc('devoir_public',{p_code:code});
+  if(error||!dv){alert('Devoir introuvable.');return;}
   currentDevoirId=dv.id;
-  const{data:el}=await sb.from('eleves').select('*').eq('classe_id',dv.classe_id);
-  const{data:ec}=await sb.from('ecoles').select('*').eq('id',dv.ecole_id).single();
-  const{data:cl}=await sb.from('classes').select('*').eq('id',dv.classe_id).single();
-  cache.devoirs=[dv];cache.eleves=el||[];cache.ecoles=ec?[ec]:[];cache.classes=cl?[cl]:[];
+  currentDevoirCode=code;
+  cache.devoirs=[dv];
   document.getElementById('ep-titre').textContent=dv.titre;
-  document.getElementById('ep-meta').textContent=(cl?cl.nom:'')+' · '+(ec?ec.abr:'')+(dv.mat?' · '+dv.mat:'');
+  document.getElementById('ep-meta').textContent=(dv.classe_nom||'')+' · '+(dv.ecole_abr||'')+(dv.mat?' · '+dv.mat:'');
   document.getElementById('auth-page').style.display='none';
   document.getElementById('eleve-page').classList.add('show');
 }
+let currentDevoirCode='';
 async function eleveLogin(){
   const nom=document.getElementById('ep-nom').value.trim();
   const pwd=document.getElementById('ep-pwd').value.trim();
   const err=document.getElementById('ep-err');
   const dv=cache.devoirs[0];
-  const eleve=cache.eleves.find(e=>e.nom.toLowerCase()===nom.toLowerCase()&&e.pwd===pwd);
-  if(!eleve){err.textContent='Nom ou mot de passe incorrect.';return;}
-  const{data:dejaFait}=await sb.from('copies').select('id').eq('devoir_id',currentDevoirId).eq('eleve_id',eleve.id).single();
-  if(dejaFait){err.textContent='Tu as déjà soumis ce devoir.';return;}
-  if(dv.statut!=='ouvert'){err.textContent='Ce devoir est clôturé.';return;}
-  currentEleveDevoir=eleve;
+  const{data:r,error}=await sb.rpc('devoir_login',{p_code:currentDevoirCode,p_nom:nom,p_pwd:pwd});
+  if(error||!r){err.textContent='Erreur de connexion. Réessaie.';return;}
+  if(!r.ok){err.textContent=r.message||'Nom ou mot de passe incorrect.';return;}
+  currentEleveDevoir={id:r.eleve_id,nom:r.nom,pwd};
   document.getElementById('ep-login').style.display='none';
-  let html=`<div class="card" style="margin-bottom:9px">${dv.consignes?`<div style="font-size:12px;color:#555;background:#f9f9f7;border-radius:6px;padding:7px;margin-bottom:7px">${dv.consignes}</div>`:''}${dv.drive_link?`<a href="${dv.drive_link}" target="_blank" class="btn btn-info btn-sm">📎 Ouvrir le sujet</a>`:''}</div>`;
+  let html=`<div class="card" style="margin-bottom:9px">${dv.consignes?`<div style="font-size:12px;color:#555;background:#f9f9f7;border-radius:6px;padding:7px;margin-bottom:7px">${resEsc(dv.consignes)}</div>`:''}${dv.drive_link&&/^https?:\/\//i.test(dv.drive_link)?`<a href="${resEsc(dv.drive_link)}" target="_blank" rel="noopener" class="btn btn-info btn-sm">📎 Ouvrir le sujet</a>`:''}</div>`;
   (dv.questions||[]).forEach((q,i)=>{
     html+=`<div class="card" style="margin-bottom:7px">
       <div style="font-size:11px;font-weight:600;color:${q.type==='qcm'?'#1565C0':'#0B4FBF'};margin-bottom:5px">Q${i+1} — ${q.type==='qcm'?'QCM':'Question ouverte'}</div>
-      <div style="font-size:13px;font-weight:500;margin-bottom:8px">${q.enonce}</div>
-      ${q.type==='qcm'?(q.options||[]).map((opt,oi)=>`<label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:12px"><input type="radio" name="q_${i}" value="${oi}" style="width:auto"> ${opt}</label>`).join(''):`<textarea id="rep_${i}" placeholder="Ta réponse..." style="min-height:70px"></textarea>`}
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px">${resEsc(q.enonce)}</div>
+      ${q.type==='qcm'?(q.options||[]).map((opt,oi)=>`<label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:12px"><input type="radio" name="q_${i}" value="${oi}" style="width:auto"> ${resEsc(opt)}</label>`).join(''):`<textarea id="rep_${i}" placeholder="Ta réponse..." style="min-height:70px"></textarea>`}
     </div>`;
   });
   document.getElementById('ep-questions').innerHTML=html;
@@ -2391,8 +2443,9 @@ async function eleveSubmit(){
   const dv=cache.devoirs[0];
   const reps=(dv.questions||[]).map((q,i)=>q.type==='qcm'?(document.querySelector(`input[name="q_${i}"]:checked`)||{}).value||'':(document.getElementById('rep_'+i)||{}).value||'');
   if(reps.some(r=>r==='')&&!confirm('Questions incomplètes. Envoyer quand même ?'))return;
-  const{error}=await sb.from('copies').insert({devoir_id:currentDevoirId,eleve_id:currentEleveDevoir.id,reponses:reps,user_id:dv.user_id});
+  const{data:res,error}=await sb.rpc('devoir_soumettre',{p_code:currentDevoirCode,p_eleve_id:currentEleveDevoir.id,p_pwd:currentEleveDevoir.pwd,p_reponses:reps});
   if(error){toast('Erreur : '+error.message);return;}
+  if(res&&res.ok===false){toast(res.message||'Envoi refusé');return;}
   document.getElementById('ep-form').style.display='none';
   document.getElementById('ep-done').style.display='block';
 }
