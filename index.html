@@ -498,7 +498,9 @@ body.dark .stat{background:#0f3460}
     <button onclick="showTab('edt-global')">🗓️ EDT</button>
     <button onclick="showTab('alertes')">🔔 Alertes</button>
     <button onclick="showTab('parametres')">⚙️ Paramètres</button>
+    <button id="nav-admin" style="display:none" onclick="showTab('admin-abo')">💼 Abonnements</button>
   </nav>
+  <div id="abo-banner" style="display:none;padding:7px 14px;font-size:12px;align-items:center;gap:10px;justify-content:space-between"></div>
 
   <div class="main">
 
@@ -684,6 +686,12 @@ body.dark .stat{background:#0f3460}
     </div>
     <div class="card"><div class="card-title">🔔 Classes de demain</div><div id="demain-liste"><div class="empty">Aucune classe</div></div></div>
     <div class="card"><div class="card-title">🗓️ Mes classes par jour</div><div id="semaine-liste"></div></div>
+  </div>
+
+  <!-- ADMIN ABONNEMENTS -->
+  <div id="admin-abo" class="section">
+    <div class="card"><div class="card-title">💳 Paiements en attente</div><div id="admin-paiements"></div></div>
+    <div class="card"><div class="card-title">👥 Professeurs abonnés</div><div id="admin-abonnes"></div></div>
   </div>
 
   <!-- PARAMÈTRES -->
@@ -936,6 +944,37 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
   <div class="modal"><div class="modal-header"><h2 id="res-titre">Résultats</h2><button class="modal-close" onclick="closeModal('modal-resultats')">✕</button></div><div id="res-content"></div></div>
 </div>
 
+<!-- ABONNEMENT -->
+<div id="abo-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(15,40,35,.92);overflow:auto;padding:16px">
+  <div style="max-width:460px;margin:20px auto;background:#fff;border-radius:14px;padding:20px;color:#222">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h2 id="abo-titre" style="font-size:17px">🔒 Abonnement requis</h2>
+      <button id="abo-fermer" class="modal-close" style="display:none" onclick="cacherAbo()">✕</button>
+    </div>
+    <p id="abo-texte" style="font-size:13px;margin:8px 0"></p>
+    <div style="background:#E1F5EE;border-radius:9px;padding:11px;font-size:13px;margin-bottom:10px">
+      <strong>Tarif : 20 000 GNF par mois</strong><br>
+      1. Envoie le montant par <strong>Orange Money</strong> au<br>
+      <span style="font-size:17px;font-weight:700;color:#0F6E56">+224 621 954 382</span><br>
+      2. Remplis le formulaire ci-dessous avec la référence de la transaction.<br>
+      3. Ton accès est activé après vérification.
+    </div>
+    <div class="form-group"><label>Nombre de mois</label>
+      <select id="abo-mois" onchange="aboMontant()"><option value="1">1 mois</option><option value="2">2 mois</option><option value="3">3 mois</option><option value="6">6 mois</option><option value="12">12 mois</option></select>
+    </div>
+    <div style="font-size:15px;font-weight:700;margin-bottom:8px">Montant à envoyer : <span id="abo-montant">20 000 GNF</span></div>
+    <div class="form-group"><label>Référence / ID de la transaction Orange Money</label><input id="abo-ref" placeholder="Ex: MP2610241234"></div>
+    <div class="form-group"><label>Ton numéro Orange Money (celui qui a payé)</label><input id="abo-tel" placeholder="+224 6.."></div>
+    <button class="btn btn-primary" style="width:100%" onclick="aboEnvoyerPaiement()">✅ J'ai payé — envoyer</button>
+    <div id="abo-mes-paiements" style="font-size:12px;margin-top:10px"></div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn" style="flex:1" onclick="aboRefresh()">🔄 Vérifier mon accès</button>
+      <button class="btn" style="flex:1" onclick="logout()">🚪 Déconnexion</button>
+    </div>
+    <p style="font-size:11px;color:#888;margin-top:10px">Tes données sont conservées intactes : elles réapparaissent dès que ton abonnement est actif.</p>
+  </div>
+</div>
+
 <!-- AUTH PAGE -->
 <div class="auth-page" id="auth-page">
   <div class="auth-card">
@@ -1056,7 +1095,8 @@ async function initApp(user){
   document.getElementById('user-name').textContent=m.prenom||m.full_name||user.email.split('@')[0];
   cfg.email=user.email;
   document.getElementById('email-rappel').value=user.email;
-  await loadAllData();
+  const accesOk=await verifierAcces();
+  if(accesOk)await loadAllData();
   showTab('dashboard');
   updateNotifStatus();
   refreshDevoir();
@@ -1195,7 +1235,7 @@ function showTab(t){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(t).classList.add('show');
-  const tabs=['dashboard','ecoles','devoirs-global','ressources','edt-global','alertes','parametres'];
+  const tabs=['dashboard','ecoles','devoirs-global','ressources','edt-global','alertes','parametres','admin-abo'];
   const idx=tabs.indexOf(t);
   if(idx>=0)document.querySelectorAll('.nav button')[idx].classList.add('active');
   if(t==='devoirs-global')renderDevoirs();
@@ -1203,6 +1243,7 @@ function showTab(t){
   if(t==='edt-global')renderEdtGlobal();
   if(t==='alertes')renderDemain();
   if(t==='dashboard')renderDashboard();
+  if(t==='admin-abo')renderAdminAbo();
   if(t==='ecoles')renderEcoles();
   if(t==='parametres'){showParamTab('p-compte');}
 }
@@ -2998,6 +3039,87 @@ async function supprimerToutDemander(){
   goTo('ecoles');
 }
 
+// ===== ABONNEMENT =====
+const ABO_PRIX=20000;
+let aboInfo=null;
+function aboDate(d){return new Date(d).toLocaleDateString('fr-FR',{day:'numeric',month:'long',year:'numeric'});}
+async function verifierAcces(){
+  try{
+    const{data,error}=await sb.rpc('mon_acces');
+    if(error||!data){console.warn('Abonnement indisponible',error);aboInfo=null;return true;}
+    aboInfo=data;
+    majBanniere();
+    if(data.admin){const b=document.getElementById('nav-admin');if(b)b.style.display='';}
+    if(!data.actif){afficherAbo(true);return false;}
+    if(document.getElementById('abo-overlay').dataset.bloque==='1')cacherAbo();
+    return true;
+  }catch(e){console.warn(e);return true;}
+}
+function majBanniere(){
+  const el=document.getElementById('abo-banner');if(!el||!aboInfo)return;
+  if(aboInfo.admin){el.style.display='none';return;}
+  const fin=new Date(Math.max(new Date(aboInfo.essai_fin),aboInfo.paye_jusqua?new Date(aboInfo.paye_jusqua):0));
+  const jours=Math.ceil((fin-new Date())/86400000);
+  const abonne=aboInfo.paye_jusqua&&new Date(aboInfo.paye_jusqua)>new Date(aboInfo.essai_fin);
+  const alerte=jours<=7;
+  el.style.display='flex';
+  el.style.background=alerte?'#FAEEDA':'#E1F5EE';el.style.color=alerte?'#633806':'#085041';
+  el.innerHTML=`<span>${abonne?'✅ Abonné jusqu\'au '+aboDate(fin):'🎁 Essai gratuit jusqu\'au '+aboDate(fin)} · ${jours} jour(s) restant(s)</span><button class="btn btn-sm btn-primary" onclick="afficherAbo(false)">💳 Payer / Prolonger</button>`;
+}
+function afficherAbo(bloque){
+  const o=document.getElementById('abo-overlay');o.dataset.bloque=bloque?'1':'0';
+  document.getElementById('abo-fermer').style.display=bloque?'none':'';
+  document.getElementById('abo-titre').textContent=bloque?'🔒 Abonnement requis':'💳 Payer mon abonnement';
+  document.getElementById('abo-texte').textContent=bloque?'Ta période d\'essai ou ton abonnement est terminé. Tes données sont conservées et seront de nouveau accessibles dès le paiement.':'Tu peux payer plusieurs mois à l\'avance : ils s\'ajoutent à la fin de ton accès actuel.';
+  o.style.display='block';aboMontant();aboMesPaiements();
+}
+function cacherAbo(){document.getElementById('abo-overlay').style.display='none';}
+function aboMontant(){const m=+document.getElementById('abo-mois').value;document.getElementById('abo-montant').textContent=(m*ABO_PRIX).toLocaleString('fr-FR')+' GNF';}
+async function aboMesPaiements(){
+  const el=document.getElementById('abo-mes-paiements');
+  const{data}=await sb.from('paiements').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false}).limit(5);
+  if(!data||!data.length){el.innerHTML='';return;}
+  const lib={en_attente:'⏳ en attente de vérification',valide:'✅ validé',rejete:'❌ refusé'};
+  el.innerHTML='<strong>Mes paiements :</strong>'+data.map(p=>`<div style="margin-top:3px">${new Date(p.created_at).toLocaleDateString('fr-FR')} · ${p.mois} mois · ${p.montant.toLocaleString('fr-FR')} GNF · ${lib[p.statut]||p.statut}</div>`).join('');
+}
+async function aboEnvoyerPaiement(){
+  const mois=+document.getElementById('abo-mois').value;
+  const ref=document.getElementById('abo-ref').value.trim();
+  const tel=document.getElementById('abo-tel').value.trim();
+  if(!ref)return toast('Entre la référence de la transaction');
+  if(!tel)return toast('Entre ton numéro Orange Money');
+  const{error}=await sb.from('paiements').insert({user_id:currentUser.id,email:currentUser.email,mois,montant:mois*ABO_PRIX,reference:ref,telephone:tel,statut:'en_attente'});
+  if(error)return toast('Erreur : '+error.message);
+  document.getElementById('abo-ref').value='';
+  toast('Paiement envoyé ✓ Il sera vérifié rapidement',5000);
+  aboMesPaiements();
+}
+async function aboRefresh(){
+  const ok=await verifierAcces();
+  if(ok){await loadAllData();showTab('dashboard');cacherAbo();toast('Accès actif ✓');}
+  else toast('Pas encore activé. Réessaie après validation du paiement.',4000);
+}
+async function renderAdminAbo(){
+  const p=document.getElementById('admin-paiements'),a=document.getElementById('admin-abonnes');
+  const r1=await sb.from('paiements').select('*').eq('statut','en_attente').order('created_at');
+  p.innerHTML=(r1.data&&r1.data.length)?r1.data.map(x=>`<div style="border:1px solid #e5e5e0;border-radius:8px;padding:9px;margin-bottom:6px;font-size:12px">
+    <strong>${resEsc(x.email)}</strong> · ${x.mois} mois · <strong>${x.montant.toLocaleString('fr-FR')} GNF</strong><br>
+    Réf : ${resEsc(x.reference)} · Tél : ${resEsc(x.telephone)} · ${new Date(x.created_at).toLocaleString('fr-FR')}<br>
+    <button class="btn btn-sm btn-primary" style="margin-top:5px" onclick="adminValider('${x.id}')">✅ Valider</button>
+    <button class="btn btn-sm btn-danger" onclick="adminRejeter('${x.id}')">Refuser</button></div>`).join(''):'<div class="empty">Aucun paiement en attente</div>';
+  const r2=await sb.rpc('admin_abonnes');
+  a.innerHTML=(r2.data&&r2.data.length)?r2.data.map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #eee;padding:6px 0;font-size:12px;flex-wrap:wrap">
+    <div><strong>${resEsc(x.email)}</strong> ${x.actif?'<span style="color:#0F6E56">● actif</span>':'<span style="color:#c0392b">● bloqué</span>'}<br><span style="color:#888">Essai : ${aboDate(x.essai_fin)} · Payé jusqu'au : ${x.paye_jusqua?aboDate(x.paye_jusqua):'—'}</span></div>
+    <button class="btn btn-sm" onclick="adminAjouterMois('${x.user_id}')">+ mois</button></div>`).join(''):'<div class="empty">Aucun professeur</div>';
+}
+async function adminValider(id){const{error}=await sb.rpc('valider_paiement',{p_id:id});if(error)return toast('Erreur : '+error.message);toast('Paiement validé ✓');renderAdminAbo();}
+async function adminRejeter(id){if(!confirm('Refuser ce paiement ?'))return;const{error}=await sb.rpc('rejeter_paiement',{p_id:id});if(error)return toast('Erreur : '+error.message);renderAdminAbo();}
+async function adminAjouterMois(uid){
+  const m=parseInt(prompt('Nombre de mois à ajouter :','1'),10);if(!m||m<1)return;
+  const{error}=await sb.rpc('admin_ajouter_mois',{p_user:uid,p_mois:m});
+  if(error)return toast('Erreur : '+error.message);toast('Mois ajoutés ✓');renderAdminAbo();
+}
+
 // ===== SYNCHRONISATION AUTOMATIQUE (téléphone <-> ordinateur) =====
 let syncEnCours=false;
 async function synchroniser(){
@@ -3009,6 +3131,7 @@ async function synchroniser(){
   try{
     const{data:{session}}=await sb.auth.getSession();
     if(!session){return;}
+    if(!(await verifierAcces()))return;
     const ok=await loadAllData();
     if(!ok)return;
     const vue=document.querySelector('.section.show');const id=vue?vue.id:'';
