@@ -3,33 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cahier du Professeur</title>
+<title>KOTO — Cahier du Professeur</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0F6E56">
+<meta name="theme-color" content="#0B4FBF">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="KOTO">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="application-name" content="KOTO">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',Arial,sans-serif;font-size:14px;background:#f5f5f0;color:#1a1a1a;min-height:100vh}
 /* AUTH */
-.auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0F6E56,#085041)}
+.auth-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#0B4FBF,#072E85)}
 .auth-card{background:#fff;border-radius:16px;padding:32px 28px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,0.15)}
 .auth-logo{text-align:center;margin-bottom:20px}
 .auth-logo .logo-icon{font-size:48px}
-.auth-logo h1{font-size:20px;font-weight:700;color:#0F6E56;margin-top:8px}
+.auth-logo h1{font-size:20px;font-weight:700;color:#0B4FBF;margin-top:8px}
 .auth-logo p{font-size:12px;color:#888;margin-top:4px}
 .auth-tabs{display:flex;margin-bottom:20px;border-bottom:2px solid #e5e5e0}
 .auth-tab{flex:1;padding:10px;text-align:center;cursor:pointer;font-size:13px;font-weight:500;color:#888;border-bottom:2px solid transparent;margin-bottom:-2px}
-.auth-tab.active{color:#0F6E56;border-bottom-color:#0F6E56}
+.auth-tab.active{color:#0B4FBF;border-bottom-color:#0B4FBF}
 .auth-form{display:none}.auth-form.active{display:block}
 .auth-input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:13px;margin-bottom:10px;font-family:inherit}
-.auth-input:focus{outline:none;border-color:#0F6E56}
-.auth-btn{width:100%;padding:11px;background:#0F6E56;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
-.auth-btn:hover{background:#085041}
+.auth-input:focus{outline:none;border-color:#0B4FBF}
+.auth-btn{width:100%;padding:11px;background:#0B4FBF;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.auth-btn:hover{background:#072E85}
 .auth-err{font-size:12px;color:#c0392b;margin-bottom:8px;text-align:center;min-height:16px}
 /* APP */
 .app-page{display:none}.app-page.show{display:block}
-header{background:#0F6E56;color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100}
+header{background:#0B4FBF;color:#fff;padding:10px 18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100}
 header h1{font-size:14px;font-weight:700}
 .hright{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 .user-badge{background:rgba(255,255,255,0.2);border-radius:20px;padding:4px 10px;font-size:11px}
@@ -37,12 +44,12 @@ header h1{font-size:14px;font-weight:700}
 /* NAVIGATION BREADCRUMB */
 .breadcrumb{background:#fff;border-bottom:1px solid #e5e5e0;padding:8px 16px;display:flex;align-items:center;gap:6px;font-size:12px;flex-wrap:wrap}
 .breadcrumb span{color:#888}
-.breadcrumb a{color:#0F6E56;cursor:pointer;font-weight:500}
+.breadcrumb a{color:#0B4FBF;cursor:pointer;font-weight:500}
 .breadcrumb a:hover{text-decoration:underline}
 /* NAV TABS */
 .nav{display:flex;background:#fff;border-bottom:1px solid #e5e5e0;overflow-x:auto}
 .nav button{padding:9px 13px;border:none;background:transparent;cursor:pointer;font-size:11px;color:#666;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
-.nav button.active{color:#0F6E56;border-bottom-color:#0F6E56;font-weight:600}
+.nav button.active{color:#0B4FBF;border-bottom-color:#0B4FBF;font-weight:600}
 .nav button:hover:not(.active){background:#f5f5f0}
 .main{padding:12px;max-width:1300px;margin:0 auto}
 /* CARDS */
@@ -56,12 +63,12 @@ header h1{font-size:14px;font-weight:700}
 .form-group{margin-bottom:8px}
 label{font-size:11px;color:#555;display:block;margin-bottom:3px;font-weight:500}
 input,select,textarea{width:100%;padding:6px 9px;border:1px solid #ddd;border-radius:6px;font-size:12px;background:#fafafa;color:#1a1a1a;font-family:inherit}
-input:focus,select:focus,textarea:focus{outline:none;border-color:#0F6E56;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:#0B4FBF;background:#fff}
 textarea{resize:vertical;min-height:50px}
 .btn{padding:6px 13px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:12px;color:#333;font-weight:500}
 .btn:hover{background:#f0f0eb}
-.btn-primary{background:#0F6E56;color:#fff;border-color:#0F6E56}
-.btn-primary:hover{background:#085041}
+.btn-primary{background:#0B4FBF;color:#fff;border-color:#0B4FBF}
+.btn-primary:hover{background:#072E85}
 .btn-warn{background:#F59E0B;color:#fff;border-color:#F59E0B}
 .btn-info{background:#1565C0;color:#fff;border-color:#1565C0}
 .btn-danger{color:#c0392b;border-color:transparent;background:transparent;padding:2px 6px;font-size:11px}
@@ -79,14 +86,14 @@ tr:hover td{background:#fafaf8}
 .badge-lycee{background:#E6F1FB;color:#0C447C}
 .badge-sup{background:#FEF3C7;color:#92400E}
 .badge-stat{background:#f0f0eb;color:#555;font-size:10px;padding:1px 6px;border-radius:20px}
-.matricule-badge{background:#0F6E56;color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;letter-spacing:.3px}
+.matricule-badge{background:#0B4FBF;color:#fff;font-size:10px;font-weight:700;padding:2px 9px;border-radius:20px;letter-spacing:.3px}
 /* EMPTY & LOADING */
 .empty{text-align:center;padding:24px;color:#bbb;font-size:12px}
 .loading{display:flex;align-items:center;justify-content:center;padding:30px;gap:10px;color:#888;font-size:12px}
-.spinner{width:24px;height:24px;border:2px solid #e5e5e0;border-top-color:#0F6E56;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+.spinner{width:24px;height:24px;border:2px solid #e5e5e0;border-top-color:#0B4FBF;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 /* TOAST */
-.toast{position:fixed;bottom:18px;right:18px;background:#0F6E56;color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:500;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:300px}
+.toast{position:fixed;bottom:18px;right:18px;background:#0B4FBF;color:#fff;padding:10px 16px;border-radius:8px;font-size:12px;font-weight:500;z-index:9999;opacity:0;transition:opacity .3s;pointer-events:none;max-width:300px}
 .toast.show{opacity:1}
 /* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:12px}
@@ -98,33 +105,33 @@ tr:hover td{background:#fafaf8}
 /* ECOLES GRID */
 .ecoles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .ecole-card{background:#fff;border:1px solid #e5e5e0;border-radius:10px;padding:16px;cursor:pointer;transition:all .15s;position:relative}
-.ecole-card:hover{border-color:#0F6E56;box-shadow:0 4px 12px rgba(15,110,86,0.15);transform:translateY(-2px)}
+.ecole-card:hover{border-color:#0B4FBF;box-shadow:0 4px 12px rgba(11,79,191,0.15);transform:translateY(-2px)}
 .ecole-card .ec-abr{font-size:28px;font-weight:700;margin-bottom:4px}
 .ecole-card .ec-nom{font-size:13px;font-weight:600;color:#333}
 .ecole-card .ec-info{font-size:11px;color:#888;margin-top:4px}
 .ecole-card .ec-stats{display:flex;gap:10px;margin-top:10px}
 .ecole-card .ec-stat{text-align:center;background:#f9f9f7;border-radius:6px;padding:5px 10px;flex:1}
-.ecole-card .ec-stat-val{font-size:18px;font-weight:700;color:#0F6E56}
+.ecole-card .ec-stat-val{font-size:18px;font-weight:700;color:#0B4FBF}
 .ecole-card .ec-stat-lbl{font-size:9px;color:#888}
 .ecole-card .ec-del{position:absolute;top:10px;right:10px;opacity:0}
 .ecole-card:hover .ec-del{opacity:1}
 /* CLASSES GRID */
 .classes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
 .classe-card{background:#fff;border:1px solid #e5e5e0;border-radius:9px;padding:14px;cursor:pointer;transition:all .15s;position:relative}
-.classe-card:hover{border-color:#0F6E56;box-shadow:0 3px 10px rgba(15,110,86,0.12)}
-.classe-card .cl-nom{font-size:18px;font-weight:700;color:#0F6E56}
+.classe-card:hover{border-color:#0B4FBF;box-shadow:0 3px 10px rgba(11,79,191,0.12)}
+.classe-card .cl-nom{font-size:18px;font-weight:700;color:#0B4FBF}
 .classe-card .cl-cycle{font-size:11px;margin-top:3px}
 .classe-card .cl-nb{font-size:12px;color:#888;margin-top:6px}
 .classe-card .cl-del{position:absolute;top:8px;right:8px;opacity:0}
 .classe-card:hover .cl-del{opacity:1}
 /* ÉLÈVES */
 .eleve-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid #e5e5e0;border-radius:8px;margin-bottom:6px;background:#fff;cursor:pointer;transition:all .12s}
-.eleve-row:hover{border-color:#0F6E56;background:#f9fdfc}
-.eleve-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #0F6E56;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;flex-shrink:0}
+.eleve-row:hover{border-color:#0B4FBF;background:#f9fdfc}
+.eleve-avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #0B4FBF;background:#E6EEFB;display:flex;align-items:center;justify-content:center;font-size:16px;overflow:hidden;flex-shrink:0}
 .eleve-avatar img{width:100%;height:100%;object-fit:cover}
 /* PHOTO */
 .photo-zone{display:flex;gap:10px;align-items:flex-start}
-.photo-preview-big{width:90px;height:90px;border-radius:50%;border:2px solid #0F6E56;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0}
+.photo-preview-big{width:90px;height:90px;border-radius:50%;border:2px solid #0B4FBF;background:#E6EEFB;display:flex;align-items:center;justify-content:center;font-size:32px;overflow:hidden;flex-shrink:0}
 .photo-preview-big img{width:100%;height:100%;object-fit:cover}
 /* NOTES TABLE */
 .notes-table-wrap{overflow-x:auto}
@@ -133,13 +140,13 @@ tr:hover td{background:#fafaf8}
 .notes-table td{font-size:11px;padding:5px 4px;text-align:center}
 .notes-table td.nom-col{text-align:left;padding-left:8px;min-width:150px;white-space:nowrap}
 .note-input{width:48px;padding:3px 4px;font-size:11px;border:1px solid #ddd;border-radius:4px;text-align:center}
-.note-input:focus{outline:none;border-color:#0F6E56}
+.note-input:focus{outline:none;border-color:#0B4FBF}
 .note-input.oral{background:#E6F1FB}
 .note-input.ecrit{background:#E1F5EE}
 .moy-cell{font-size:11px;font-weight:700;padding:3px 6px;border-radius:4px}
 /* EDT */
 .edt-table{width:100%;border-collapse:collapse;font-size:11px}
-.edt-table th{background:#0F6E56;color:#fff;padding:7px 5px;text-align:center;font-size:10px}
+.edt-table th{background:#0B4FBF;color:#fff;padding:7px 5px;text-align:center;font-size:10px}
 .edt-table td{border:1px solid #e5e5e0;padding:3px;vertical-align:top;height:50px}
 .edt-table td.heure-col{background:#f5f5f0;text-align:center;font-size:9px;color:#666;font-weight:600;width:55px}
 .edt-slot{border-radius:5px;padding:3px 5px;font-size:9px;line-height:1.3;position:relative;height:100%;min-height:42px}
@@ -148,13 +155,13 @@ tr:hover td{background:#fafaf8}
 /* CAHIER JOURNAL TABS */
 .sub-tabs{display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap}
 .sub-tab{padding:5px 12px;border-radius:20px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:11px;color:#666}
-.sub-tab.active{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.sub-tab.active{background:#0B4FBF;color:#fff;border-color:#0B4FBF}
 .sub-content{display:none}.sub-content.active{display:block}
 /* RAPPEL */
 .eleve-rappel{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid #e5e5e0;border-radius:7px;margin-bottom:5px;font-size:12px;background:#fff}
-.eleve-rappel.bon{border-color:#0F6E56;background:#E1F5EE20}
+.eleve-rappel.bon{border-color:#0B4FBF;background:#E1F5EE20}
 .eleve-rappel.sanction{border-color:#c0392b;background:#FCEBEB20}
-.bonus-btn{padding:2px 8px;border-radius:20px;border:1px solid #0F6E56;background:#fff;color:#0F6E56;cursor:pointer;font-size:11px;font-weight:600}
+.bonus-btn{padding:2px 8px;border-radius:20px;border:1px solid #0B4FBF;background:#fff;color:#0B4FBF;cursor:pointer;font-size:11px;font-weight:600}
 .sanction-chip{display:inline-block;padding:2px 7px;border-radius:20px;background:#FCEBEB;color:#791F1F;font-size:10px;font-weight:600;margin:2px}
 /* ALERTS */
 .alert-box{border-radius:8px;padding:10px 12px;margin-bottom:9px;font-size:12px}
@@ -169,7 +176,7 @@ tr:hover td{background:#fafaf8}
 /* PRINT */
 @media print{.no-print{display:none!important}body{background:#fff}}
 /* CSS VARIABLES THÈME */
-:root{--primary:#0F6E56;--primary-dark:#085041;--primary-light:#E1F5EE}
+:root{--primary:#0B4FBF;--primary-dark:#072E85;--primary-light:#E6EEFB}
 /* PARAMÈTRES */
 .param-menu-btn{display:block;width:100%;text-align:left;padding:9px 12px;border:none;background:transparent;cursor:pointer;font-size:12px;border-radius:7px;color:#555;font-weight:500;margin-bottom:3px}
 .param-menu-btn:hover{background:#f5f5f0}
@@ -217,13 +224,13 @@ body.dark .stat{background:#0f3460}
 .file-chip a{color:#0C447C;text-decoration:none;font-weight:500}
 /* DOSSIERS RESSOURCES */
 .dossier-card{background:#fff;border:1px solid #e5e5e0;border-radius:9px;padding:14px 10px;text-align:center;cursor:pointer;transition:all .15s}
-.dossier-card:hover{border-color:#0F6E56;background:#f9fdfc;transform:translateY(-2px);box-shadow:0 3px 10px rgba(15,110,86,.1)}
+.dossier-card:hover{border-color:#0B4FBF;background:#f9fdfc;transform:translateY(-2px);box-shadow:0 3px 10px rgba(11,79,191,.1)}
 .dossier-card .d-icon{font-size:28px;margin-bottom:5px}
 .dossier-card .d-nom{font-size:12px;font-weight:600;color:#333}
 .dossier-card .d-nb{font-size:10px;color:#888;margin-top:3px}
 /* RESSOURCE CARD */
 .ressource-card{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid #e5e5e0;border-radius:8px;margin-bottom:7px;background:#fff;transition:all .12s}
-.ressource-card:hover{border-color:#0F6E56;background:#f9fdfc}
+.ressource-card:hover{border-color:#0B4FBF;background:#f9fdfc}
 .ressource-icon{font-size:28px;flex-shrink:0;width:40px;text-align:center}
 .ressource-info{flex:1}
 .ressource-info .r-titre{font-size:13px;font-weight:600;color:#1a1a1a}
@@ -239,11 +246,17 @@ body.dark .stat{background:#0f3460}
 </head>
 <body>
 <div class="toast" id="toast"></div>
+<div id="install-bar" style="display:none;position:fixed;left:10px;right:10px;bottom:10px;z-index:9000;background:#0B4FBF;color:#fff;border-radius:12px;padding:10px 12px;font-size:12px;box-shadow:0 6px 24px rgba(0,0,0,.25);align-items:center;gap:10px">
+  <img src="icon-192.png" alt="" style="width:36px;height:36px;border-radius:9px">
+  <div style="flex:1" id="install-txt">Installe KOTO sur ton téléphone</div>
+  <button id="install-btn" class="btn btn-sm" style="display:none" onclick="installerKoto()">Installer</button>
+  <button class="btn btn-sm" style="background:transparent;color:#fff;border-color:rgba(255,255,255,.4)" onclick="fermerInstall()">✕</button>
+</div>
 
 <!-- PAGE ÉLÈVE DEVOIR -->
 <div class="eleve-page" id="eleve-page">
   <div style="max-width:620px;margin:0 auto">
-    <div style="background:#0F6E56;color:#fff;border-radius:9px;padding:12px 16px;margin-bottom:14px;text-align:center">
+    <div style="background:#0B4FBF;color:#fff;border-radius:9px;padding:12px 16px;margin-bottom:14px;text-align:center">
       <div style="font-size:17px;font-weight:700" id="ep-titre">Devoir</div>
       <div style="font-size:11px;opacity:.8;margin-top:3px" id="ep-meta"></div>
     </div>
@@ -367,7 +380,7 @@ body.dark .stat{background:#0f3460}
         </div>
       </div>
       <div id="zone-tirage" style="display:none" class="card">
-        <div class="card-title">Élèves interrogés — <span id="rp-lecon-titre" style="color:#0F6E56"></span></div>
+        <div class="card-title">Élèves interrogés — <span id="rp-lecon-titre" style="color:#0B4FBF"></span></div>
         <div id="liste-interroges"></div>
         <div style="margin-top:10px;display:flex;gap:7px">
           <button class="btn btn-primary" onclick="sauvegarderRappel()">💾 Enregistrer les résultats</button>
@@ -472,7 +485,7 @@ body.dark .stat{background:#0f3460}
 <!-- APP -->
 <div class="app-page" id="app-page">
   <header>
-    <h1>📚 Cahier du Professeur</h1>
+    <h1 style="display:flex;align-items:center;gap:9px"><img src="icon-192.png" alt="" style="width:30px;height:30px;border-radius:8px"> KOTO <span style="font-size:11px;font-weight:400;opacity:.8" class="h-sous">Cahier du Professeur</span></h1>
     <div class="hright">
       <span class="sync-dot" id="sync-dot"></span>
       <div class="user-badge" onclick="showTab('parametres')" style="cursor:pointer">
@@ -550,7 +563,7 @@ body.dark .stat{background:#0f3460}
     <!-- Import Excel -->
     <div class="card" style="margin-bottom:10px">
       <div class="card-title">📥 Import liste élèves (Excel)</div>
-      <div class="alert-info alert-box" style="margin-bottom:7px">Format du fichier : <code>N° | Prénom | Nom | Matricule (facultatif)</code> (1ère ligne = en-tête). Si le matricule est vide, il est créé automatiquement. <a onclick="telechargerModeleEleves()" style="color:#0F6E56;cursor:pointer;text-decoration:underline">⬇️ Télécharger le modèle</a></div>
+      <div class="alert-info alert-box" style="margin-bottom:7px">Format du fichier : <code>N° | Prénom | Nom | Matricule (facultatif)</code> (1ère ligne = en-tête). Si le matricule est vide, il est créé automatiquement. <a onclick="telechargerModeleEleves()" style="color:#0B4FBF;cursor:pointer;text-decoration:underline">⬇️ Télécharger le modèle</a></div>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="file" id="import-eleves-file" accept=".xlsx,.xls,.csv" onchange="importExcelEleves(this)" style="flex:1">
       </div>
@@ -612,7 +625,7 @@ body.dark .stat{background:#0f3460}
       <div id="re-breadcrumb" style="font-size:12px;color:#666;display:flex;align-items:center;gap:5px;flex-wrap:wrap"></div>
     </div>
     <div id="re-dossiers" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px"></div>
-    <div id="re-upload-status" style="font-size:12px;color:#0F6E56;margin-bottom:8px"></div>
+    <div id="re-upload-status" style="font-size:12px;color:#0B4FBF;margin-bottom:8px"></div>
     <div id="liste-ressources"><div class="loading"><div class="spinner"></div>Chargement...</div></div>
   </div>
 
@@ -682,7 +695,7 @@ body.dark .stat{background:#0f3460}
         <div class="form-group"><label>Public Key</label><input id="ejs-pubkey" placeholder="xxxxxxx"></div>
       </div>
       <button class="btn btn-primary" onclick="sauvegarderEmailJS()">💾 Sauvegarder EmailJS</button>
-      <div id="ejs-status" style="margin-top:6px;font-size:11px;color:#0F6E56"></div>
+      <div id="ejs-status" style="margin-top:6px;font-size:11px;color:#0B4FBF"></div>
     </div>
     <div class="card"><div class="card-title">🔔 Classes de demain</div><div id="demain-liste"><div class="empty">Aucune classe</div></div></div>
     <div class="card"><div class="card-title">🗓️ Mes classes par jour</div><div id="semaine-liste"></div></div>
@@ -723,7 +736,7 @@ body.dark .stat{background:#0f3460}
             <div class="card-title">👤 Mon compte</div>
             <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap">
               <div style="text-align:center">
-                <div id="profil-avatar" style="width:90px;height:90px;border-radius:50%;overflow:hidden;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid var(--primary);margin-bottom:8px">👤</div>
+                <div id="profil-avatar" style="width:90px;height:90px;border-radius:50%;overflow:hidden;background:#E6EEFB;display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid var(--primary);margin-bottom:8px">👤</div>
                 <input type="file" id="profil-photo-file" accept="image/*" capture="camera" onchange="previewProfilPhoto(this)" style="display:none">
                 <button class="btn btn-sm" onclick="document.getElementById('profil-photo-file').click()">📷 Changer</button>
               </div>
@@ -740,7 +753,7 @@ body.dark .stat{background:#0f3460}
                 <button class="btn btn-primary" onclick="sauvegarderProfil()">💾 Sauvegarder</button>
               </div>
             </div>
-            <div id="profil-status" style="font-size:12px;color:#0F6E56;margin-top:4px"></div>
+            <div id="profil-status" style="font-size:12px;color:#0B4FBF;margin-top:4px"></div>
           </div>
         </div>
 
@@ -753,7 +766,7 @@ body.dark .stat{background:#0f3460}
               <div id="couleurs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:10px;margin-bottom:14px"></div>
               <div style="display:flex;gap:8px;align-items:center">
                 <label style="font-weight:500">Ou choisir une couleur personnalisée :</label>
-                <input type="color" id="couleur-custom" value="#0F6E56" onchange="appliquerCouleur(this.value)" style="width:50px;height:36px;border-radius:6px;border:1px solid #ddd;cursor:pointer;padding:2px">
+                <input type="color" id="couleur-custom" value="#0B4FBF" onchange="appliquerCouleur(this.value)" style="width:50px;height:36px;border-radius:6px;border:1px solid #ddd;cursor:pointer;padding:2px">
               </div>
             </div>
             <div style="border-top:1px solid #e5e5e0;margin:14px 0;padding-top:14px">
@@ -772,7 +785,7 @@ body.dark .stat{background:#0f3460}
             <div style="margin-top:10px">
               <label style="font-size:13px;font-weight:600;margin-bottom:8px;display:block">Aperçu</label>
               <div id="theme-preview" style="border:1px solid #e5e5e0;border-radius:8px;overflow:hidden">
-                <div id="prev-header" style="background:var(--primary);color:#fff;padding:8px 12px;font-size:12px;font-weight:600">📚 Cahier du Professeur</div>
+                <div id="prev-header" style="background:var(--primary);color:#fff;padding:8px 12px;font-size:12px;font-weight:600">KOTO</div>
                 <div style="padding:10px;background:#f5f5f0">
                   <div style="background:#fff;border-radius:6px;padding:8px;margin-bottom:6px;border:1px solid #e5e5e0;font-size:11px">📁 Ressources — Biologie</div>
                   <div id="prev-btn" style="background:var(--primary);color:#fff;border-radius:6px;padding:5px 10px;font-size:11px;display:inline-block">+ Ajouter</div>
@@ -952,10 +965,10 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
       <button id="abo-fermer" class="modal-close" style="display:none" onclick="cacherAbo()">✕</button>
     </div>
     <p id="abo-texte" style="font-size:13px;margin:8px 0"></p>
-    <div style="background:#E1F5EE;border-radius:9px;padding:11px;font-size:13px;margin-bottom:10px">
+    <div style="background:#E6EEFB;border-radius:9px;padding:11px;font-size:13px;margin-bottom:10px">
       <strong>Tarif : 20 000 GNF par mois</strong><br>
       1. Envoie le montant par <strong>Orange Money</strong> au<br>
-      <span style="font-size:17px;font-weight:700;color:#0F6E56">+224 621 954 382</span><br>
+      <span style="font-size:17px;font-weight:700;color:#0B4FBF">+224 621 954 382</span><br>
       2. Remplis le formulaire ci-dessous avec la référence de la transaction.<br>
       3. Ton accès est activé après vérification.
     </div>
@@ -979,9 +992,9 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
 <div class="auth-page" id="auth-page">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="logo-icon">📚</div>
-      <h1>Cahier du Professeur</h1>
-      <p>Plateforme pédagogique numérique — Guinée</p>
+      <img src="icon-192.png" alt="KOTO" style="width:84px;height:84px;border-radius:20px;box-shadow:0 6px 18px rgba(11,79,191,.3)">
+      <h1 style="font-size:26px;letter-spacing:3px">KOTO</h1>
+      <p>Le cahier numérique du professeur — Guinée</p>
     </div>
     <div class="auth-tabs">
       <div class="auth-tab active" onclick="showAuthTab('login')">Connexion</div>
@@ -1066,7 +1079,7 @@ async function register(){
   err.textContent='Création en cours...';
   const{error}=await sb.auth.signUp({email,password:pwd,options:{data:{prenom,nom,full_name:prenom+' '+nom}}});
   if(error){err.textContent=error.message;return;}
-  err.style.color='#0F6E56';
+  err.style.color='#0B4FBF';
   err.textContent='✓ Compte créé ! Connecte-toi maintenant.';
   showAuthTab('login');
 }
@@ -1366,7 +1379,7 @@ function renderClassesEcole(ecoleId){
     const badgeCls=c.cycle==='Lycée'?'badge-lycee':c.cycle==='Supérieur'?'badge-sup':'badge-college';
     return `<div class="classe-card" onclick="goTo('eleves',null,${JSON.stringify(c).replace(/"/g,'&quot;')})">
       <button class="cl-del btn btn-danger btn-xs" onclick="delClasse('${c.id}',event)">✕</button>
-      <div class="cl-nom" style="color:${ec?ec.couleur:'#0F6E56'}">${c.nom}</div>
+      <div class="cl-nom" style="color:${ec?ec.couleur:'#0B4FBF'}">${c.nom}</div>
       <div class="cl-cycle"><span class="badge ${badgeCls}">${c.cycle}</span></div>
       <div class="cl-nb">👥 ${nb} élève${nb>1?'s':''}</div>
     </div>`;
@@ -1416,7 +1429,7 @@ function ouvrirFicheEleve(id){
   const moy=notes.length?(notes.reduce((s,n)=>s+n.note/n.bareme*20,0)/notes.length).toFixed(2):'—';
   let html=`
     <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap">
-      <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:30px;border:2px solid #0F6E56;flex-shrink:0">
+      <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#E6EEFB;display:flex;align-items:center;justify-content:center;font-size:30px;border:2px solid #0B4FBF;flex-shrink:0">
         ${e.photo?`<img src="${e.photo}" style="width:80px;height:80px;object-fit:cover">`:'👤'}
       </div>
       <div style="flex:1">
@@ -1424,9 +1437,9 @@ function ouvrirFicheEleve(id){
         <div style="margin-top:4px"><span class="matricule-badge">${e.matricule||'—'}</span></div>
         <div style="font-size:11px;color:#888;margin-top:3px">🔑 Mdp devoir : <code style="background:#f0f0eb;padding:1px 5px;border-radius:3px">${e.pwd||'—'}</code></div>
       </div>
-      <div style="text-align:center;background:#E1F5EE;border-radius:9px;padding:10px 14px">
-        <div style="font-size:24px;font-weight:700;color:#0F6E56">${moy}</div>
-        <div style="font-size:10px;color:#0F6E56">/20 Moyenne</div>
+      <div style="text-align:center;background:#E6EEFB;border-radius:9px;padding:10px 14px">
+        <div style="font-size:24px;font-weight:700;color:#0B4FBF">${moy}</div>
+        <div style="font-size:10px;color:#0B4FBF">/20 Moyenne</div>
       </div>
     </div>
     <div style="margin-bottom:12px;padding:8px;background:#f9f9f7;border-radius:7px">
@@ -1535,7 +1548,7 @@ function ouvrirFicheEleve(id){
   const moy=notes.length?(notes.reduce((s,n)=>s+n.note/n.bareme*20,0)/notes.length).toFixed(2):'—';
   let html=`
     <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap">
-      <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#E1F5EE;display:flex;align-items:center;justify-content:center;font-size:30px;border:2px solid #0F6E56;flex-shrink:0">
+      <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#E6EEFB;display:flex;align-items:center;justify-content:center;font-size:30px;border:2px solid #0B4FBF;flex-shrink:0">
         ${e.photo?`<img src="${e.photo}" style="width:80px;height:80px;object-fit:cover">`:'👤'}
       </div>
       <div style="flex:1">
@@ -1544,9 +1557,9 @@ function ouvrirFicheEleve(id){
         ${e.ddn?`<div style="font-size:11px;color:#888;margin-top:4px">📅 Né(e) le : ${e.ddn}</div>`:''}
         <div style="font-size:11px;color:#888;margin-top:3px">🔑 Mdp devoir : <code style="background:#f0f0eb;padding:1px 5px;border-radius:3px">${e.pwd||'—'}</code></div>
       </div>
-      <div style="text-align:center;background:#E1F5EE;border-radius:9px;padding:10px 14px">
-        <div style="font-size:24px;font-weight:700;color:#0F6E56">${moy}</div>
-        <div style="font-size:10px;color:#0F6E56">/20 Moyenne</div>
+      <div style="text-align:center;background:#E6EEFB;border-radius:9px;padding:10px 14px">
+        <div style="font-size:24px;font-weight:700;color:#0B4FBF">${moy}</div>
+        <div style="font-size:10px;color:#0B4FBF">/20 Moyenne</div>
       </div>
     </div>`;
   // Modifier photo
@@ -1869,7 +1882,7 @@ function renderEdtGlobal(){
       if(cell&&cell.first){
         const s=cell.slot;
         const ec=cache.ecoles.find(e=>e.id==s.ecole_id);
-        const col=ec?ec.couleur:'#0F6E56';
+        const col=ec?ec.couleur:'#0B4FBF';
         html+=`<td rowspan="${s.span||1}"><div class="edt-slot" style="background:${col}15;border-left:3px solid ${col};min-height:${(s.span||1)*42}px">
           <button class="edt-del" onclick="delSlot('${s.id}')">✕</button>
           ${ec?`<span style="font-size:8px;font-weight:700;color:${col}">${ec.abr}</span> `:''}
@@ -1952,7 +1965,7 @@ function renderSeances(){
     return `<div class="seance-card">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
         <div>
-          <strong style="color:#0F6E56">${s.date}</strong>
+          <strong style="color:#0B4FBF">${s.date}</strong>
           ${s.hdeb?`<span style="font-size:10px;color:#888;margin-left:6px">${s.hdeb}–${s.hfin}</span>`:''}
           <span class="badge-stat" style="margin-left:5px">${s.mat}</span>
           <div style="font-size:13px;font-weight:600;margin-top:3px">${s.lecon}</div>
@@ -2022,7 +2035,7 @@ function renderInterroges(){
     <div class="eleve-rappel ${ei.statut}">
       <div style="flex:1">
         <strong>${ei.nom}</strong>
-        ${ei.statut==='bon'?`<span style="color:#0F6E56;font-size:11px;margin-left:6px">✓ Bon récitant ${ei.bonus>0?'(+'+ei.bonus+' pts)':''}</span>`:''}
+        ${ei.statut==='bon'?`<span style="color:#0B4FBF;font-size:11px;margin-left:6px">✓ Bon récitant ${ei.bonus>0?'(+'+ei.bonus+' pts)':''}</span>`:''}
         ${ei.statut==='sanction'?`<span style="color:#c0392b;font-size:11px;margin-left:6px">✗ Pas répondu</span>`:''}
       </div>
       <div style="display:flex;gap:5px">
@@ -2210,7 +2223,7 @@ function renderBonus(){
           ${t.details.map(d=>`<span style="font-size:10px;background:#E1F5EE;color:#085041;padding:1px 6px;border-radius:20px">+${d.points} ${d.motif} · ${MOIS[d.moisIdx]||''} <span style="color:#aaa">${d.date}</span></span>`).join('')}
         </div>
       </div>
-      <div style="text-align:center;background:#0F6E56;color:#fff;border-radius:8px;padding:5px 10px;flex-shrink:0">
+      <div style="text-align:center;background:#0B4FBF;color:#fff;border-radius:8px;padding:5px 10px;flex-shrink:0">
         <div style="font-size:20px;font-weight:700">+${t.total}</div>
         <div style="font-size:9px;opacity:.8">pts</div>
       </div>
@@ -2229,7 +2242,7 @@ function renderQBuilder(){
   const el=document.getElementById('questions-builder');
   if(!dvQArr.length){el.innerHTML='';return;}
   el.innerHTML=dvQArr.map((q,i)=>`
-    <div style="background:#f9f9f7;border-radius:6px;padding:9px;margin-bottom:7px;border-left:3px solid ${q.type==='qcm'?'#1565C0':'#0F6E56'}">
+    <div style="background:#f9f9f7;border-radius:6px;padding:9px;margin-bottom:7px;border-left:3px solid ${q.type==='qcm'?'#1565C0':'#0B4FBF'}">
       <div style="display:flex;justify-content:space-between;margin-bottom:5px">
         <span style="font-size:10px;font-weight:600">${q.type==='qcm'?'🔵 QCM':'🟢 Ouverte'} Q${i+1}</span>
         <button class="btn btn-danger btn-xs" onclick="dvQArr.splice(${i},1);renderQBuilder()">✕</button>
@@ -2306,7 +2319,7 @@ function renderDevoirs(){
   el.innerHTML=arr.map(dv=>{
     const nbCopies=cache.copies.filter(c=>c.devoir_id===dv.id).length;
     const nbEl=cache.eleves.filter(e=>e.classe_id==dv.classe_id).length;
-    const ec=cache.ecoles.find(e=>e.id==dv.ecole_id);const col=ec?ec.couleur:'#0F6E56';
+    const ec=cache.ecoles.find(e=>e.id==dv.ecole_id);const col=ec?ec.couleur:'#0B4FBF';
     return `<div style="border:1px solid #e5e5e0;border-radius:9px;padding:11px 13px;margin-bottom:9px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div>
@@ -2315,7 +2328,7 @@ function renderDevoirs(){
           <span class="badge-stat" style="margin-left:3px;background:${dv.statut==='ouvert'?'#E1F5EE':'#f0f0eb'};color:${dv.statut==='ouvert'?'#085041':'#555'}">${dv.statut==='ouvert'?'✓ Ouvert':'Clôturé'}</span>
           <div style="font-size:13px;font-weight:600;margin-top:3px">${dv.titre}</div>
           <div style="font-size:10px;color:#888">${getClasseNomGlobal(dv.classe_id)} · ${(dv.questions||[]).length} question(s)${dv.deadline?' · Limite : '+dv.deadline:''}</div>
-          <div style="font-size:11px;color:#0F6E56;font-weight:600">📥 ${nbCopies}/${nbEl} copie(s)</div>
+          <div style="font-size:11px;color:#0B4FBF;font-weight:600">📥 ${nbCopies}/${nbEl} copie(s)</div>
           ${dv.drive_link?`<div style="margin-top:4px"><span class="file-chip">📎 <a href="${dv.drive_link}" target="_blank">Fichier sujet</a></span></div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
@@ -2366,7 +2379,7 @@ async function eleveLogin(){
   let html=`<div class="card" style="margin-bottom:9px">${dv.consignes?`<div style="font-size:12px;color:#555;background:#f9f9f7;border-radius:6px;padding:7px;margin-bottom:7px">${dv.consignes}</div>`:''}${dv.drive_link?`<a href="${dv.drive_link}" target="_blank" class="btn btn-info btn-sm">📎 Ouvrir le sujet</a>`:''}</div>`;
   (dv.questions||[]).forEach((q,i)=>{
     html+=`<div class="card" style="margin-bottom:7px">
-      <div style="font-size:11px;font-weight:600;color:${q.type==='qcm'?'#1565C0':'#0F6E56'};margin-bottom:5px">Q${i+1} — ${q.type==='qcm'?'QCM':'Question ouverte'}</div>
+      <div style="font-size:11px;font-weight:600;color:${q.type==='qcm'?'#1565C0':'#0B4FBF'};margin-bottom:5px">Q${i+1} — ${q.type==='qcm'?'QCM':'Question ouverte'}</div>
       <div style="font-size:13px;font-weight:500;margin-bottom:8px">${q.enonce}</div>
       ${q.type==='qcm'?(q.options||[]).map((opt,oi)=>`<label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:12px"><input type="radio" name="q_${i}" value="${oi}" style="width:auto"> ${opt}</label>`).join(''):`<textarea id="rep_${i}" placeholder="Ta réponse..." style="min-height:70px"></textarea>`}
     </div>`;
@@ -2439,7 +2452,7 @@ function renderRessources(){
   while(k&&g++<30){chain.unshift(k);k=resParent(k);}
   document.getElementById('re-breadcrumb').innerHTML=chain.map((c,i)=>{
     const n=resEsc(resNomDossier(c));
-    return i===chain.length-1?`<strong>${i===0?'🏠 ':''}${n}</strong>`:`<a onclick="resOuvrir('${c}')" style="color:#0F6E56;cursor:pointer">${i===0?'🏠 ':''}${n}</a> <span>›</span>`;
+    return i===chain.length-1?`<strong>${i===0?'🏠 ':''}${n}</strong>`:`<a onclick="resOuvrir('${c}')" style="color:#0B4FBF;cursor:pointer">${i===0?'🏠 ':''}${n}</a> <span>›</span>`;
   }).join(' ');
   const q=(document.getElementById('re-search').value||'').toLowerCase().trim();
   // sous-dossiers
@@ -2589,7 +2602,7 @@ function getCoursDemain(){
   return cache.slots.filter(s=>s.jour===JOURS_FR[d.getDay()]);
 }
 function edtLigne(sl){
-  const ec=cache.ecoles.find(e=>e.id==sl.ecole_id);const col=ec?ec.couleur:'#0F6E56';
+  const ec=cache.ecoles.find(e=>e.id==sl.ecole_id);const col=ec?ec.couleur:'#0B4FBF';
   return `<div style="border:1px solid #e5e5e0;border-left:3px solid ${col};border-radius:7px;padding:7px 11px;margin-bottom:5px;font-size:12px">
     <strong>${sl.hdeb}–${sl.hfin}</strong> · <strong style="color:${col}">${ec?ec.abr:''}</strong> · <strong>${sl.classe||getClasseNomGlobal(sl.classe_id)}</strong>${sl.mat?' — '+sl.mat:''}${sl.salle?' · Salle '+sl.salle:''}${sl.lecon?'<div style="color:#888;font-size:11px">📖 '+sl.lecon+'</div>':''}
   </div>`;
@@ -2622,11 +2635,11 @@ function renderDashboard(){
   document.getElementById('dash-ecoles').innerHTML=cache.ecoles.length?cache.ecoles.map(ec=>{
     const cls=cache.classes.filter(c=>c.ecole_id===ec.id);
     const nbE=cache.eleves.filter(e=>cls.some(c=>c.id===e.classe_id)).length;
-    return `<div style="margin-bottom:12px"><div style="font-weight:700;font-size:13px;color:${ec.couleur||'#0F6E56'}">🏫 ${ec.nom} <span style="font-weight:400;color:#888;font-size:11px">· ${cls.length} classe(s) · ${nbE} élève(s)</span></div>`+
+    return `<div style="margin-bottom:12px"><div style="font-weight:700;font-size:13px;color:${ec.couleur||'#0B4FBF'}">🏫 ${ec.nom} <span style="font-weight:400;color:#888;font-size:11px">· ${cls.length} classe(s) · ${nbE} élève(s)</span></div>`+
       (cls.length?cls.map(c=>{
         const n=cache.eleves.filter(e=>e.classe_id===c.id).length;
         const m=moy(cache.notes.filter(x=>x.classe_id===c.id));
-        return `<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:5px"><span style="width:90px;flex-shrink:0">${c.nom}</span><div style="flex:1;background:#f0f0ec;border-radius:20px;height:8px"><div style="width:${n/max*100}%;background:${ec.couleur||'#0F6E56'};height:8px;border-radius:20px"></div></div><span style="width:70px;text-align:right">${n} élève(s)</span><span style="width:60px;text-align:right;color:#888">${m===null?'—':m.toFixed(1)+'/20'}</span></div>`;
+        return `<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin-top:5px"><span style="width:90px;flex-shrink:0">${c.nom}</span><div style="flex:1;background:#f0f0ec;border-radius:20px;height:8px"><div style="width:${n/max*100}%;background:${ec.couleur||'#0B4FBF'};height:8px;border-radius:20px"></div></div><span style="width:70px;text-align:right">${n} élève(s)</span><span style="width:60px;text-align:right;color:#888">${m===null?'—':m.toFixed(1)+'/20'}</span></div>`;
       }).join(''):'<div style="font-size:11px;color:#aaa;margin-top:4px">Aucune classe</div>')+'</div>';
   }).join(''):'<div class="empty">Aucune école — crée-en une dans « Écoles »</div>';
 }
@@ -2681,7 +2694,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 // ===== PARAMÈTRES =====
 const COULEURS_THEMES=[
-  {nom:'Vert',val:'#0F6E56'},{nom:'Bleu',val:'#1565C0'},
+  {nom:'KOTO',val:'#0B4FBF'},{nom:'Vert',val:'#0F6E56'},{nom:'Bleu',val:'#1565C0'},
   {nom:'Violet',val:'#6A1B9A'},{nom:'Rouge',val:'#B71C1C'},
   {nom:'Orange',val:'#E65100'},{nom:'Cyan',val:'#00838F'},
   {nom:'Rose',val:'#AD1457'},{nom:'Marron',val:'#4E342E'},
@@ -2703,11 +2716,11 @@ function showParamTab(id){
 }
 
 // ===== THÈME =====
-let currentTheme={couleur:'#0F6E56',mode:'clair'};
+let currentTheme={couleur:'#0B4FBF',mode:'clair'};
 
 function loadTheme(){
   const saved=localStorage.getItem('theme_'+currentUser?.id);
-  if(saved){currentTheme=JSON.parse(saved);}
+  if(saved){currentTheme=JSON.parse(saved);if((currentTheme.couleur||'').toLowerCase()==='#0f6e56')currentTheme.couleur='#0B4FBF';}
   appliquerCouleur(currentTheme.couleur,false);
   if(currentTheme.mode==='sombre')setMode('sombre',false);
 }
@@ -2802,7 +2815,7 @@ async function sauvegarderProfil(){
   if(profilPhotoData){
     document.getElementById('user-avatar').innerHTML=`<img src="${profilPhotoData}" style="width:22px;height:22px;object-fit:cover;border-radius:50%">`;
   }
-  status.style.color='#0F6E56';
+  status.style.color='#0B4FBF';
   status.textContent='✓ Profil mis à jour avec succès !';
   toast('Profil mis à jour ✓');
   setTimeout(()=>status.textContent='',3000);
@@ -2815,7 +2828,7 @@ async function changerMotDePasse(){
   if(pwd!==pwd2){status.style.color='#c0392b';status.textContent='Mots de passe différents';return;}
   const{error}=await sb.auth.updateUser({password:pwd});
   if(error){status.style.color='#c0392b';status.textContent='Erreur : '+error.message;return;}
-  status.style.color='#0F6E56';status.textContent='✓ Mot de passe changé !';
+  status.style.color='#0B4FBF';status.textContent='✓ Mot de passe changé !';
   document.getElementById('new-pwd').value='';document.getElementById('new-pwd2').value='';
   toast('Mot de passe changé ✓');
 }
@@ -3109,7 +3122,7 @@ async function renderAdminAbo(){
     <button class="btn btn-sm btn-danger" onclick="adminRejeter('${x.id}')">Refuser</button></div>`).join(''):'<div class="empty">Aucun paiement en attente</div>';
   const r2=await sb.rpc('admin_abonnes');
   a.innerHTML=(r2.data&&r2.data.length)?r2.data.map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #eee;padding:6px 0;font-size:12px;flex-wrap:wrap">
-    <div><strong>${resEsc(x.email)}</strong> ${x.actif?'<span style="color:#0F6E56">● actif</span>':'<span style="color:#c0392b">● bloqué</span>'}<br><span style="color:#888">Essai : ${aboDate(x.essai_fin)} · Payé jusqu'au : ${x.paye_jusqua?aboDate(x.paye_jusqua):'—'}</span></div>
+    <div><strong>${resEsc(x.email)}</strong> ${x.actif?'<span style="color:#0B4FBF">● actif</span>':'<span style="color:#c0392b">● bloqué</span>'}<br><span style="color:#888">Essai : ${aboDate(x.essai_fin)} · Payé jusqu'au : ${x.paye_jusqua?aboDate(x.paye_jusqua):'—'}</span></div>
     <button class="btn btn-sm" onclick="adminAjouterMois('${x.user_id}')">+ mois</button></div>`).join(''):'<div class="empty">Aucun professeur</div>';
 }
 async function adminValider(id){const{error}=await sb.rpc('valider_paiement',{p_id:id});if(error)return toast('Erreur : '+error.message);toast('Paiement validé ✓');renderAdminAbo();}
@@ -3150,6 +3163,35 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)synchronis
 window.addEventListener('focus',synchroniser);
 window.addEventListener('online',synchroniser);
 setInterval(synchroniser,45000);
+
+// ===== INSTALLATION (PWA) =====
+let promptInstall=null;
+function dejaInstalle(){return window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;}
+function installVu(){try{return localStorage.getItem('koto_install_vu')==='1';}catch(e){return false;}}
+function fermerInstall(){document.getElementById('install-bar').style.display='none';try{localStorage.setItem('koto_install_vu','1');}catch(e){}}
+async function installerKoto(){
+  if(!promptInstall)return;
+  promptInstall.prompt();
+  try{await promptInstall.userChoice;}catch(e){}
+  promptInstall=null;fermerInstall();
+}
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();promptInstall=e;
+  if(dejaInstalle()||installVu())return;
+  document.getElementById('install-btn').style.display='';
+  document.getElementById('install-bar').style.display='flex';
+});
+window.addEventListener('appinstalled',()=>{document.getElementById('install-bar').style.display='none';});
+(function(){
+  const ios=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(ios&&!dejaInstalle()&&!installVu()){
+    document.getElementById('install-txt').innerHTML='Pour installer KOTO : appuie sur <strong>Partager</strong> <span style="font-size:15px">⎋</span> puis <strong>« Sur l\'écran d\'accueil »</strong>';
+    setTimeout(()=>{document.getElementById('install-bar').style.display='flex';},2500);
+  }
+})();
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(e=>console.warn('SW',e));});
+}
 
 // ===== INIT =====
 sb.auth.getSession().then(async({data:{session}})=>{
