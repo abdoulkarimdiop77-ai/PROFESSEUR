@@ -1077,6 +1077,57 @@ async function sbGet(table,filters={}){
   return r.data||[];
 }
 let ecrituresEnCours=0;
+// Réduit une photo (téléphone = plusieurs Mo) en petite image ~15 Ko
+function compresserImage(dataUrl,max=320,q=0.72){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const k=Math.min(1,max/Math.max(img.width,img.height));
+      const c=document.createElement('canvas');c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      try{res(c.toDataURL('image/jpeg',q));}catch(e){res(dataUrl);}
+    };
+    img.onerror=()=>res(dataUrl);
+    img.src=dataUrl;
+  });
+}
+function lireFichierImage(file,max,q){
+  return new Promise(res=>{const r=new FileReader();r.onload=e=>compresserImage(e.target.result,max,q).then(res);r.readAsDataURL(file);});
+}
+// Élèves SANS la photo (rapide), les photos sont chargées ensuite par petits lots
+async function sbGetEleves(){
+  const cols='id,user_id,nom,prenom,nom_famille,classe_id,ecole_id,matricule,pwd,observations,created_at';
+  const r=await sb.from('eleves').select(cols).eq('user_id',currentUser.id).order('created_at',{ascending:false});
+  if(!r.error)return r.data||[];
+  return sbGet('eleves');
+}
+let photosConnues={};
+let chargementPhotos=false;
+async function chargerPhotos(){
+  if(chargementPhotos)return;
+  const ids=cache.eleves.filter(e=>!(e.id in photosConnues)).map(e=>e.id);
+  if(!ids.length)return;
+  chargementPhotos=true;
+  try{
+    for(let i=0;i<ids.length;i+=5){
+      const lot=ids.slice(i,i+5);
+      const{data,error}=await sb.from('eleves').select('id,photo').in('id',lot);
+      if(error){console.error('photos',error);continue;}
+      for(const row of data||[]){
+        let p=row.photo||'';
+        if(p.length>120000){// ancienne grosse photo : on la réduit une fois pour toutes
+          p=await compresserImage(p);
+          await sb.from('eleves').update({photo:p}).eq('id',row.id).eq('user_id',currentUser.id);
+        }
+        photosConnues[row.id]=p;
+        const el=cache.eleves.find(x=>x.id===row.id);if(el)el.photo=p;
+      }
+    }
+    const vue=document.querySelector('.section.show');
+    if(vue&&vue.id==='vue-eleves'&&currentClasse)renderElevesClasse(currentClasse.id);
+  }catch(e){console.error(e);}
+  finally{chargementPhotos=false;}
+}
 async function sbInsert(table,obj){
   ecrituresEnCours++;try{return await _sbInsert(table,obj);}finally{ecrituresEnCours--;}
 }
@@ -1122,18 +1173,19 @@ async function loadAllData(){
   setSyncStatus('syncing');
   try{
     const[ec,cl,el,no,dv,cp,re,sl,ex]=await Promise.all([
-      sbGet('ecoles'),sbGet('classes'),sbGet('eleves'),
+      sbGet('ecoles'),sbGet('classes'),sbGetEleves(),
       sbGet('notes'),sbGet('devoirs'),sbGet('copies'),sbGet('ressources'),sbGet('slots'),
       sbGet('extras')
     ]);
     if(!ec.length&&cache.ecoles.length&&!estPremierChargement){throw new Error('Réponse vide inattendue — données locales conservées');}
     cache={ecoles:ec,classes:cl,eleves:el,notes:no,devoirs:dv,copies:cp,ressources:re,slots:sl,extras:{}};
+    cache.eleves.forEach(e=>{if(e.id in photosConnues)e.photo=photosConnues[e.id];});
     ex.sort((a,b)=>String(a.updated_at||a.created_at||'')<String(b.updated_at||b.created_at||'')?-1:1);
     ex.forEach(e=>{
       if(!cache.extras[e.classe_id])cache.extras[e.classe_id]={};
       cache.extras[e.classe_id][e.type]=e.data||[];
     });
-    setSyncStatus('');estPremierChargement=false;
+    setSyncStatus('');estPremierChargement=false;setTimeout(chargerPhotos,50);
   }catch(e){setSyncStatus('error');console.error(e);if(!estPremierChargement||true)toast('Synchronisation impossible : '+(e.message||e),6000);return false;}
   refreshAllSelects();return true;
 }
@@ -1284,13 +1336,12 @@ function renderClassesEcole(ecoleId){
 let addPhotoData='';
 function previewAddPhoto(input){
   const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    addPhotoData=e.target.result;
+  lireFichierImage(file,320,0.72).then(d=>{
+    addPhotoData=d;
     const prev=document.getElementById('add-photo-preview');
     prev.innerHTML=`<img src="${addPhotoData}">`;
     document.getElementById('add-photo-data').value=addPhotoData;
-  };reader.readAsDataURL(file);
+  });
 }
 async function saveNewEleve(){
   const prenom=document.getElementById('add-prenom').value.trim();
@@ -1484,15 +1535,13 @@ function ouvrirFicheEleve(id){
 }
 async function updatePhotoEleve(id,input){
   const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    const photo=e.target.result;
-    await sbUpdate('eleves',id,{photo});
+  lireFichierImage(file,320,0.72).then(async photo=>{
+    await sbUpdate('eleves',id,{photo});photosConnues[id]=photo;
     const el=cache.eleves.find(x=>x.id===id);if(el)el.photo=photo;
     renderElevesClasse(currentClasse.id);
     ouvrirFicheEleve(id);
     toast('Photo mise à jour ✓');
-  };reader.readAsDataURL(file);
+  });
 }
 async function addObsEleve(id){
   const e=cache.eleves.find(x=>x.id===id);if(!e)return;
@@ -2691,11 +2740,10 @@ function chargerProfil(){
 }
 function previewProfilPhoto(input){
   const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
-    profilPhotoData=e.target.result;
+  lireFichierImage(file,200,0.7).then(d=>{
+    profilPhotoData=d;
     document.getElementById('profil-avatar').innerHTML=`<img src="${profilPhotoData}" style="width:90px;height:90px;object-fit:cover">`;
-  };reader.readAsDataURL(file);
+  });
 }
 async function sauvegarderProfil(){
   const prenom=document.getElementById('profil-prenom').value.trim();
