@@ -747,6 +747,7 @@ body.dark .stat{background:#0f3460}
                   <div class="form-group"><label>Prénom</label><input id="profil-prenom" placeholder="Karim"></div>
                   <div class="form-group"><label>Nom</label><input id="profil-nom" placeholder="DIOP"></div>
                 </div>
+                <div class="form-group"><label>ID de connexion</label><input id="profil-idconn" readonly style="background:#f5f5f0" placeholder="—"></div>
                 <div class="form-group"><label>Email</label><input id="profil-email" type="email" placeholder="email@exemple.com"></div>
                 <div class="two-eq">
                   <div class="form-group"><label>École principale</label><input id="profil-ecole" placeholder="École Internationale Maloum"></div>
@@ -991,6 +992,30 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
   </div>
 </div>
 
+<!-- ID DE CONNEXION APRÈS INSCRIPTION -->
+<div id="id-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(7,46,133,.92);padding:16px;overflow:auto">
+  <div style="max-width:420px;margin:40px auto;background:#fff;border-radius:14px;padding:22px;text-align:center">
+    <div style="font-size:40px">🎉</div>
+    <h2 style="font-size:18px;margin:6px 0">Compte créé !</h2>
+    <p style="font-size:13px;margin:6px 0">Voici ton <strong>ID de connexion</strong>. Note-le ou fais une capture d'écran :</p>
+    <div id="id-valeur" style="font-size:24px;font-weight:700;letter-spacing:1px;color:#0B4FBF;background:#E6EEFB;border-radius:10px;padding:12px;margin:10px 0;word-break:break-all"></div>
+    <p style="font-size:12px;color:#666;margin-bottom:12px">Pour te connecter, utilise cet ID (ou ton email) avec ton mot de passe. Tu le retrouves aussi dans Paramètres, Mon compte.</p>
+    <button class="btn btn-primary" style="width:100%" onclick="continuerApresInscription()">Commencer avec KOTO →</button>
+  </div>
+</div>
+
+<!-- NOUVEAU MOT DE PASSE (après lien de récupération) -->
+<div id="recup-overlay" style="display:none;position:fixed;inset:0;z-index:10001;background:rgba(7,46,133,.92);padding:16px;overflow:auto">
+  <div style="max-width:400px;margin:40px auto;background:#fff;border-radius:14px;padding:22px">
+    <h2 style="font-size:18px;margin-bottom:6px">🔑 Nouveau mot de passe</h2>
+    <p style="font-size:13px;color:#555;margin-bottom:12px">Choisis un nouveau mot de passe pour ton compte KOTO.</p>
+    <div class="form-group"><label>Nouveau mot de passe</label><input id="recup-pwd" type="password" placeholder="Minimum 6 caractères"></div>
+    <div class="form-group"><label>Confirmer</label><input id="recup-pwd2" type="password" placeholder="Répéter le mot de passe"></div>
+    <div id="recup-err" style="font-size:12px;color:#c0392b;margin-bottom:8px"></div>
+    <button class="btn btn-primary" style="width:100%" onclick="validerNouveauMdp()">💾 Enregistrer</button>
+  </div>
+</div>
+
 <!-- AUTH PAGE -->
 <div class="auth-page" id="auth-page">
   <div class="auth-card">
@@ -1006,17 +1031,28 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
     <div class="auth-form active" id="auth-login">
       <div class="auth-err" id="login-err"></div>
       <a id="resend-link" onclick="renvoyerConfirmation()" style="display:none;text-align:center;font-size:12px;color:#0B4FBF;cursor:pointer;margin-bottom:8px;text-decoration:underline">Renvoyer l'email de confirmation</a>
-      <input class="auth-input" id="login-email" type="email" placeholder="Votre adresse email">
+      <input class="auth-input" id="login-email" type="text" autocapitalize="none" autocomplete="username" placeholder="Votre ID de connexion (ou email)">
       <input class="auth-input" id="login-pwd" type="password" placeholder="Mot de passe">
       <button class="auth-btn" onclick="login()">Se connecter</button>
+      <a onclick="motDePasseOublie()" style="display:block;text-align:center;font-size:12px;color:#0B4FBF;cursor:pointer;margin-top:10px;text-decoration:underline">Mot de passe oublié ?</a>
     </div>
     <div class="auth-form" id="auth-register">
       <div class="auth-err" id="register-err"></div>
-      <input class="auth-input" id="reg-prenom" placeholder="Prénom">
+      <input class="auth-input" id="reg-prenom" placeholder="Prénom(s)">
       <input class="auth-input" id="reg-nom" placeholder="Nom de famille">
+      <input class="auth-input" id="reg-profession" placeholder="Profession (ex : Professeur de collège)">
+      <input class="auth-input" id="reg-matiere" placeholder="Matière enseignée">
       <input class="auth-input" id="reg-email" type="email" placeholder="Adresse email">
-      <input class="auth-input" id="reg-pwd" type="password" placeholder="Mot de passe (min. 6 caractères)">
+      <input class="auth-input" id="reg-contact" type="tel" placeholder="Contact : téléphone / WhatsApp (+224 6..)">
+      <input class="auth-input" id="reg-adresse" placeholder="Adresse (quartier, ville)">
+      <input class="auth-input" id="reg-pwd" type="password" placeholder="Créer un mot de passe (min. 6 caractères)">
       <input class="auth-input" id="reg-pwd2" type="password" placeholder="Confirmer le mot de passe">
+      <input id="reg-site" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px;opacity:0" aria-hidden="true">
+      <div id="robot-box" style="display:flex;align-items:center;gap:8px;font-size:13px;margin:2px 0 8px;padding:8px 10px;border:1px solid #ddd;border-radius:8px">
+        <span>🤖 Je ne suis pas un robot : <strong id="reg-q"></strong> =</span>
+        <input id="reg-rep" inputmode="numeric" style="width:60px;padding:5px 7px;border:1px solid #ddd;border-radius:6px" autocomplete="off">
+      </div>
+      <div id="turnstile-box" style="margin-bottom:8px"></div>
       <div style="background:#E6EEFB;border-radius:9px;padding:10px 12px;font-size:12px;color:#222;margin:4px 0 10px;line-height:1.5">
         <strong>🎁 2 mois gratuits</strong>, puis <strong>20 000 GNF par mois</strong> par Orange Money au <strong>+224 621 954 382</strong>.<br>
         <strong>Après ton paiement :</strong> partage le <strong>reçu généré par Maxit</strong>, ou fais une <strong>capture d'écran du message de paiement Orange Money</strong>, et envoie-la sur <strong>WhatsApp au numéro bénéficiaire</strong> (+224 621 954 382). Puis patiente un peu avant la confirmation de ton accès.
@@ -1075,26 +1111,95 @@ function showAuthTab(tab){
   document.getElementById('auth-login').classList.toggle('active',tab==='login');
   document.getElementById('auth-register').classList.toggle('active',tab==='register');
 }
+// Vérification anti-robot : Cloudflare Turnstile si une clé est renseignée, sinon petite question de calcul
+const TURNSTILE_SITEKEY='';
+let robotA=0,robotB=0,turnstileId=null;
+function nouvelleQuestionRobot(){
+  robotA=2+Math.floor(Math.random()*8);robotB=2+Math.floor(Math.random()*8);
+  const q=document.getElementById('reg-q');if(q)q.textContent=robotA+' + '+robotB;
+  const r=document.getElementById('reg-rep');if(r)r.value='';
+}
+function initRobot(){
+  if(TURNSTILE_SITEKEY){
+    document.getElementById('robot-box').style.display='none';
+    const sc=document.createElement('script');sc.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';sc.async=true;
+    sc.onload=()=>{turnstileId=turnstile.render('#turnstile-box',{sitekey:TURNSTILE_SITEKEY});};
+    document.head.appendChild(sc);
+  }else nouvelleQuestionRobot();
+}
+let pendingUser=null;
 async function register(){
-  const prenom=document.getElementById('reg-prenom').value.trim();
-  const nom=document.getElementById('reg-nom').value.trim();
-  const email=document.getElementById('reg-email').value.trim();
+  const v=id=>(document.getElementById(id).value||'').trim();
+  const prenom=v('reg-prenom'),nom=v('reg-nom'),profession=v('reg-profession'),matiere=v('reg-matiere');
+  const email=v('reg-email'),contact=v('reg-contact'),adresse=v('reg-adresse');
   const pwd=document.getElementById('reg-pwd').value;
   const pwd2=document.getElementById('reg-pwd2').value;
   const err=document.getElementById('register-err');
-  if(!prenom||!nom||!email||!pwd){err.textContent='Tous les champs sont requis.';return;}
+  err.style.color='#c0392b';
+  if(v('reg-site'))return;// piège à robots
+  if(!prenom||!nom||!profession||!matiere||!email||!contact||!adresse||!pwd){err.textContent='Tous les champs sont requis.';return;}
+  if(!/^\S+@\S+\.\S+$/.test(email)){err.textContent='Adresse email invalide.';return;}
+  if(contact.replace(/\D/g,'').length<8){err.textContent='Contact invalide (numéro de téléphone).';return;}
   if(pwd!==pwd2){err.textContent='Mots de passe différents.';return;}
   if(pwd.length<6){err.textContent='Mot de passe trop court (min. 6).';return;}
+  let captchaToken;
+  if(TURNSTILE_SITEKEY){
+    captchaToken=window.turnstile?turnstile.getResponse(turnstileId):'';
+    if(!captchaToken){err.textContent='Vérification anti-robot requise.';return;}
+  }else if(parseInt(v('reg-rep'),10)!==robotA+robotB){err.textContent='Mauvaise réponse à la vérification anti-robot.';nouvelleQuestionRobot();return;}
   err.textContent='Création en cours...';
-  const{data,error}=await sb.auth.signUp({email,password:pwd,options:{emailRedirectTo:location.origin+location.pathname,data:{prenom,nom,full_name:prenom+' '+nom}}});
-  if(error){err.textContent=error.message;return;}
+  const opts={emailRedirectTo:location.origin+location.pathname,data:{prenom,nom,full_name:prenom+' '+nom,profession,matiere,matiere_principale:matiere,contact,adresse}};
+  if(captchaToken)opts.captchaToken=captchaToken;
+  const{data,error}=await sb.auth.signUp({email,password:pwd,options:opts});
+  if(error){err.textContent=error.message;if(TURNSTILE_SITEKEY&&window.turnstile)turnstile.reset(turnstileId);else nouvelleQuestionRobot();return;}
   if(data&&data.user&&data.user.identities&&data.user.identities.length===0){err.textContent='Cette adresse email est déjà utilisée. Connecte-toi.';return;}
+  if(data&&data.session){
+    // pas de confirmation email : on affiche l'ID de connexion puis on entre dans l'application
+    pendingUser=data.user;
+    let idc='';
+    try{const r=await sb.rpc('mon_profil');if(r.data&&r.data.id_connexion)idc=r.data.id_connexion;}catch(e){}
+    if(idc){document.getElementById('id-valeur').textContent=idc;document.getElementById('id-overlay').style.display='block';}
+    else continuerApresInscription();
+    return;
+  }
   err.style.color='#0B4FBF';
-  if(data&&data.session){err.textContent='✓ Compte créé ! Connecte-toi maintenant.';}
-  else{err.textContent='✓ Compte créé ! Un email de confirmation t\'a été envoyé : clique sur le lien dans le message (regarde aussi dans les spams), puis connecte-toi.';}
   showAuthTab('login');
   document.getElementById('login-email').value=email;
-  const el=document.getElementById('login-err');el.style.color='#0B4FBF';el.textContent=err.textContent;
+  const el=document.getElementById('login-err');el.style.color='#0B4FBF';
+  el.textContent='✓ Compte créé ! Un email de confirmation t\'a été envoyé : clique sur le lien (regarde aussi les spams), puis connecte-toi.';
+}
+async function continuerApresInscription(){
+  document.getElementById('id-overlay').style.display='none';
+  if(pendingUser){const u=pendingUser;pendingUser=null;await initApp(u);}
+}
+async function motDePasseOublie(){
+  const el=document.getElementById('login-err');
+  let saisie=(document.getElementById('login-email').value||'').trim();
+  if(!saisie)saisie=(prompt('Entre ton adresse email (ou ton ID de connexion) :')||'').trim();
+  if(!saisie)return;
+  document.getElementById('login-email').value=saisie;
+  el.style.color='#0B4FBF';el.textContent='Envoi du lien...';
+  let email=saisie;
+  if(!email.includes('@')){
+    const r=await sb.rpc('email_pour_id',{p_id:email});
+    if(r.error||!r.data){el.style.color='#c0392b';el.textContent='ID introuvable. Essaie avec ton adresse email.';return;}
+    email=r.data;
+  }
+  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  if(error){el.style.color='#c0392b';el.textContent='Envoi impossible : '+error.message;return;}
+  const [a,b]=email.split('@');
+  el.textContent='✓ Si ce compte existe, un email de récupération a été envoyé à '+a.slice(0,2)+'***@'+b+'. Clique sur le lien, puis choisis un nouveau mot de passe (regarde aussi dans les spams).';
+}
+async function validerNouveauMdp(){
+  const p1=document.getElementById('recup-pwd').value,p2=document.getElementById('recup-pwd2').value;
+  const err=document.getElementById('recup-err');
+  if(p1.length<6){err.textContent='Mot de passe trop court (min. 6).';return;}
+  if(p1!==p2){err.textContent='Mots de passe différents.';return;}
+  const{error}=await sb.auth.updateUser({password:p1});
+  if(error){err.textContent='Erreur : '+error.message;return;}
+  document.getElementById('recup-overlay').style.display='none';
+  history.replaceState(null,'',location.pathname);
+  toast('✓ Mot de passe changé. Bienvenue !',4000);
 }
 async function renvoyerConfirmation(){
   const email=document.getElementById('login-email').value.trim();
@@ -1105,16 +1210,21 @@ async function renvoyerConfirmation(){
   el.textContent=error?('Envoi impossible : '+error.message):'✓ Email de confirmation renvoyé. Regarde aussi dans les spams.';
 }
 async function login(){
-  const email=document.getElementById('login-email').value.trim();
+  let email=document.getElementById('login-email').value.trim();
   const pwd=document.getElementById('login-pwd').value;
   const err=document.getElementById('login-err');
-  if(!email||!pwd){err.textContent='Email et mot de passe requis.';return;}
-  err.textContent='Connexion...';
+  if(!email||!pwd){err.textContent='ID (ou email) et mot de passe requis.';return;}
+  err.style.color='#0B4FBF';err.textContent='Connexion...';
+  if(!email.includes('@')){
+    const r=await sb.rpc('email_pour_id',{p_id:email});
+    if(r.error||!r.data){err.style.color='#c0392b';err.textContent='ID ou mot de passe incorrect.';return;}
+    email=r.data;
+  }
   const{data,error}=await sb.auth.signInWithPassword({email,password:pwd});
   err.style.color='#c0392b';
   if(error){
     const nonConf=/confirm/i.test(error.message||'');
-    err.textContent=nonConf?'Confirme d\'abord ton adresse email : clique sur le lien reçu par email (vérifie aussi les spams).':'Email ou mot de passe incorrect.';
+    err.textContent=nonConf?'Confirme d\'abord ton adresse email : clique sur le lien reçu par email (vérifie aussi les spams).':'ID (ou email) ou mot de passe incorrect.';
     document.getElementById('resend-link').style.display=nonConf?'block':'none';
     return;
   }
@@ -2841,6 +2951,7 @@ function chargerProfil(){
   document.getElementById('profil-email').value=currentUser.email||'';
   document.getElementById('profil-ecole').value=m.ecole_principale||'';
   document.getElementById('profil-matiere').value=m.matiere_principale||'';
+  sb.rpc('mon_profil').then(r=>{if(r.data&&r.data.id_connexion)document.getElementById('profil-idconn').value=r.data.id_connexion;}).catch(()=>{});
   if(m.photo){
     document.getElementById('profil-avatar').innerHTML=`<img src="${m.photo}" style="width:90px;height:90px;object-fit:cover">`;
   }
@@ -3175,7 +3286,7 @@ async function renderAdminAbo(){
     <button class="btn btn-sm btn-danger" onclick="adminRejeter('${x.id}')">Refuser</button></div>`).join(''):'<div class="empty">Aucun paiement en attente</div>';
   const r2=await sb.rpc('admin_abonnes');
   a.innerHTML=(r2.data&&r2.data.length)?r2.data.map(x=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #eee;padding:6px 0;font-size:12px;flex-wrap:wrap">
-    <div><strong>${resEsc(x.email)}</strong> ${x.actif?'<span style="color:#0B4FBF">● actif</span>':'<span style="color:#c0392b">● bloqué</span>'}<br><span style="color:#888">Essai : ${aboDate(x.essai_fin)} · Payé jusqu'au : ${x.paye_jusqua?aboDate(x.paye_jusqua):'—'}</span></div>
+    <div><strong>${resEsc(x.nom||x.email)}</strong> ${x.actif?'<span style="color:#0B4FBF">● actif</span>':'<span style="color:#c0392b">● bloqué</span>'}<br><span style="color:#555">${resEsc(x.email)}${x.contact?' · '+resEsc(x.contact):''}${x.id_connexion?' · ID : '+resEsc(x.id_connexion):''}${x.profession?' · '+resEsc(x.profession):''}</span><br><span style="color:#888">Essai : ${aboDate(x.essai_fin)} · Payé jusqu'au : ${x.paye_jusqua?aboDate(x.paye_jusqua):'—'}</span></div>
     <button class="btn btn-sm" onclick="adminAjouterMois('${x.user_id}')">+ mois</button></div>`).join(''):'<div class="empty">Aucun professeur</div>';
 }
 async function adminValider(id){const{error}=await sb.rpc('valider_paiement',{p_id:id});if(error)return toast('Erreur : '+error.message);toast('Paiement validé ✓');renderAdminAbo();}
@@ -3216,6 +3327,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)synchronis
 window.addEventListener('focus',synchroniser);
 window.addEventListener('online',synchroniser);
 setInterval(synchroniser,45000);
+
+initRobot();
 
 // ===== INSTALLATION (PWA) =====
 let promptInstall=null;
@@ -3260,6 +3373,7 @@ sb.auth.getSession().then(async({data:{session}})=>{
   }
 });
 sb.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){document.getElementById('recup-overlay').style.display='block';}
   if(event==='SIGNED_OUT'){
     document.getElementById('app-page').classList.remove('show');
     document.getElementById('auth-page').style.display='flex';
