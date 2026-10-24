@@ -267,6 +267,14 @@ body.admin-mode #breadcrumb{display:none}
 </style>
 </head>
 <body>
+<div id="splash" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#0B4FBF,#0A3A9E);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;transition:opacity .6s">
+  <img src="icon-512.png" alt="KOTO" style="width:150px;height:150px;border-radius:32px;box-shadow:0 8px 30px rgba(0,0,0,.35);animation:splashpop .9s ease-out">
+  <div style="font-size:34px;font-weight:800;letter-spacing:6px;margin-top:20px">KOTO</div>
+  <div style="font-size:13px;opacity:.85;margin-top:4px">Cahier du Professeur</div>
+  <div style="width:150px;height:4px;background:rgba(255,255,255,.25);border-radius:4px;margin-top:28px;overflow:hidden"><div style="height:100%;background:#fff;border-radius:4px;animation:splashbar 6s linear forwards"></div></div>
+</div>
+<style>@keyframes splashpop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}@keyframes splashbar{from{width:0}to{width:100%}}</style>
+<script>(function(){var e=document.getElementById('splash');if(/[?&]devoir=/.test(location.search)){e.remove();return;}setTimeout(function(){e.style.opacity='0';setTimeout(function(){e.remove();},650);},6000);})();</script>
 <div class="toast" id="toast"></div>
 <div id="install-bar" style="display:none;position:fixed;left:10px;right:10px;bottom:10px;z-index:9000;background:#0B4FBF;color:#fff;border-radius:12px;padding:10px 12px;font-size:12px;box-shadow:0 6px 24px rgba(0,0,0,.25);align-items:center;gap:10px">
   <img src="icon-192.png" alt="" style="width:36px;height:36px;border-radius:9px">
@@ -367,6 +375,7 @@ body.admin-mode #breadcrumb{display:none}
     </div>
     <div class="sub-tabs">
       <button class="sub-tab active" onclick="showCahierTab('cj-seances')">📅 Séances</button>
+      <button class="sub-tab" onclick="showCahierTab('cj-presences')">✅ Présences</button>
       <button class="sub-tab" onclick="showCahierTab('cj-rappel')">🎯 Rappel</button>
       <button class="sub-tab" onclick="showCahierTab('cj-sanctions')">⚠️ Sanctions</button>
       <button class="sub-tab" onclick="showCahierTab('cj-bonus')">⭐ Bonus</button>
@@ -395,6 +404,26 @@ body.admin-mode #breadcrumb{display:none}
         </div>
       </div>
       <div id="liste-seances"><div class="empty">Aucune séance enregistrée</div></div>
+    </div>
+    <!-- PRÉSENCES -->
+    <div id="cj-presences" class="sub-content">
+      <div id="pr-alertes"></div>
+      <div class="card">
+        <div class="card-title">✅ Contrôle de présence</div>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-bottom:8px">
+          <button class="btn btn-sm" onclick="prJour(-1)">◀</button>
+          <input type="date" id="pr-date" onchange="prCharger()" style="width:auto">
+          <button class="btn btn-sm" onclick="prJour(1)">▶</button>
+          <button class="btn btn-sm" onclick="document.getElementById('pr-date').value=aujIso();prCharger()">Aujourd'hui</button>
+        </div>
+        <div id="pr-info" style="margin-bottom:8px"></div>
+        <div id="pr-liste"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px">
+          <span id="pr-resume" style="font-size:12px;color:#555"></span>
+          <span style="display:flex;gap:6px"><button class="btn btn-sm" onclick="prToutPresent()">Tous présents</button><button class="btn btn-primary" onclick="prEnregistrer()">💾 Enregistrer</button></span>
+        </div>
+      </div>
+      <div class="card"><div class="card-title">📖 Historique des présences (clique sur une date pour la revoir)</div><div id="pr-historique"></div></div>
     </div>
     <!-- RAPPEL -->
     <div id="cj-rappel" class="sub-content">
@@ -476,6 +505,20 @@ body.admin-mode #breadcrumb{display:none}
         </div>
         <div class="form-group"><label>Précisions</label><input id="sanc-detail" placeholder="Détails..."></div>
         <button class="btn btn-warn btn-sm" onclick="ajouterSanction()">+ Ajouter</button>
+      </div>
+      <div class="card">
+        <div class="card-title">🔎 Filtrer la liste des sanctions <span id="sf-nb" style="font-size:11px;color:#888;font-weight:400"></span></div>
+        <div class="two-eq">
+          <div class="form-group"><label>Motif</label>
+            <select id="sf-motif" onchange="renderSanctions()"><option value="">Tous les motifs</option>
+            <option>Rappel de cours non effectué</option><option>Cahier non à jour</option><option>Perturbation de cours</option><option>Distraction des amis</option><option>Devoir non rendu</option><option>Téléphone en classe</option><option>Absence non justifiée</option><option>Retard répété</option><option>Manque de respect</option><option>Autre</option></select></div>
+          <div class="form-group"><label>Élève</label><select id="sf-eleve" onchange="renderSanctions()"><option value="">Tous les élèves</option></select></div>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>Du</label><input type="date" id="sf-du" onchange="renderSanctions()"></div>
+          <div class="form-group"><label>Au</label><input type="date" id="sf-au" onchange="renderSanctions()"></div>
+        </div>
+        <button class="btn btn-sm" onclick="resetFiltreSanctions()">Réinitialiser les filtres</button>
       </div>
       <div id="liste-sanctions"><div class="empty">Aucune sanction</div></div>
     </div>
@@ -566,6 +609,7 @@ body.admin-mode #breadcrumb{display:none}
   <!-- TABLEAU DE BORD -->
   <div id="dashboard" class="section">
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:10px" id="dash-stats"></div>
+    <div class="card" id="dash-absences-card" style="display:none;border-left:4px solid #c0392b"><div class="card-title" style="color:#791F1F">⚠️ Absences répétées (3 ou plus en 2 mois)</div><div id="dash-absences"></div></div>
     <div class="two-col">
       <div class="card"><div class="card-title" id="dash-edt-titre">🗓️ Emploi du temps du jour</div><div id="dash-edt"></div></div>
       <div class="card"><div class="card-title">🏫 Écoles, classes et élèves</div><div id="dash-ecoles"></div></div>
@@ -602,6 +646,8 @@ body.admin-mode #breadcrumb{display:none}
       <strong style="font-size:15px" id="eleves-titre">Élèves</strong>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="openModal('modal-add-eleve')">+ Ajouter un élève</button>
+        <button class="btn btn-info btn-sm" onclick="ouvrirPresences()">✅ Contrôle de présence</button>
+        <button class="btn btn-warn btn-sm" onclick="ouvrirSanctions()">⚠️ Sanctions</button>
         <button class="btn btn-info btn-sm" onclick="ouvrirCahier()">📔 Cahier journal</button>
         <button class="btn btn-sm" onclick="ouvrirNotesClasse()">📊 Fiche de notes</button>
         <button class="btn btn-sm" onclick="regenererCodesClasse()" title="Nouveaux mots de passe de devoir pour tous les élèves">🔑 Régénérer les codes</button>
@@ -673,6 +719,7 @@ body.admin-mode #breadcrumb{display:none}
       <div id="re-breadcrumb" style="font-size:12px;color:#666;display:flex;align-items:center;gap:5px;flex-wrap:wrap"></div>
     </div>
     <div id="re-dossiers" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin-bottom:12px"></div>
+    <div style="margin-bottom:8px"><button class="btn btn-sm" onclick="resToutGarder()">📥 Tout garder hors ligne</button> <span style="font-size:11px;color:#888">pour lire tes fichiers sans internet</span></div>
     <div id="re-upload-status" style="font-size:12px;color:#0B4FBF;margin-bottom:8px"></div>
     <div id="liste-ressources"><div class="loading"><div class="spinner"></div>Chargement...</div></div>
   </div>
@@ -1340,6 +1387,13 @@ async function login(){
   await initApp(data.user);
 }
 async function logout(){
+  if(outbox.length){
+    await flushOutbox();
+    if(outbox.length&&!confirm('Des modifications faites hors ligne ne sont pas encore envoyées au cloud ('+outbox.length+'). Si tu te déconnectes maintenant, elles seront perdues. Continuer ?'))return;
+  }
+  try{if(currentUser){await IDB.set('snap_'+currentUser.id,null);await IDB.set('outbox_'+currentUser.id,[]);}localStorage.removeItem('koto_user');}catch(e){}
+  await resViderLocal();resHLCharge=false;
+  outbox=[];outboxCharge=false;cacheChargee=false;
   await sb.auth.signOut();
   currentUser=null;currentEcole=null;currentClasse=null;
   document.getElementById('app-page').classList.remove('show');
@@ -1347,6 +1401,7 @@ async function logout(){
 }
 async function initApp(user){
   currentUser=user;
+  try{localStorage.setItem('koto_user',JSON.stringify({id:user.id,email:user.email,user_metadata:user.user_metadata||{}}));}catch(e){}
   navPile=[];chatConvs=[];chatUnread={};chatQNew=0;chatQConnus=null;msgConnus=null;sugConnues=null;msgNonLus=0;sugNonLues=0;sigAnn='';
   document.getElementById('auth-page').style.display='none';
   document.getElementById('app-page').classList.add('show');
@@ -1366,6 +1421,182 @@ async function initApp(user){
   updateNotifStatus();
   refreshDevoir();
   verifierMessages(true);
+}
+
+// ===== MODE HORS LIGNE =====
+const IDB={_db:null,
+  open(){return this._db||(this._db=new Promise((res,rej)=>{const r=indexedDB.open('koto',1);r.onupgradeneeded=()=>r.result.createObjectStore('kv');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);}));},
+  async get(k){const db=await this.open();return new Promise((res,rej)=>{const q=db.transaction('kv').objectStore('kv').get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error);});},
+  async set(k,v){const db=await this.open();return new Promise((res,rej)=>{const t=db.transaction('kv','readwrite');t.objectStore('kv').put(v,k);t.oncomplete=()=>res();t.onerror=()=>rej(t.error);});}
+};
+let outbox=[],outboxCharge=false,cacheChargee=false,flushing=false,snapT=null;
+function estReseau(err){const m=String((err&&err.message)||err||'').toLowerCase();return !navigator.onLine||/failed to fetch|network|load failed|fetch failed|internet/.test(m);}
+async function chargerOutbox(){
+  if(outboxCharge||!currentUser)return;
+  try{const o=await IDB.get('outbox_'+currentUser.id);if(Array.isArray(o))outbox=o.concat(outbox);}catch(e){console.warn(e);}
+  outboxCharge=true;majPastille();
+}
+async function sauverOutbox(){if(!currentUser)return;try{await IDB.set('outbox_'+currentUser.id,outbox);}catch(e){console.warn(e);}}
+function planifierSnapshot(){clearTimeout(snapT);snapT=setTimeout(sauverSnapshot,1200);}
+async function sauverSnapshot(){
+  if(!currentUser||(aboInfo&&aboInfo.admin)||!cacheChargee)return;
+  try{await IDB.set('snap_'+currentUser.id,{cache,photos:photosConnues,t:Date.now()});}catch(e){console.warn(e);}
+}
+async function chargerSnapshot(){
+  if(cacheChargee)return true;
+  try{
+    const s=await IDB.get('snap_'+currentUser.id);
+    if(!s||!s.cache)return false;
+    cache=s.cache;photosConnues=s.photos||{};cacheChargee=true;
+    return true;
+  }catch(e){console.warn(e);return false;}
+}
+function finEnq(){sauverOutbox();majPastille();planifierSnapshot();}
+function enqueue(op){
+  if(op.op==='update'){
+    const q=outbox.find(o=>o.op==='insert'&&o.table===op.table&&o.row.id===op.id);
+    if(q){Object.assign(q.row,op.obj);return finEnq();}
+  }
+  if(op.op==='delete'){
+    if(outbox.some(o=>o.op==='insert'&&o.table===op.table&&o.row.id===op.id)){
+      outbox=outbox.filter(o=>!(o.table===op.table&&((o.row&&o.row.id===op.id)||o.id===op.id)));
+      return finEnq();
+    }
+  }
+  if(op.op==='extra')outbox=outbox.filter(o=>!(o.op==='extra'&&o.type===op.type&&o.classeId===op.classeId));
+  outbox.push(op);finEnq();
+}
+async function pret(){if(!outbox.length)return true;await flushOutbox();return !outbox.length;}
+async function extraEnLigne(type,classeId,data){
+  const now=new Date().toISOString();
+  const ex=await sb.from('extras').select('id').eq('user_id',currentUser.id).eq('type',type).eq('classe_id',classeId).limit(1);
+  if(ex.error&&estReseau(ex.error))throw ex.error;
+  const id=ex.data&&ex.data[0]?ex.data[0].id:null;
+  let r;
+  if(id){r=await sb.from('extras').update({data,updated_at:now}).eq('id',id);if(r.error&&!estReseau(r.error))r=await sb.from('extras').update({data}).eq('id',id);}
+  else r=await sb.from('extras').insert({user_id:currentUser.id,type,classe_id:classeId,data});
+  if(r.error)throw r.error;
+}
+async function flushOutbox(){
+  if(flushing||!currentUser||!navigator.onLine)return;
+  await chargerOutbox();
+  if(!outbox.length)return;
+  flushing=true;let n=0,echecs=0;
+  try{
+    while(outbox.length){
+      const o=outbox[0];let error=null;
+      try{
+        if(o.op==='insert'){const r=await sb.from(o.table).insert(o.row);error=r.error;if(error&&error.code==='23505')error=null;}
+        else if(o.op==='update'){const r=await sb.from(o.table).update(o.obj).eq('id',o.id).eq('user_id',currentUser.id);error=r.error;}
+        else if(o.op==='delete'){const r=await sb.from(o.table).delete().eq('id',o.id).eq('user_id',currentUser.id);error=r.error;}
+        else if(o.op==='extra'){await extraEnLigne(o.type,o.classeId,o.data);}
+      }catch(e){error=e;}
+      if(error&&estReseau(error))break;           // toujours hors ligne : on réessaiera
+      if(error){echecs++;console.error('Envoi refusé',o,error);toast('Une modification n\'a pas pu être envoyée : '+(error.message||error),6000);}
+      else n++;
+      outbox.shift();await sauverOutbox();
+    }
+  }finally{flushing=false;majPastille();}
+  if(n&&!outbox.length)toast('✓ '+n+' modification(s) hors ligne envoyée(s) au cloud',4000);
+}
+function majPastille(){
+  let p=document.getElementById('offline-pill');
+  if(!p){p=document.createElement('div');p.id='offline-pill';p.style.cssText='position:fixed;left:10px;bottom:10px;z-index:3000;background:#333;color:#fff;font-size:12px;padding:6px 12px;border-radius:20px;box-shadow:0 2px 8px rgba(0,0,0,.3);display:none;cursor:pointer';p.onclick=()=>{if(navigator.onLine)flushOutbox();else toast('Pas de connexion : tes modifications sont gardées sur cet appareil',4000);};document.body.appendChild(p);}
+  const off=!navigator.onLine,n=outbox.length;
+  if(!off&&!n){p.style.display='none';return;}
+  p.style.display='block';
+  p.style.background=off?'#555':'#E08A00';
+  p.textContent=(off?'📴 Hors ligne':'⏳ Envoi en cours')+(n?' · '+n+' modification(s) en attente':'');
+}
+window.addEventListener('offline',majPastille);
+window.addEventListener('online',()=>{majPastille();flushOutbox();});
+window.addEventListener('pagehide',()=>{sauverOutbox();sauverSnapshot();});
+function offlineInsert(table,obj){
+  const row={...obj,id:(crypto.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&3|8)).toString(16);})),user_id:currentUser.id,created_at:new Date().toISOString()};
+  enqueue({op:'insert',table,row});
+  return row;
+}
+
+// ===== RESSOURCES HORS LIGNE =====
+let resHL=new Set(),resHLCharge=false;
+async function resChargerHL(){
+  if(resHLCharge||!currentUser)return;
+  try{const a=await IDB.get('filesidx_'+currentUser.id);resHL=new Set(a||[]);}catch(e){}
+  resHLCharge=true;
+}
+async function resSauverHL(){try{await IDB.set('filesidx_'+currentUser.id,[...resHL]);}catch(e){}}
+const MIMES={pdf:'application/pdf',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',gif:'image/gif',webp:'image/webp',txt:'text/plain',csv:'text/csv',doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',xls:'application/vnd.ms-excel',xlsx:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',ppt:'application/vnd.ms-powerpoint',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation'};
+function resMime(f){return f.mime||MIMES[((f.nom||'').split('.').pop()||'').toLowerCase()]||'application/octet-stream';}
+async function resStocker(path,buf,mime){
+  await IDB.set('file_'+path,{buf,mime});
+  resHL.add(path);await resSauverHL();
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}
+}
+async function resTelecharger(f){
+  const{data,error}=await sb.storage.from(RES_BUCKET).createSignedUrl(f.path,3600);
+  if(error||!data)throw error||new Error('lien indisponible');
+  const r=await fetch(data.signedUrl);
+  if(!r.ok)throw new Error('erreur '+r.status);
+  await resStocker(f.path,await r.arrayBuffer(),resMime(f));
+}
+async function resBlobLocal(f){
+  const o=await IDB.get('file_'+f.path);
+  return o&&o.buf?new Blob([o.buf],{type:o.mime||resMime(f)}):null;
+}
+function resAfficherBlob(f,b,w){
+  const url=URL.createObjectURL(b);
+  const lisible=/^(application\/pdf|image\/|text\/)/.test(b.type);
+  if(lisible){if(w)w.location.href=url;else window.location.href=url;}
+  else{
+    if(w)w.close();
+    const a=document.createElement('a');a.href=url;a.download=f.nom||'fichier';document.body.appendChild(a);a.click();a.remove();
+  }
+  setTimeout(()=>URL.revokeObjectURL(url),300000);
+}
+async function resGarder(id){
+  const f=resFichiers().find(x=>x.id===id);if(!f||!f.path)return;
+  if(!navigator.onLine)return toast('Connecte-toi à internet pour télécharger ce fichier');
+  toast('⏳ Téléchargement…');
+  try{await resTelecharger(f);toast('✓ « '+f.nom+' » est disponible hors ligne',3500);renderRessources();}
+  catch(e){toast('Téléchargement impossible : '+(e.message||e),5000);}
+}
+async function resToutGarder(){
+  await resChargerHL();
+  if(!navigator.onLine)return toast('Il faut internet pour télécharger les fichiers');
+  const l=resFichiers().filter(f=>f.path&&!resHL.has(f.path));
+  if(!l.length)return toast('✓ Tous tes fichiers sont déjà disponibles hors ligne',3500);
+  const mo=l.reduce((a,f)=>a+(f.taille||0),0)/1048576;
+  if(!confirm('Télécharger '+l.length+' fichier(s) (environ '+mo.toFixed(1)+' Mo) sur cet appareil pour les lire sans internet ?\n\nCela consomme des données mobiles si tu n\'es pas en Wi-Fi.'))return;
+  const st=document.getElementById('re-upload-status');let ok=0,ko=0;
+  for(let i=0;i<l.length;i++){
+    st.textContent='⏳ Téléchargement '+(i+1)+'/'+l.length+' : '+l[i].nom;
+    try{await resTelecharger(l[i]);ok++;}catch(e){ko++;if(!navigator.onLine)break;}
+  }
+  st.textContent='';renderRessources();
+  toast('✓ '+ok+' fichier(s) téléchargé(s) pour le hors ligne'+(ko?' · '+ko+' échec(s)':''),5000);
+}
+async function resOuvrirFichier(id){
+  const f=resFichiers().find(x=>x.id===id);if(!f)return;
+  const w=window.open('','_blank');
+  await resChargerHL();
+  if(resHL.has(f.path)){
+    let b=null;try{b=await resBlobLocal(f);}catch(e){}
+    if(b)return resAfficherBlob(f,b,w);
+  }
+  if(!navigator.onLine){
+    if(w)w.close();
+    return toast('Ce fichier n\'est pas encore sur ton appareil. Ouvre-le une fois avec internet, ou touche « 📥 Garder hors ligne ».',6000);
+  }
+  const{data,error}=await sb.storage.from(RES_BUCKET).createSignedUrl(f.path,3600);
+  if(error||!data){if(w)w.close();return toast('Impossible d\'ouvrir : '+(error?error.message:''));}
+  if(w)w.location.href=data.signedUrl;else window.location.href=data.signedUrl;
+  if(!f.taille||f.taille<=15*1048576)resTelecharger(f).then(()=>renderRessources()).catch(()=>{});
+}
+async function resOublierLocal(path){
+  try{resHL.delete(path);await IDB.set('file_'+path,null);await resSauverHL();}catch(e){}
+}
+async function resViderLocal(){
+  try{await resChargerHL();for(const p of resHL)await IDB.set('file_'+p,null);resHL=new Set();await resSauverHL();}catch(e){}
 }
 
 // ===== SUPABASE CRUD =====
@@ -1410,7 +1641,7 @@ async function sbGetEleves(){
 let photosConnues={};
 let chargementPhotos=false;
 async function chargerPhotos(){
-  if(chargementPhotos)return;
+  if(chargementPhotos||!navigator.onLine)return;
   const ids=cache.eleves.filter(e=>!(e.id in photosConnues)).map(e=>e.id);
   if(!ids.length)return;
   chargementPhotos=true;
@@ -1439,37 +1670,51 @@ async function sbInsert(table,obj){
 }
 async function _sbInsert(table,obj){
   setSyncStatus('syncing');
-  const{data,error}=await sb.from(table).insert({...obj,user_id:currentUser.id}).select().single();
-  setSyncStatus(error?'error':'');
-  if(error){toast('Erreur : '+error.message);return null;}
-  return data;
+  if(await pret()&&navigator.onLine){
+    const{data,error}=await sb.from(table).insert({...obj,user_id:currentUser.id}).select().single();
+    if(!error){setSyncStatus('');return data;}
+    if(!estReseau(error)){setSyncStatus('error');toast('Erreur : '+error.message);return null;}
+  }
+  setSyncStatus('');
+  return offlineInsert(table,obj);
 }
 async function sbDelete(table,id){
   ecrituresEnCours++;
-  setSyncStatus('syncing');
-  const{error}=await sb.from(table).delete().eq('id',id).eq('user_id',currentUser.id);
-  ecrituresEnCours--;
-  setSyncStatus(error?'error':'');
-  if(error)toast('Erreur de suppression : '+error.message);
+  try{
+    setSyncStatus('syncing');
+    if(await pret()&&navigator.onLine){
+      const{error}=await sb.from(table).delete().eq('id',id).eq('user_id',currentUser.id);
+      if(!error){setSyncStatus('');return;}
+      if(!estReseau(error)){setSyncStatus('error');toast('Erreur de suppression : '+error.message);return;}
+    }
+    setSyncStatus('');
+    enqueue({op:'delete',table,id});
+  }finally{ecrituresEnCours--;}
 }
 async function sbUpdate(table,id,obj){
   setSyncStatus('syncing');
-  const{data,error}=await sb.from(table).update(obj).eq('id',id).eq('user_id',currentUser.id).select().single();
-  setSyncStatus(error?'error':'');
-  return data;
+  if(await pret()&&navigator.onLine){
+    const{data,error}=await sb.from(table).update(obj).eq('id',id).eq('user_id',currentUser.id).select().single();
+    if(!error){setSyncStatus('');return data;}
+    if(!estReseau(error)){setSyncStatus('error');return data;}
+  }
+  setSyncStatus('');
+  enqueue({op:'update',table,id,obj});
+  const ancien=(cache[table]||[]).find(x=>x.id===id)||{id};
+  return {...ancien,...obj};
 }
 async function saveExtra(type,classeId,data){
   ecrituresEnCours++;
   try{
-    const now=new Date().toISOString();
-    const ex=await sb.from('extras').select('id').eq('user_id',currentUser.id).eq('type',type).eq('classe_id',classeId).limit(1);
-    const id=ex.data&&ex.data[0]?ex.data[0].id:null;
-    let r;
-    if(id){r=await sb.from('extras').update({data,updated_at:now}).eq('id',id);if(r.error)r=await sb.from('extras').update({data}).eq('id',id);}
-    else r=await sb.from('extras').insert({user_id:currentUser.id,type,classe_id:classeId,data});
-    if(r.error){toast('Erreur de sauvegarde : '+r.error.message);throw r.error;}
+    let fait=false;
+    if(await pret()&&navigator.onLine){
+      try{await extraEnLigne(type,classeId,data);fait=true;}
+      catch(e){if(!estReseau(e)){toast('Erreur de sauvegarde : '+(e.message||e));throw e;}}
+    }
+    if(!fait)enqueue({op:'extra',type,classeId,data});
     if(!cache.extras[classeId])cache.extras[classeId]={};
     cache.extras[classeId][type]=data;
+    planifierSnapshot();
   }finally{ecrituresEnCours--;}
 }
 function getExtra(type,classeId){return(cache.extras[classeId]||{})[type]||[];}
@@ -1478,6 +1723,15 @@ let estPremierChargement=true;
 async function loadAllData(){
   setSyncStatus('syncing');
   try{
+    await chargerOutbox();
+    if(outbox.length){
+      await flushOutbox();
+      if(outbox.length){// toujours des modifications non envoyées : on garde les données locales
+        const ok=await chargerSnapshot()||cacheChargee||cache.ecoles.length>0;
+        setSyncStatus('');
+        if(ok){cacheChargee=true;refreshAllSelects();return true;}
+      }
+    }
     const[ec,cl,el,no,dv,cp,re,sl,ex]=await Promise.all([
       sbGet('ecoles'),sbGet('classes'),sbGetEleves(),
       sbGet('notes'),sbGet('devoirs'),sbGet('copies'),sbGet('ressources'),sbGet('slots'),
@@ -1491,8 +1745,10 @@ async function loadAllData(){
       if(!cache.extras[e.classe_id])cache.extras[e.classe_id]={};
       cache.extras[e.classe_id][e.type]=e.data||[];
     });
-    setSyncStatus('');estPremierChargement=false;setTimeout(chargerPhotos,50);
-  }catch(e){setSyncStatus('error');console.error(e);if(!estPremierChargement||true)toast('Synchronisation impossible : '+(e.message||e),6000);return false;}
+    setSyncStatus('');estPremierChargement=false;cacheChargee=true;planifierSnapshot();setTimeout(chargerPhotos,50);
+  }catch(e){
+    if(estReseau(e)&&await chargerSnapshot()){setSyncStatus('');refreshAllSelects();toast('📴 Mode hors ligne : tes données enregistrées sur cet appareil sont affichées',4500);return true;}
+    setSyncStatus('error');console.error(e);if(!estPremierChargement||true)toast('Synchronisation impossible : '+(e.message||e),6000);return false;}
   refreshAllSelects();return true;
 }
 
@@ -1734,12 +1990,13 @@ function renderElevesClasse(classeId){
   const el=document.getElementById('liste-eleves-classe');
   const arr=cache.eleves.filter(e=>e.classe_id===classeId);
   if(!arr.length){el.innerHTML='<div class="empty">Aucun élève — clique sur "+ Ajouter un élève" ou importe depuis Excel</div>';return;}
+  const absAl=new Map(absencesAlertes(classeId).map(a=>[a.eleve.id,a.n]));
   el.innerHTML=arr.map((e,i)=>`
     <div class="eleve-row" onclick="ouvrirFicheEleve('${e.id}')">
       <div class="eleve-avatar">${e.photo?`<img src="${e.photo}">`:'👤'}</div>
       <div style="flex:1">
         <div style="font-weight:600;font-size:13px">${e.nom}</div>
-        <div style="font-size:10px;color:#888;margin-top:2px"><span class="matricule-badge">${e.matricule||'—'}</span></div>
+        <div style="font-size:10px;color:#888;margin-top:2px"><span class="matricule-badge">${e.matricule||'—'}</span>${absAl.has(e.id)?` <span class="sanction-chip">⚠️ ${absAl.get(e.id)} absences / 2 mois</span>`:''}</div>
       </div>
       <div style="font-size:11px;color:#aaa">#${i+1}</div>
       <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delEleve('${e.id}')">✕</button>
@@ -2192,14 +2449,16 @@ function ouvrirCahier(){
   const opts='<option value="">--</option>'+eleves.map(e=>`<option value="${e.id}">${e.nom}</option>`).join('');
   document.getElementById('sanc-eleve').innerHTML=opts;
   document.getElementById('bon-eleve').innerHTML=opts;
+  document.getElementById('sf-eleve').innerHTML='<option value="">Tous les élèves</option>'+eleves.map(e=>`<option value="${e.id}">${resEsc(e.nom)}</option>`).join('');
+  resetFiltreSanctionsSilencieux();
   document.getElementById('sj-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('sanc-date').value=new Date().toISOString().split('T')[0];
   showCahierTab('cj-seances');
-  renderSeances();renderSanctions();renderBonus();renderHistoriqueRappels();
+  renderSeances();renderSanctions();renderBonus();renderHistoriqueRappels();prInit();
   openModal('modal-cahier');
 }
 function showCahierTab(id){
-  ['cj-seances','cj-rappel','cj-sanctions','cj-bonus'].forEach((t,i)=>{
+  ['cj-seances','cj-presences','cj-rappel','cj-sanctions','cj-bonus'].forEach((t,i)=>{
     document.getElementById(t).classList.toggle('active',t===id);
     document.querySelectorAll('#modal-cahier .sub-tab')[i].classList.toggle('active',t===id);
   });
@@ -2418,29 +2677,6 @@ async function delSanction(idx){
   await saveExtra('sanctions',currentCahierClasseId,sanctions);
   renderSanctions();
   if(document.getElementById('vue-notes').classList.contains('show'))renderNotesClasse();
-}
-function renderSanctions(){
-  const el=document.getElementById('liste-sanctions');
-  const sanctions=getExtra('sanctions',currentCahierClasseId);
-  if(!sanctions.length){el.innerHTML='<div class="empty">Aucune sanction</div>';return;}
-  const byEleve={};
-  sanctions.forEach((s,i)=>{if(!byEleve[s.nom])byEleve[s.nom]=[];byEleve[s.nom].push({...s,idx:i});});
-  el.innerHTML=Object.entries(byEleve).map(([nom,ss])=>`
-    <div style="border:1px solid #f5b8b8;border-left:3px solid #c0392b;border-radius:7px;padding:9px 12px;margin-bottom:7px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-        <strong>${nom}</strong>
-        <span style="font-size:11px;background:#FCEBEB;color:#791F1F;padding:2px 8px;border-radius:20px">${ss.length} sanction(s)</span>
-      </div>
-      ${ss.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;background:#f9f9f7;border-radius:5px;padding:5px 8px;margin-bottom:3px;font-size:11px">
-        <div>
-          <span class="sanction-chip">${s.motif}</span>
-          ${s.points>0?`<span style="color:#c0392b;font-size:10px"> (−${s.points} pt oral ${MOIS[s.moisIdx]||''})</span>`:''}
-          ${s.detail?`<span style="color:#666;font-size:10px"> — ${s.detail}</span>`:''}
-          <span style="color:#aaa;font-size:10px;margin-left:4px">${s.date}</span>
-        </div>
-        <button class="btn btn-danger btn-xs" onclick="delSanction(${s.idx})">✕</button>
-      </div>`).join('')}
-    </div>`).join('');
 }
 function imprimerSanctions(){
   const classeId=currentCahierClasseId;
@@ -2725,6 +2961,7 @@ function resCompte(k){
   return fic+' fichier(s)'+(sous?' · '+sous+' dossier(s)':'');
 }
 function renderRessources(){
+  if(!resHLCharge&&currentUser)resChargerHL().then(()=>renderRessources());
   const elD=document.getElementById('re-dossiers'),elL=document.getElementById('liste-ressources');
   if(!elD||!elL)return;
   if(resCourant!=='root'&&!resCourant.includes(':')&&!resDossiers().some(d=>d.id===resCourant))resCourant='root';
@@ -2765,7 +3002,7 @@ function renderRessources(){
         <div class="r-titre">${resEsc(f.nom)}</div>
         <div class="r-meta">${resEsc(meta)}</div>
         ${f.desc?`<div class="r-desc">${resEsc(f.desc)}</div>`:''}
-        <div style="margin-top:5px">${bOuvrir}</div>
+        <div style="margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${bOuvrir}${f.kind==='new'&&f.path?(resHL.has(f.path)?'<span style="font-size:10px;background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:20px">📥 disponible hors ligne</span>':`<button class="btn btn-sm" onclick="resGarder('${f.id}')">📥 Garder hors ligne</button>`):''}</div>
       </div>
       <button class="btn btn-danger btn-sm" onclick="${bSup}">✕</button>
     </div>`;
@@ -2812,6 +3049,7 @@ function resNomSur(nom){
 async function resUpload(input){
   const files=[...input.files];input.value='';
   if(!files.length)return;
+  if(!navigator.onLine)return toast('Importer des fichiers demande une connexion internet',4500);
   const st=document.getElementById('re-upload-status');
   const dossier=resCourant;
   let ok=0,echecs=[],bucketManquant=false;
@@ -2826,7 +3064,8 @@ async function resUpload(input){
       echecs.push(f.name+' ('+error.message+')');continue;
     }
     const entree={id:resUid(),nom:f.name,dossier,path,taille:f.size,mime:f.type,date:new Date().toISOString()};
-    try{await saveExtra('ressources_fichiers',RES_KEY,[...resFichiers(),entree]);ok++;}
+    try{await saveExtra('ressources_fichiers',RES_KEY,[...resFichiers(),entree]);ok++;
+      try{if(f.size<=30*1048576)await resStocker(path,await f.arrayBuffer(),resMime({mime:f.type,nom:f.name}));}catch(e){}}
     catch(e){await sb.storage.from(RES_BUCKET).remove([path]);echecs.push(f.name+' (enregistrement impossible)');}
     if(resCourant===dossier)renderRessources();
   }
@@ -2837,13 +3076,6 @@ async function resUpload(input){
     if(bucketManquant){openModal('modal-res-aide');toast('Il faut d\'abord activer le stockage (une seule fois)',5000);}
     else alert('Non importé :\n'+echecs.join('\n'));
   }
-}
-async function resOuvrirFichier(id){
-  const f=resFichiers().find(x=>x.id===id);if(!f)return;
-  const w=window.open('','_blank');
-  const{data,error}=await sb.storage.from(RES_BUCKET).createSignedUrl(f.path,3600);
-  if(error||!data){if(w)w.close();return toast('Impossible d\'ouvrir : '+(error?error.message:''));}
-  if(w)w.location.href=data.signedUrl;else window.location.href=data.signedUrl;
 }
 function resOuvrirLien(id){const f=resFichiers().find(x=>x.id===id);if(f&&f.url)window.open(f.url,'_blank','noopener');}
 async function resAjouterLien(){
@@ -2858,7 +3090,7 @@ async function resSupprimerFichier(id){
   const f=resFichiers().find(x=>x.id===id);if(!f)return;
   if(!confirm('Supprimer « '+f.nom+' » définitivement ?'))return;
   setSyncStatus('syncing');
-  if(f.path){const{error}=await sb.storage.from(RES_BUCKET).remove([f.path]);if(error)console.error(error);}
+  if(f.path){const{error}=await sb.storage.from(RES_BUCKET).remove([f.path]);if(error)console.error(error);resOublierLocal(f.path);}
   await saveExtra('ressources_fichiers',RES_KEY,resFichiers().filter(x=>x.id!==id));
   setSyncStatus('');
   renderRessources();toast('Fichier supprimé');
@@ -2897,6 +3129,7 @@ function renderDemain(){
   }
 }
 function renderDashboard(){
+  renderDashAbsences();
   const d=new Date();
   const moy=(arr)=>{const v=arr.filter(n=>n.note!==null&&n.note!==''&&!isNaN(parseFloat(n.note))).map(n=>parseFloat(n.note)/(parseFloat(n.bareme)||20)*20);return v.length?(v.reduce((a,b)=>a+b,0)/v.length):null;};
   const stats=[['🏫','Écoles',cache.ecoles.length],['📚','Classes',cache.classes.length],['👥','Élèves',cache.eleves.length],['🗓️','Classes aujourd\'hui',slotsDuJour(JOURS_FR[d.getDay()]).length]];
@@ -3330,8 +3563,13 @@ function aboDate(d){return new Date(d).toLocaleDateString('fr-FR',{day:'numeric'
 async function verifierAcces(){
   try{
     const{data,error}=await sb.rpc('mon_acces');
+    if(error&&estReseau(error)){
+      try{const a=JSON.parse(localStorage.getItem('koto_abo_'+currentUser.id)||'null');if(a){aboInfo=a;majBanniere();return a.actif!==false;}}catch(e){}
+      return true;
+    }
     if(error||!data){console.warn('Abonnement indisponible',error);aboInfo=null;return true;}
     aboInfo=data;
+    try{localStorage.setItem('koto_abo_'+currentUser.id,JSON.stringify(data));}catch(e){}
     majBanniere();
     if(!data.actif){afficherAbo(true);return false;}
     if(document.getElementById('abo-overlay').dataset.bloque==='1')cacherAbo();
@@ -3857,10 +4095,137 @@ async function renderAdminConvs(){
   el.innerHTML=admConvs.length?admConvs.map(c=>`<div class="msg-item" onclick="ouvrirConvId('${c.id}')"><div class="m-sujet">💬 ${resEsc(c.nom1)} ⇄ ${resEsc(c.nom2)}</div><div class="m-meta">Dernier message : ${fmtD(c.dernier_msg)}</div></div>`).join(''):'<div class="empty">Aucune conversation</div>';
 }
 
+// ===== CONTRÔLE DE PRÉSENCE =====
+let prEtat={};
+function aujIso(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().split('T')[0];}
+function prListe(){return getExtra('presences',currentCahierClasseId).slice();}
+// Élèves ayant au moins 3 absences sur les 2 derniers mois (60 jours)
+function absencesAlertes(classeId){
+  const fin=new Date();fin.setHours(23,59,59,999);
+  const deb=new Date();deb.setDate(deb.getDate()-60);deb.setHours(0,0,0,0);
+  const recs=getExtra('presences',classeId).filter(r=>{const d=new Date(r.date+'T12:00:00');return d>=deb&&d<=fin;});
+  const out=[];
+  cache.eleves.filter(e=>e.classe_id===classeId).forEach(e=>{
+    const dates=recs.filter(r=>r.p&&r.p[e.id]==='A').map(r=>r.date).sort();
+    if(dates.length>=3)out.push({eleve:e,n:dates.length,dates});
+  });
+  return out.sort((a,b)=>b.n-a.n);
+}
+function fmtDateFr(iso){return new Date(iso+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}
+function ouvrirPresences(){ouvrirCahier();showCahierTab('cj-presences');}
+function ouvrirSanctions(){ouvrirCahier();showCahierTab('cj-sanctions');}
+async function ouvrirPresencesClasse(classeId){
+  const cl=cache.classes.find(c=>c.id===classeId);if(!cl)return;
+  const ec=cache.ecoles.find(e=>e.id===cl.ecole_id);
+  goTo('eleves',ec,cl);
+  ouvrirPresences();
+}
+function prInit(){
+  document.getElementById('pr-date').value=aujIso();
+  prCharger();
+}
+function prCharger(){
+  const date=document.getElementById('pr-date').value||aujIso();
+  const rec=prListe().find(r=>r.date===date);
+  const eleves=cache.eleves.filter(e=>e.classe_id===currentCahierClasseId);
+  prEtat={};
+  eleves.forEach(e=>{prEtat[e.id]=(rec&&rec.p&&rec.p[e.id])||'P';});
+  const jour=JOURS_FR[new Date(date+'T12:00:00').getDay()];
+  const cours=cache.slots.filter(s=>s.classe_id==currentCahierClasseId&&s.jour===jour);
+  document.getElementById('pr-info').innerHTML=(cours.length?`<span style="background:#E6EEFB;color:#0B4FBF;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600">🗓️ Cours prévu ${jour.toLowerCase()} : ${cours.map(s=>s.hdeb+'–'+s.hfin+' '+resEsc(s.mat||'')).join(', ')}</span>`:`<span style="font-size:11px;color:#999">Pas de cours prévu ${jour.toLowerCase()} dans l'emploi du temps</span>`)+(rec?' <span style="font-size:11px;color:#085041;background:#E1F5EE;padding:2px 9px;border-radius:20px">✓ déjà enregistré</span>':'');
+  prRender();prRenderAlertes();prRenderHistorique();
+}
+function prRender(){
+  const el=document.getElementById('pr-liste');
+  const eleves=cache.eleves.filter(e=>e.classe_id===currentCahierClasseId);
+  if(!eleves.length){el.innerHTML='<div class="empty">Aucun élève dans cette classe</div>';return;}
+  const alertes=new Map(absencesAlertes(currentCahierClasseId).map(a=>[a.eleve.id,a.n]));
+  el.innerHTML=eleves.map((e,i)=>{
+    const v=prEtat[e.id];
+    const b=(k,l,col)=>`<button class="btn btn-sm" style="${v===k?`background:${col};color:#fff;border-color:${col}`:''}" onclick="prSet('${e.id}','${k}')">${l}</button>`;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid #f0f0eb;flex-wrap:wrap"><span style="width:24px;color:#aaa;font-size:11px">${i+1}</span><span style="flex:1;min-width:140px;font-size:13px;font-weight:600">${resEsc(e.nom)}${alertes.has(e.id)?` <span class="sanction-chip">⚠️ ${alertes.get(e.id)} abs. / 2 mois</span>`:''}</span><span style="display:flex;gap:4px">${b('P','✓ Présent','#1D9E75')}${b('R','⏱ Retard','#E08A00')}${b('A','✗ Absent','#c0392b')}</span></div>`;
+  }).join('');
+  const n={P:0,R:0,A:0};Object.values(prEtat).forEach(v=>n[v]++);
+  document.getElementById('pr-resume').textContent=`Présents : ${n.P} · Retards : ${n.R} · Absents : ${n.A}`;
+}
+function prSet(id,v){prEtat[id]=v;prRender();}
+function prToutPresent(){Object.keys(prEtat).forEach(k=>prEtat[k]='P');prRender();}
+async function prEnregistrer(){
+  const date=document.getElementById('pr-date').value;
+  if(!date)return toast('Choisis une date');
+  if(!Object.keys(prEtat).length)return toast('Aucun élève dans cette classe');
+  const cid=currentCahierClasseId;
+  const liste=prListe().filter(r=>r.date!==date);
+  liste.push({date,p:{...prEtat}});
+  liste.sort((a,b)=>a.date<b.date?-1:1);
+  await saveExtra('presences',cid,liste);
+  toast('✓ Présences enregistrées dans le cahier journal',3500);
+  prCharger();renderElevesClasse(cid);
+  const abs=Object.keys(prEtat).filter(k=>prEtat[k]==='A');
+  const al=absencesAlertes(cid).filter(a=>abs.includes(a.eleve.id));
+  if(al.length){
+    const txt=al.map(a=>a.eleve.nom+' ('+a.n+' absences)').join(', ');
+    setTimeout(()=>toast('⚠️ Attention : '+txt+' en 2 mois',7000),3600);
+    try{if('Notification' in window&&Notification.permission==='granted')new Notification('⚠️ Absences répétées',{body:txt,icon:'icon-192.png'});}catch(e){}
+  }
+}
+function prRenderAlertes(){
+  const el=document.getElementById('pr-alertes');
+  const al=absencesAlertes(currentCahierClasseId);
+  el.innerHTML=al.length?`<div style="background:#FCEBEB;border:1px solid #f5b8b8;border-left:4px solid #c0392b;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:12px"><strong style="color:#791F1F">⚠️ Absences répétées (3 absences ou plus en 2 mois)</strong>${al.map(a=>`<div style="margin-top:4px"><strong>${resEsc(a.eleve.nom)}</strong> — ${a.n} absences : ${a.dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})).join(', ')}</div>`).join('')}</div>`:'';
+}
+function prRenderHistorique(){
+  const el=document.getElementById('pr-historique');
+  const liste=prListe().sort((a,b)=>a.date<b.date?1:-1);
+  const eleves=cache.eleves.filter(e=>e.classe_id===currentCahierClasseId);
+  if(!liste.length){el.innerHTML='<div class="empty">Aucun contrôle de présence enregistré</div>';return;}
+  el.innerHTML=liste.map(r=>{
+    const abs=eleves.filter(e=>r.p[e.id]==='A'),ret=eleves.filter(e=>r.p[e.id]==='R'),pre=eleves.filter(e=>(r.p[e.id]||'P')==='P');
+    return `<div class="seance-card" style="cursor:pointer" onclick="prVoirDate('${r.date}')"><div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><strong style="color:#0B4FBF">${fmtDateFr(r.date)}</strong><span style="display:flex;gap:5px;align-items:center"><span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:20px;font-size:10px">✓ ${pre.length}</span><span style="background:#FFF3DC;color:#8a5a00;padding:2px 7px;border-radius:20px;font-size:10px">⏱ ${ret.length}</span><span style="background:#FCEBEB;color:#791F1F;padding:2px 7px;border-radius:20px;font-size:10px">✗ ${abs.length}</span><button class="btn btn-danger btn-xs" onclick="event.stopPropagation();prSupprimer('${r.date}')">✕</button></span></div>${abs.length?`<div style="font-size:11px;color:#791F1F;margin-top:4px">Absents : ${abs.map(e=>resEsc(e.nom)).join(', ')}</div>`:''}${ret.length?`<div style="font-size:11px;color:#8a5a00;margin-top:2px">En retard : ${ret.map(e=>resEsc(e.nom)).join(', ')}</div>`:''}</div>`;
+  }).join('');
+}
+function prVoirDate(d){document.getElementById('pr-date').value=d;prCharger();document.getElementById('pr-date').scrollIntoView({behavior:'smooth',block:'center'});}
+async function prSupprimer(date){
+  if(!confirm('Supprimer le contrôle de présence du '+fmtDateFr(date)+' ?'))return;
+  await saveExtra('presences',currentCahierClasseId,prListe().filter(r=>r.date!==date));
+  prCharger();renderElevesClasse(currentCahierClasseId);
+}
+function prJour(delta){
+  const i=document.getElementById('pr-date');const d=new Date((i.value||aujIso())+'T12:00:00');d.setDate(d.getDate()+delta);
+  i.value=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().split('T')[0];prCharger();
+}
+
+// ===== SANCTIONS : liste filtrable =====
+function renderSanctions(){
+  const el=document.getElementById('liste-sanctions');
+  const toutes=getExtra('sanctions',currentCahierClasseId).map((s,i)=>({...s,idx:i}));
+  const fm=document.getElementById('sf-motif').value,fe=document.getElementById('sf-eleve').value,
+        du=document.getElementById('sf-du').value,au=document.getElementById('sf-au').value;
+  const l=toutes.filter(s=>(!fm||s.motif===fm)&&(!fe||s.eleveId===fe)&&(!du||(s.date||'')>=du)&&(!au||(s.date||'')<=au))
+    .sort((a,b)=>(a.date||'')<(b.date||'')?1:-1);
+  document.getElementById('sf-nb').textContent=l.length+' sanction(s)'+(l.length!==toutes.length?' sur '+toutes.length:'');
+  if(!l.length){el.innerHTML='<div class="empty">Aucune sanction'+(toutes.length?' pour ce filtre':'')+'</div>';return;}
+  el.innerHTML=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr style="background:#f4f4f0;text-align:left"><th style="padding:6px">Date</th><th style="padding:6px">Élève</th><th style="padding:6px">Motif</th><th style="padding:6px">Points</th><th style="padding:6px">Précisions</th><th></th></tr></thead><tbody>${l.map(s=>`<tr style="border-bottom:1px solid #eee"><td style="padding:6px;white-space:nowrap">${s.date?new Date(s.date+'T12:00:00').toLocaleDateString('fr-FR'):'—'}</td><td style="padding:6px;font-weight:600">${resEsc(s.nom)}</td><td style="padding:6px"><span class="sanction-chip">${resEsc(s.motif)}</span></td><td style="padding:6px;color:#c0392b">${s.points>0?'−'+s.points+' ('+(MOIS[s.moisIdx]||'')+')':'—'}</td><td style="padding:6px;color:#666">${resEsc(s.detail||'')}</td><td style="padding:6px"><button class="btn btn-danger btn-xs" onclick="delSanction(${s.idx})">✕</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function resetFiltreSanctions(){['sf-motif','sf-eleve','sf-du','sf-au'].forEach(i=>document.getElementById(i).value='');renderSanctions();}
+
+// ===== TABLEAU DE BORD : absences répétées =====
+let absToastFait=false;
+function renderDashAbsences(){
+  const el=document.getElementById('dash-absences'),card=document.getElementById('dash-absences-card');
+  if(!el)return;
+  const tout=[];
+  cache.classes.forEach(c=>absencesAlertes(c.id).forEach(a=>tout.push({...a,classe:c})));
+  card.style.display=tout.length?'block':'none';
+  el.innerHTML=tout.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #f5d5d5;padding:6px 0;font-size:12px;flex-wrap:wrap"><div><strong>${resEsc(a.eleve.nom)}</strong> <span style="color:#888">· ${resEsc(a.classe.nom)}</span><br><span style="color:#791F1F">${a.n} absences en 2 mois : ${a.dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})).join(', ')}</span></div><button class="btn btn-sm" onclick="ouvrirPresencesClasse('${a.classe.id}')">Voir</button></div>`).join('');
+  if(tout.length&&!absToastFait){absToastFait=true;setTimeout(()=>toast('⚠️ '+tout.length+' élève(s) avec 3 absences ou plus en 2 mois',6000),800);}
+}
+
+function resetFiltreSanctionsSilencieux(){['sf-motif','sf-du','sf-au'].forEach(i=>document.getElementById(i).value='');}
 // ===== SYNCHRONISATION AUTOMATIQUE (téléphone <-> ordinateur) =====
 let syncEnCours=false;
 async function synchroniser(){
-  if(!currentUser||syncEnCours||ecrituresEnCours>0||document.hidden)return;
+  if(!currentUser||syncEnCours||ecrituresEnCours>0||document.hidden||!navigator.onLine)return;
   if(document.querySelector('.modal-overlay.show'))return;
   const ae=document.activeElement;
   if(ae&&['INPUT','TEXTAREA','SELECT'].includes(ae.tagName))return;
@@ -3921,18 +4286,23 @@ if('serviceWorker' in navigator){
 }
 
 // ===== INIT =====
-sb.auth.getSession().then(async({data:{session}})=>{
+(async function demarrage(){
+  let session=null;
+  try{session=await Promise.race([sb.auth.getSession().then(r=>r.data.session),new Promise(r=>setTimeout(()=>r(null),5000))]);}catch(e){}
   const code=new URLSearchParams(window.location.search).get('devoir');
-  if(code){
-    await refreshDevoir();
-  }else if(session){
+  if(code){await refreshDevoir();return;}
+  if(session){
     await initApp(session.user);
     loadTheme();
     nettoierCorbeille();
+  }else if(!navigator.onLine){
+    let u=null;try{u=JSON.parse(localStorage.getItem('koto_user')||'null');}catch(e){}
+    if(u){await initApp(u);loadTheme();}
+    else{document.getElementById('auth-page').style.display='flex';toast('Connecte-toi une première fois avec internet pour pouvoir travailler hors ligne',6000);}
   }else{
     document.getElementById('auth-page').style.display='flex';
   }
-});
+})();
 sb.auth.onAuthStateChange((event,session)=>{
   if(event==='PASSWORD_RECOVERY'){document.getElementById('recup-overlay').style.display='block';}
   if(event==='SIGNED_OUT'){
