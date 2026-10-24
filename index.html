@@ -261,6 +261,9 @@ body.admin-mode #breadcrumb{display:none}
 .msg-item .m-meta{font-size:10px;color:#888;margin-top:2px}
 .msg-item .m-corps{display:none;margin-top:7px;white-space:pre-wrap;font-size:12px;color:#333}
 .msg-item.ouvert .m-corps{display:block}
+.btn-loading{pointer-events:none;opacity:.7;position:relative}
+.btn-loading::before{content:"";display:inline-block;width:12px;height:12px;margin-right:7px;vertical-align:-2px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:kspin .7s linear infinite}
+@keyframes kspin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
@@ -3942,6 +3945,27 @@ sb.auth.onAuthStateChange((event,session)=>{
   const m=new Date(),p=new Date();p.setHours(20,0,0,0);
   if(p<=m)p.setDate(p.getDate()+1);
   setTimeout(()=>{if(currentUser)verifierRappels();setInterval(()=>{if(currentUser)verifierRappels();},86400000);},p-m);
+})();
+
+// ===== LOADERS SUR LES BOUTONS =====
+(function(){
+  let cur=null;
+  document.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('button');cur=b||null;setTimeout(()=>{cur=null;},0);},true);
+  const src=[...document.scripts].map(x=>x.textContent).join('\n');
+  const noms=new Set([...src.matchAll(/async function (\w+)/g)].map(m=>m[1]));
+  noms.forEach(n=>{
+    const f=window[n];if(typeof f!=='function'||f.__ld)return;
+    const w=function(...a){
+      const b=cur;
+      if(!b||b.classList.contains('btn-loading')||b.classList.contains('modal-close'))return f.apply(this,a);
+      b.classList.add('btn-loading');
+      const fin=()=>b.classList.remove('btn-loading');
+      let r;try{r=f.apply(this,a);}catch(e){fin();throw e;}
+      Promise.resolve(r).then(fin,fin);
+      return r;
+    };
+    w.__ld=1;window[n]=w;
+  });
 })();
 </script>
 </body>
