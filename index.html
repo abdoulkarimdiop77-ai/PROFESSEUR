@@ -264,6 +264,7 @@ body.admin-mode #breadcrumb{display:none}
 .btn-loading{pointer-events:none;opacity:.7;position:relative}
 .btn-loading::before{content:"";display:inline-block;width:12px;height:12px;margin-right:7px;vertical-align:-2px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:kspin .7s linear infinite}
 @keyframes kspin{to{transform:rotate(360deg)}}
+body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [onclick*="regenererCodesClasse"],body.cycle-primaire [onclick*="exporterCodesClasse"]{display:none!important}
 </style>
 </head>
 <body>
@@ -1037,7 +1038,7 @@ body.admin-mode #breadcrumb{display:none}
     <div class="modal-header"><h2>📚 Nouvelle classe</h2><button class="modal-close" onclick="closeModal('modal-add-classe')">✕</button></div>
     <div class="two-eq">
       <div class="form-group"><label>Cycle</label>
-        <select id="cl-cycle" onchange="updateNiveaux()"><option value="Collège">Collège</option><option value="Lycée">Lycée</option><option value="Supérieur">Supérieur</option></select>
+        <select id="cl-cycle" onchange="updateNiveaux()"><option value="Primaire">Primaire</option><option value="Collège">Collège</option><option value="Lycée">Lycée</option><option value="Supérieur">Supérieur</option></select>
       </div>
       <div class="form-group"><label>Niveau</label>
         <select id="cl-niveau"><option>7ème</option><option>8ème</option><option>9ème</option><option>10ème</option></select>
@@ -1199,6 +1200,7 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
       <div class="auth-err" id="register-err"></div>
       <input class="auth-input" id="reg-prenom" placeholder="Prénom(s)">
       <input class="auth-input" id="reg-nom" placeholder="Nom de famille">
+      <select class="auth-input" id="reg-cycle"><option value="">Cycle enseigné…</option><option value="primaire">Primaire</option><option value="secondaire">Secondaire (collège / lycée)</option><option value="superieur">Supérieur (université / institut)</option></select>
       <input class="auth-input" id="reg-profession" placeholder="Profession (ex : Professeur de collège)">
       <input class="auth-input" id="reg-matiere" placeholder="Matière enseignée">
       <input class="auth-input" id="reg-email" type="email" placeholder="Adresse email">
@@ -1286,13 +1288,14 @@ function initRobot(){
 let pendingUser=null;
 async function register(){
   const v=id=>(document.getElementById(id).value||'').trim();
-  const prenom=v('reg-prenom'),nom=v('reg-nom'),profession=v('reg-profession'),matiere=v('reg-matiere');
+  const prenom=v('reg-prenom'),nom=v('reg-nom'),profession=v('reg-profession'),matiere=v('reg-matiere'),cycleEns=v('reg-cycle');
   const email=v('reg-email'),contact=v('reg-contact'),adresse=v('reg-adresse');
   const pwd=document.getElementById('reg-pwd').value;
   const pwd2=document.getElementById('reg-pwd2').value;
   const err=document.getElementById('register-err');
   err.style.color='#c0392b';
   if(v('reg-site'))return;// piège à robots
+  if(!cycleEns){err.textContent='Choisis le cycle que tu enseignes.';return;}
   if(!prenom||!nom||!profession||!matiere||!email||!contact||!adresse||!pwd){err.textContent='Tous les champs sont requis.';return;}
   if(!/^\S+@\S+\.\S+$/.test(email)){err.textContent='Adresse email invalide.';return;}
   if(contact.replace(/\D/g,'').length<8){err.textContent='Contact invalide (numéro de téléphone).';return;}
@@ -1304,7 +1307,7 @@ async function register(){
     if(!captchaToken){err.textContent='Vérification anti-robot requise.';return;}
   }else if(parseInt(v('reg-rep'),10)!==robotA+robotB){err.textContent='Mauvaise réponse à la vérification anti-robot.';nouvelleQuestionRobot();return;}
   err.textContent='Création en cours...';
-  const opts={emailRedirectTo:location.origin+location.pathname,data:{prenom,nom,full_name:prenom+' '+nom,profession,matiere,matiere_principale:matiere,contact,adresse}};
+  const opts={emailRedirectTo:location.origin+location.pathname,data:{prenom,nom,cycle:cycleEns,full_name:prenom+' '+nom,profession,matiere,matiere_principale:matiere,contact,adresse}};
   if(captchaToken)opts.captchaToken=captchaToken;
   const{data,error}=await sb.auth.signUp({email,password:pwd,options:opts});
   if(error){err.textContent=error.message;if(TURNSTILE_SITEKEY&&window.turnstile)turnstile.reset(turnstileId);else nouvelleQuestionRobot();return;}
@@ -1417,7 +1420,9 @@ async function initApp(user){
     return;
   }
   document.body.classList.remove('admin-mode');
+  await chargerCycle();
   if(accesOk)await loadAllData();
+  appliquerCycle();
   showTab('dashboard');
   updateNotifStatus();
   refreshDevoir();
@@ -1600,6 +1605,29 @@ async function resViderLocal(){
   try{await resChargerHL();for(const p of resHL)await IDB.set('file_'+p,null);resHL=new Set();await resSauverHL();}catch(e){}
 }
 
+
+// ===== CYCLE ENSEIGNÉ =====
+let monCycle='secondaire';
+function appliquerCycle(){
+  document.body.classList.toggle('cycle-primaire',monCycle==='primaire');
+  const bAjEc=document.querySelector('#ecoles [onclick*="modal-add-ecole"]');
+  if(bAjEc)bAjEc.style.display=(monCycle==='primaire'&&cache.ecoles.length>=1)?'none':'';
+  const bAjCl=document.querySelector('#vue-classes [onclick*="modal-add-classe"]');
+  if(bAjCl)bAjCl.style.display=(monCycle==='primaire'&&cache.classes.length>=1)?'none':'';
+  if(monCycle==='primaire'){const c=document.getElementById('cl-cycle');if(c&&c.value!=='Primaire'){c.value='Primaire';updateNiveaux();}}
+}
+async function chargerCycle(){
+  const cle='koto_cycle_'+currentUser.id;
+  let c=null;
+  try{const r=await sb.rpc('mon_profil');if(r.data&&r.data.cycle)c=r.data.cycle;}catch(e){}
+  if(!c){try{c=localStorage.getItem(cle);}catch(e){}}
+  if(!c)c=(currentUser.user_metadata&&currentUser.user_metadata.cycle)||'secondaire';
+  if(!['primaire','secondaire','superieur'].includes(c))c='secondaire';
+  monCycle=c;try{localStorage.setItem(cle,c);}catch(e){}
+  appliquerCycle();
+}
+
+(function(){const a=renderEcoles,b=renderClassesEcole;renderEcoles=function(...x){const r=a(...x);appliquerCycle();return r;};renderClassesEcole=function(...x){const r=b(...x);appliquerCycle();return r;};})();
 // ===== SUPABASE CRUD =====
 async function sbGet(table,filters={}){
   let q=sb.from(table).select('*').eq('user_id',currentUser.id);
@@ -1755,6 +1783,7 @@ async function loadAllData(){
 
 // ===== NAVIGATION =====
 function showTab(t){
+  if(t==='devoirs-global'&&monCycle==='primaire')t='dashboard';
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(t).classList.add('show');
@@ -1816,6 +1845,7 @@ async function addEcole(){
   const nom=document.getElementById('ec-nom').value.trim();
   const abr=document.getElementById('ec-abr').value.trim().toUpperCase();
   if(!nom||!abr)return toast('Nom et abréviation requis');
+  if(monCycle==='primaire'&&cache.ecoles.length>=1)return toast('Cycle primaire : une seule école est possible.',4500);
   const obj={nom,abr,loc:document.getElementById('ec-loc').value.trim(),type:document.getElementById('ec-type').value,couleur:document.getElementById('ec-couleur').value};
   const data=await sbInsert('ecoles',obj);
   if(!data)return;
@@ -1854,13 +1884,15 @@ function renderEcoles(){
 function updateNiveaux(){
   const cycle=document.getElementById('cl-cycle').value;
   let opts='';
-  if(cycle==='Collège')opts='<option>7ème</option><option>8ème</option><option>9ème</option><option>10ème</option>';
+  if(cycle==='Primaire')opts='<option>1ère année</option><option>2ème année</option><option>3ème année</option><option>4ème année</option><option>5ème année</option><option>6ème année</option>';
+  else if(cycle==='Collège')opts='<option>7ème</option><option>8ème</option><option>9ème</option><option>10ème</option>';
   else if(cycle==='Lycée')opts='<option>11ème</option><option>12ème</option><option>Terminale</option>';
   else opts='<option>1ère année</option><option>2ème année</option><option>3ème année</option><option>4ème année</option><option>5ème année</option>';
   document.getElementById('cl-niveau').innerHTML=opts;
 }
 async function addClasse(){
   if(!currentEcole)return toast('Sélectionne une école d\'abord');
+  if(monCycle==='primaire'&&cache.classes.length>=1)return toast('Cycle primaire : une seule classe est possible.',4500);
   const niveau=document.getElementById('cl-niveau').value;
   const lettre=document.getElementById('cl-lettre').value;
   const cycle=document.getElementById('cl-cycle').value;
@@ -2777,6 +2809,7 @@ function filterClassesDevoir(){
   document.getElementById('dv-classe').innerHTML='<option value="">--</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
 }
 async function saveDevoir(){
+  if(monCycle==='primaire')return toast('Les devoirs ne sont pas disponibles pour le cycle primaire.',4500);
   const titre=document.getElementById('dv-titre').value.trim();
   const classeId=document.getElementById('dv-classe').value;
   const ecoleId=document.getElementById('dv-ecole').value;
@@ -3652,7 +3685,7 @@ function ouvrirMenu(){
   const items=adm
     ?[['admin-abo','💼 Abonnements'],['admin-msg','📨 Messages',1],['parametres','🔒 Compte']]
     :[['dashboard','🏠 Tableau de bord'],['ecoles','🏫 Écoles'],['devoirs-global','📋 Devoirs'],['ressources','📁 Ressources'],['edt-global','🗓️ Emploi du temps'],['alertes','🔔 Alertes'],['messagerie','💬 Messagerie',2],['propositions','💡 Propositions',1],['parametres','⚙️ Paramètres']];
-  document.getElementById('menu-liste').innerHTML=items.map(([id,label,b])=>
+  document.getElementById('menu-liste').innerHTML=items.filter(x=>!(monCycle==='primaire'&&x[0]==='devoirs-global')).map(([id,label,b])=>
     `<button class="m-item${cur===id?' actif':''}" onclick="menuAller('${id}')"><span>${label}</span>${b&&(b===2?chatTotal():n)>0?`<span class="badge-notif" style="display:inline-block">${b===2?chatTotal():n}</span>`:''}</button>`).join('')+
     `<div style="border-top:1px solid #e5e5e0;margin:8px 0"></div><button class="m-item" style="color:#c0392b" onclick="fermerMenu();logout()">🚪 Déconnexion</button>`;
   document.getElementById('menu-drawer').style.display='block';
