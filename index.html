@@ -265,6 +265,45 @@ body.admin-mode #breadcrumb{display:none}
 .btn-loading::before{content:"";display:inline-block;width:12px;height:12px;margin-right:7px;vertical-align:-2px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:kspin .7s linear infinite}
 @keyframes kspin{to{transform:rotate(360deg)}}
 body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [onclick*="regenererCodesClasse"],body.cycle-primaire [onclick*="exporterCodesClasse"]{display:none!important}
+/* couleurs par onglet (palette du logo) */
+.section{--acc:#0B4FBF}
+#ecoles,#vue-classes,#vue-eleves{--acc:#2E9E3E}
+#vue-notes{--acc:#1B7F36}
+#devoirs-global{--acc:#F08A00}
+#ressources{--acc:#E5A800}
+#bibliotheque{--acc:#1E90FF}
+#edt-global{--acc:#0A3A9E}
+#alertes{--acc:#E65100}
+#messagerie{--acc:#29A8F0}
+#parametres{--acc:#5B6B8C}
+#admin-abo{--acc:#0A3A9E}
+#admin-msg{--acc:#29A8F0}
+.section .card{border-top:3px solid var(--acc)}
+.section .card-title{color:var(--acc)}
+.nav button{--nb:#0B4FBF;border-bottom:3px solid var(--nb)!important;border-bottom-color:var(--nb)!important}
+.nav button:not(.active){opacity:.82}
+.nav button.active{opacity:1;color:var(--nb)!important;background:rgba(0,0,0,.04);font-weight:700}
+.nav button[onclick*="'dashboard'"]{--nb:#0B4FBF}
+.nav button[onclick*="'ecoles'"]{--nb:#2E9E3E}
+.nav button[onclick*="'devoirs-global'"]{--nb:#F08A00}
+.nav button[onclick*="'ressources'"]{--nb:#E5A800}
+.nav button[onclick*="'bibliotheque'"]{--nb:#1E90FF}
+.nav button[onclick*="'edt-global'"]{--nb:#0A3A9E}
+.nav button[onclick*="'alertes'"]{--nb:#E65100}
+.nav button[onclick*="'messagerie'"]{--nb:#29A8F0}
+.nav button[onclick*="'parametres'"]{--nb:#5B6B8C}
+.nav button[onclick*="'admin-abo'"]{--nb:#0A3A9E}
+.nav button[onclick*="'admin-msg'"]{--nb:#29A8F0}
+.nav button[onclick*="'ecoles'"]::before{content:""}
+body.dark .section .card-title{color:#cfe0ff}
+body.dark .nav button.active{background:rgba(255,255,255,.08)}
+.edt-grille td{height:64px;min-width:78px}
+.edt-grille th{background:#0A3A9E}
+.edt-grille td.heure-col{font-size:11px;font-weight:700;color:#222;background:#fff;width:70px}
+.edt-coin{position:relative;height:46px;background:linear-gradient(to top right,transparent 48.5%,#fff 49.5%,#fff 50.5%,transparent 51.5%),#0A3A9E!important}
+.edt-coin .c-j{position:absolute;top:3px;right:6px;font-size:9px}.edt-coin .c-h{position:absolute;bottom:3px;left:5px;font-size:9px}
+.edt-bloc{position:relative;color:#fff;text-align:center;padding:6px 4px 4px;min-height:62px;display:flex;flex-direction:column;justify-content:center;gap:1px;border-bottom:1px solid rgba(255,255,255,.4)}
+.edt-bloc strong{font-size:12px}.edt-bloc .e-mat{font-size:9px;opacity:.95}.edt-bloc .e-abr{font-size:10px;font-weight:800;letter-spacing:1px;margin-top:3px;background:rgba(0,0,0,.22);border-radius:10px;padding:0 7px;align-self:center}
 </style>
 </head>
 <body>
@@ -366,6 +405,18 @@ body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [
         <button id="conv-btn" class="btn btn-primary" onclick="envoyerChat()">Envoyer</button>
       </div>
     </div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-edt-classe">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header"><h2 id="ecc-titre">🗓️ Mes cours dans cette classe</h2><button class="modal-close" onclick="closeModal('modal-edt-classe')">✕</button></div>
+    <p style="font-size:12px;color:#666;margin-bottom:8px">Coche les jours et les périodes où tu as cours dans cette classe. Ils apparaissent automatiquement dans l'emploi du temps général, aux couleurs de l'école.</p>
+    <div class="two-eq">
+      <div class="form-group"><label>Matière</label><input id="ecc-mat" placeholder="Biologie"></div>
+      <div class="form-group"><label>Salle (facultatif)</label><input id="ecc-salle" placeholder="Salle 12"></div>
+    </div>
+    <div id="ecc-grille" style="overflow-x:auto"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:10px" onclick="enregistrerEdtClasse()">💾 Enregistrer mes cours</button>
   </div>
 </div>
 <div class="modal-overlay" id="modal-cahier" style="padding:8px">
@@ -595,6 +646,7 @@ body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [
     <button data-r="p" onclick="showTab('ecoles')">🏫 Écoles</button>
     <button data-r="p" onclick="showTab('devoirs-global')">📋 Devoirs</button>
     <button data-r="p" onclick="showTab('ressources')">📁 Ressources</button>
+    <button data-r="p" onclick="showTab('bibliotheque')">🏛️ Bibliothèque</button>
     <button data-r="p" onclick="showTab('edt-global')">🗓️ EDT</button>
     <button data-r="p" onclick="showTab('alertes')">🔔 Alertes</button>
     <button data-r="p" onclick="showTab('messagerie')">💬 Messagerie<span id="nav-chat-badge" class="badge-notif"></span></button>
@@ -613,7 +665,10 @@ body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [
     <div class="card" id="dash-absences-card" style="display:none;border-left:4px solid #c0392b"><div class="card-title" style="color:#791F1F">⚠️ Absences répétées (3 ou plus en 2 mois)</div><div id="dash-absences"></div></div>
     <div class="two-col">
       <div class="card"><div class="card-title" id="dash-edt-titre">🗓️ Emploi du temps du jour</div><div id="dash-edt"></div></div>
-      <div class="card"><div class="card-title">🏫 Écoles, classes et élèves</div><div id="dash-ecoles"></div></div>
+      <div>
+        <div class="card" id="dash-demain-card" style="display:none"><div class="card-title" id="dash-demain-titre">🌙 Emploi du temps de demain</div><div id="dash-demain"></div></div>
+        <div class="card"><div class="card-title">🏫 Écoles, classes et élèves</div><div id="dash-ecoles"></div></div>
+      </div>
     </div>
   </div>
 
@@ -647,6 +702,7 @@ body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [
       <strong style="font-size:15px" id="eleves-titre">Élèves</strong>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="openModal('modal-add-eleve')">+ Ajouter un élève</button>
+        <button class="btn btn-info btn-sm" onclick="ouvrirEdtClasse()">🗓️ Mes cours</button>
         <button class="btn btn-info btn-sm" onclick="ouvrirPresences()">✅ Contrôle de présence</button>
         <button class="btn btn-warn btn-sm" onclick="ouvrirSanctions()">⚠️ Sanctions</button>
         <button class="btn btn-info btn-sm" onclick="ouvrirCahier()">📔 Cahier journal</button>
@@ -745,15 +801,12 @@ body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [
           <div class="form-group"><label>Classe</label><select id="sl-classe"><option value="">--</option></select></div>
           <div class="form-group"><label>Matière</label><input id="sl-mat" placeholder="Biologie"></div>
         </div>
-        <div class="three-col">
+        <div class="two-eq">
           <div class="form-group"><label>Jour</label>
             <select id="sl-jour"><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option></select>
           </div>
-          <div class="form-group"><label>Heure début</label>
-            <select id="sl-hdeb"><option>07h00</option><option>08h00</option><option>09h00</option><option>10h00</option><option>11h00</option><option>12h00</option><option>13h00</option><option>14h00</option><option>15h00</option><option>16h00</option><option>17h00</option></select>
-          </div>
-          <div class="form-group"><label>Heure fin</label>
-            <select id="sl-hfin"><option>08h00</option><option>09h00</option><option>10h00</option><option>11h00</option><option>12h00</option><option>13h00</option><option>14h00</option><option>15h00</option><option>16h00</option><option>17h00</option><option>18h00</option></select>
+          <div class="form-group"><label>Période</label>
+            <select id="sl-periode"><option value="0">8H-10H</option><option value="1">10H15-12H15</option><option value="2">12H15-14H15</option><option value="3">15H-17H</option></select>
           </div>
         </div>
         <div class="two-eq">
@@ -790,6 +843,38 @@ body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [
     <div class="card"><div class="card-title">📊 Tableau de bord <button class="btn btn-sm" style="float:right" onclick="renderAdminStats()">↻ Actualiser</button></div><div id="admin-stats"><div class="empty">Chargement…</div></div></div>
     <div class="card"><div class="card-title">💳 Paiements en attente</div><div id="admin-paiements"></div></div>
     <div class="card"><div class="card-title">👥 Professeurs abonnés</div><div id="admin-abonnes"></div></div>
+  </div>
+
+  <!-- BIBLIOTHÈQUE -->
+  <div id="bibliotheque" class="section">
+    <div class="card">
+      <div class="card-title">🏛️ Bibliothèque des professeurs <span id="bib-nb" style="font-size:11px;color:#888;font-weight:400"></span></div>
+      <div style="font-size:12px;color:#666;margin-bottom:8px">Documents partagés par tous les professeurs de KOTO. Ouvre et utilise ceux qui t'intéressent, et partage les tiens.</div>
+      <input id="bib-recherche" placeholder="🔍 Rechercher : titre, matière, niveau, auteur…" onkeyup="bibSimId=null;bibAfficher()" style="width:100%;margin-bottom:8px">
+      <div class="two-eq">
+        <div class="form-group"><select id="bf-matiere" onchange="bibAfficher()"><option value="">Toutes les matières</option></select></div>
+        <div class="form-group"><select id="bf-niveau" onchange="bibAfficher()"></select></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select id="bf-type" onchange="bibAfficher()" style="flex:1;min-width:160px"></select>
+        <button class="btn btn-sm" onclick="bibReset()">Réinitialiser</button>
+        <button class="btn btn-primary btn-sm" onclick="const f=document.getElementById('bib-form');f.style.display=f.style.display==='none'?'block':'none'">+ Partager un document</button>
+      </div>
+    </div>
+    <div class="card" id="bib-form" style="display:none">
+      <div class="card-title">📤 Partager un document</div>
+      <div class="form-group"><label>Fichier * (PDF, Word, Excel ou PowerPoint — 25 Mo max)</label><input type="file" id="bib-fichier" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx"></div>
+      <div class="form-group"><label>Titre du document *</label><input id="bib-titre" maxlength="150" placeholder="Ex : La cellule vivante — cours complet"></div>
+      <div class="two-eq">
+        <div class="form-group"><label>Matière *</label><input id="bib-matiere" list="bib-matieres-liste" maxlength="80" placeholder="Choisir ou écrire"><datalist id="bib-matieres-liste"></datalist></div>
+        <div class="form-group"><label>Niveau concerné *</label><select id="bib-niveau"></select></div>
+      </div>
+      <div class="form-group"><label>Type de document *</label><select id="bib-type"></select></div>
+      <div class="form-group"><label>Description (facultatif)</label><textarea id="bib-desc" rows="2" maxlength="1000" placeholder="Ex : chapitre 3, avec exercices corrigés"></textarea></div>
+      <button id="bib-btn" class="btn btn-primary" onclick="bibPublier()">📤 Publier dans la bibliothèque</button>
+    </div>
+    <div id="bib-sim-banniere"></div>
+    <div id="bib-liste"><div class="empty">Chargement…</div></div>
   </div>
 
   <!-- MESSAGERIE -->
@@ -1662,6 +1747,199 @@ async function renderAdminStats(){
     titre('📈 Inscriptions des 14 derniers jours')+`<div style="display:flex;gap:2px;align-items:flex-end;border-bottom:1px solid #eee;padding-bottom:2px">${barres}</div>`;
 }
 
+// ===== BIBLIOTHÈQUE PARTAGÉE =====
+const BIB_BUCKET='bibliotheque',BIB_MAX=25*1024*1024,BIB_EXT=['pdf','doc','docx','xls','xlsx','ppt','pptx'];
+const BIB_NIVEAUX=['Primaire — 1ère année','Primaire — 2ème année','Primaire — 3ème année','Primaire — 4ème année','Primaire — 5ème année','Primaire — 6ème année','Collège — 7ème','Collège — 8ème','Collège — 9ème','Collège — 10ème','Lycée — 11ème','Lycée — 12ème','Lycée — Terminale','Supérieur — Licence 1','Supérieur — Licence 2','Supérieur — Licence 3','Supérieur — Master','Tous niveaux'];
+const BIB_TYPES=['Cours / leçon','Fiche de préparation','Exercices / TD','Sujet d\'examen / devoir','Corrigé','Programme / progression','Manuel / livre','Document pédagogique','Autre'];
+const BIB_MATIERES=['Mathématiques','Physique','Chimie','SVT / Biologie','Géologie','Français','Anglais','Histoire','Géographie','ECM / Éducation civique','Philosophie','Informatique','Économie','EPS','Arabe','Éveil / Sciences','Autre'];
+let bibDocs=[],bibSimId=null,bibInit=false;
+const bibNorm=t=>String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+function bibIcone(n){const e=((n||'').split('.').pop()||'').toLowerCase();return {pdf:'📕',doc:'📘',docx:'📘',xls:'📗',xlsx:'📗',ppt:'📙',pptx:'📙'}[e]||'📄';}
+async function renderBibliotheque(){
+  if(!bibInit){
+    bibInit=true;
+    document.getElementById('bib-niveau').innerHTML='<option value="">Choisir…</option>'+BIB_NIVEAUX.map(x=>`<option>${x}</option>`).join('');
+    document.getElementById('bib-type').innerHTML='<option value="">Choisir…</option>'+BIB_TYPES.map(x=>`<option>${x}</option>`).join('');
+    document.getElementById('bib-matieres-liste').innerHTML=BIB_MATIERES.map(x=>`<option value="${x}">`).join('');
+    document.getElementById('bf-niveau').innerHTML='<option value="">Tous les niveaux</option>'+BIB_NIVEAUX.map(x=>`<option>${x}</option>`).join('');
+    document.getElementById('bf-type').innerHTML='<option value="">Tous les types</option>'+BIB_TYPES.map(x=>`<option>${x}</option>`).join('');
+    const m=(currentUser.user_metadata||{}).matiere;if(m)document.getElementById('bib-matiere').value=m;
+  }
+  if(!navigator.onLine&&!bibDocs.length){document.getElementById('bib-liste').innerHTML='<div class="empty">📴 La bibliothèque demande une connexion internet.</div>';return;}
+  const{data,error}=await sb.from('bibliotheque').select('*').order('created_at',{ascending:false}).limit(600);
+  if(error){document.getElementById('bib-liste').innerHTML='<div class="empty">Erreur : '+resEsc(error.message)+'<br><span style="font-size:11px">Lance le script bibliotheque.sql dans Supabase.</span></div>';return;}
+  bibDocs=data||[];
+  const mats=[...new Set(bibDocs.map(d=>d.matiere))].sort((a,b)=>a.localeCompare(b,'fr'));
+  const cur=document.getElementById('bf-matiere').value;
+  document.getElementById('bf-matiere').innerHTML='<option value="">Toutes les matières</option>'+mats.map(x=>`<option${x===cur?' selected':''}>${resEsc(x)}</option>`).join('');
+  bibAfficher();
+}
+function bibScore(d,tokens){
+  const champs=[[bibNorm(d.titre),3],[bibNorm(d.matiere),2],[bibNorm(d.niveau),2],[bibNorm(d.type_doc),1.5],[bibNorm(d.description),1],[bibNorm(d.auteur_nom),1],[bibNorm(d.fichier_nom),1]];
+  let sc=0,tous=true;
+  for(const t of tokens){
+    let ok=false;
+    for(const[c,p]of champs)if(c.includes(t)){sc+=p;ok=true;}
+    if(!ok)tous=false;
+  }
+  return{sc,tous};
+}
+function bibAfficher(){
+  const el=document.getElementById('bib-liste');
+  const q=bibNorm(document.getElementById('bib-recherche').value).split(/\s+/).filter(x=>x.length>1);
+  const fm=document.getElementById('bf-matiere').value,fn=document.getElementById('bf-niveau').value,ft=document.getElementById('bf-type').value;
+  let l=bibDocs.map(d=>({d,...bibScore(d,q)}));
+  let titreSim='';
+  if(bibSimId){
+    const ref=bibDocs.find(x=>x.id===bibSimId);
+    if(ref){
+      titreSim=ref.titre;
+      const mots=bibNorm(ref.titre).split(/\s+/).filter(x=>x.length>3);
+      l=l.filter(x=>x.d.id!==ref.id).map(x=>{
+        let s=0;if(x.d.matiere===ref.matiere)s+=3;if(x.d.niveau===ref.niveau)s+=2;if(x.d.type_doc===ref.type_doc)s+=1;
+        const t=bibNorm(x.d.titre);mots.forEach(m=>{if(t.includes(m))s+=1.5;});
+        return{...x,sc:s,tous:s>=3};
+      }).filter(x=>x.sc>=3);
+    }
+  }else if(q.length)l=l.filter(x=>x.sc>0);
+  l=l.filter(x=>(!fm||x.d.matiere===fm)&&(!fn||x.d.niveau===fn)&&(!ft||x.d.type_doc===ft));
+  l.sort((a,b)=>(q.length||bibSimId)?((b.tous-a.tous)||(b.sc-a.sc)):(a.d.created_at<b.d.created_at?1:-1));
+  document.getElementById('bib-sim-banniere').innerHTML=bibSimId?`<div style="background:#E6EEFB;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:8px">🔎 Documents similaires à <strong>${resEsc(titreSim)}</strong> <button class="btn btn-sm" style="margin-left:8px" onclick="bibSimilaires(null)">✕ Afficher tout</button></div>`:'';
+  document.getElementById('bib-nb').textContent=l.length+' document(s)';
+  if(!l.length){el.innerHTML='<div class="empty">Aucun document trouvé</div>';return;}
+  el.innerHTML=l.slice(0,150).map(({d})=>{
+    const moi=d.user_id===currentUser.id;
+    return `<div class="ressource-card"><div class="ressource-icon">${bibIcone(d.fichier_nom)}</div><div class="ressource-info">
+      <div class="r-titre">${resEsc(d.titre)}</div>
+      <div style="margin:3px 0"><span class="sanction-chip" style="background:#E6EEFB;color:#0A3A9E">${resEsc(d.matiere)}</span><span class="sanction-chip" style="background:#E3F5E7;color:#1B6B2B">${resEsc(d.niveau)}</span><span class="sanction-chip" style="background:#FFF1D6;color:#8a5a00">${resEsc(d.type_doc)}</span></div>
+      <div class="r-meta">Par ${resEsc(d.auteur_nom||'un professeur')}${moi?' (toi)':''} · ${new Date(d.created_at).toLocaleDateString('fr-FR')} · ${resTaille(d.taille||0)}${d.telechargements?' · '+d.telechargements+' ouverture(s)':''}</div>
+      ${d.description?`<div class="r-desc">${resEsc(d.description)}</div>`:''}
+      <div style="margin-top:5px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm btn-info" onclick="bibOuvrir('${d.id}')">👁️ Ouvrir</button><button class="btn btn-sm" onclick="bibSimilaires('${d.id}')">🔎 Similaires</button></div>
+    </div>${moi?`<button class="btn btn-danger btn-sm" onclick="bibSupprimer('${d.id}')">✕</button>`:''}</div>`;
+  }).join('');
+}
+function bibSimilaires(id){bibSimId=id;if(id)document.getElementById('bib-recherche').value='';bibAfficher();window.scrollTo({top:0,behavior:'smooth'});}
+function bibReset(){['bib-recherche','bf-matiere','bf-niveau','bf-type'].forEach(i=>document.getElementById(i).value='');bibSimId=null;bibAfficher();}
+async function bibPublier(){
+  const f=document.getElementById('bib-fichier').files[0];
+  const titre=document.getElementById('bib-titre').value.trim(),matiere=document.getElementById('bib-matiere').value.trim(),
+    niveau=document.getElementById('bib-niveau').value,type_doc=document.getElementById('bib-type').value,description=document.getElementById('bib-desc').value.trim();
+  if(!f)return toast('Choisis un fichier (PDF, Word, Excel ou PowerPoint)');
+  if(!titre||!matiere||!niveau||!type_doc)return toast('Titre, matière, niveau et type sont obligatoires',4000);
+  const ext=(f.name.split('.').pop()||'').toLowerCase();
+  if(!BIB_EXT.includes(ext))return toast('Formats acceptés : PDF, Word, Excel, PowerPoint',4500);
+  if(f.size>BIB_MAX)return toast('Fichier trop lourd (25 Mo maximum)',4500);
+  if(!navigator.onLine)return toast('Publier un document demande internet',4500);
+  const btn=document.getElementById('bib-btn');btn.disabled=true;
+  try{
+    const path=currentUser.id+'/'+resUid()+'-'+resNomSur(f.name);
+    const u=await sb.storage.from(BIB_BUCKET).upload(path,f,{contentType:f.type||'application/octet-stream',upsert:false});
+    if(u.error)throw u.error;
+    const m=currentUser.user_metadata||{};
+    const{error}=await sb.from('bibliotheque').insert({user_id:currentUser.id,auteur_nom:m.full_name||((m.prenom||'')+' '+(m.nom||'')).trim()||currentUser.email.split('@')[0],titre,matiere,niveau,type_doc,description,fichier_path:path,fichier_nom:f.name,taille:f.size,mime:f.type||''});
+    if(error){await sb.storage.from(BIB_BUCKET).remove([path]);throw error;}
+    ['bib-fichier','bib-titre','bib-desc'].forEach(i=>document.getElementById(i).value='');
+    toast('✓ Document publié dans la bibliothèque',4000);
+    document.getElementById('bib-form').style.display='none';
+    renderBibliotheque();
+  }catch(e){
+    const msg=e.message||String(e);
+    toast('Publication impossible : '+msg+(/bucket|not found|policy|row-level/i.test(msg)?' (lance bibliotheque.sql)':''),6000);
+  }
+  btn.disabled=false;
+}
+async function bibOuvrir(id){
+  const d=bibDocs.find(x=>x.id===id);if(!d)return;
+  if(!navigator.onLine)return toast('Ouvrir un document de la bibliothèque demande internet',4500);
+  const w=window.open('','_blank');
+  const{data,error}=await sb.storage.from(BIB_BUCKET).createSignedUrl(d.fichier_path,3600);
+  if(error||!data){if(w)w.close();return toast('Impossible d\'ouvrir : '+(error?error.message:''));}
+  if(w)w.location.href=data.signedUrl;else window.location.href=data.signedUrl;
+  sb.rpc('bib_compter',{p_id:id}).then(()=>{}).catch(()=>{});
+}
+async function bibSupprimer(id){
+  const d=bibDocs.find(x=>x.id===id);if(!d)return;
+  if(!confirm('Supprimer « '+d.titre+' » de la bibliothèque ? Il ne sera plus accessible aux autres professeurs.'))return;
+  await sb.storage.from(BIB_BUCKET).remove([d.fichier_path]);
+  const{error}=await sb.from('bibliotheque').delete().eq('id',id);
+  if(error)return toast('Erreur : '+error.message);
+  toast('Document supprimé');renderBibliotheque();
+}
+
+// ===== ORDRE ALPHABÉTIQUE DES ÉLÈVES =====
+const cmpFr=(a,b)=>String(a||'').localeCompare(String(b||''),'fr',{sensitivity:'base',numeric:true});
+function trierEleves(){
+  cache.eleves.sort((a,b)=>cmpFr(a.nom,b.nom)||cmpFr(a.matricule,b.matricule));
+  const vue=document.querySelector('.section.show');
+  if(vue&&vue.id==='vue-eleves'&&currentClasse)renderElevesClasse(currentClasse.id);
+  if(document.getElementById('cj-presences')&&document.getElementById('modal-cahier').classList.contains('show')&&typeof prRender==='function')prRender();
+}
+let trierT=null;
+function planifierTri(){clearTimeout(trierT);trierT=setTimeout(trierEleves,350);}
+
+
+
+// ===== EMPLOI DU TEMPS PAR PÉRIODES =====
+const PERIODES=[{lib:'8H-10H',d:'08h00',f:'10h00'},{lib:'10H15-12H15',d:'10h15',f:'12h15'},{lib:'12H15-14H15',d:'12h15',f:'14h15'},{lib:'15H-17H',d:'15h00',f:'17h00'}];
+function minutes(h){const m=/(\d+)\s*[hH:]\s*(\d*)/.exec(h||'');return m?(+m[1])*60+(+m[2]||0):0;}
+function periodeDe(sl){
+  const m=minutes(sl.hdeb);let best=0,bd=1e9;
+  PERIODES.forEach((p,i)=>{const a=minutes(p.d),b=minutes(p.f);const dist=(m>=a&&m<b)?0:Math.min(Math.abs(m-a),Math.abs(m-b));if(dist<bd){bd=dist;best=i;}});
+  return best;
+}
+function ouvrirEdtClasse(){
+  if(!currentClasse)return;
+  const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
+  document.getElementById('ecc-titre').textContent='🗓️ Mes cours — '+currentClasse.nom+(ec?' ('+ec.abr+')':'');
+  const sl=cache.slots.filter(x=>x.classe_id===currentClasse.id);
+  document.getElementById('ecc-mat').value=(sl.find(x=>x.mat)||{}).mat||((currentUser.user_metadata||{}).matiere)||'';
+  document.getElementById('ecc-salle').value=(sl.find(x=>x.salle)||{}).salle||'';
+  let h='<table class="edt-table edt-grille"><thead><tr><th class="edt-coin"><span class="c-j">JOURS</span><span class="c-h">HORAIRES</span></th>'+JOURS.map(j=>'<th>'+j.toUpperCase()+'</th>').join('')+'</tr></thead><tbody>';
+  PERIODES.forEach((P,r)=>{
+    h+='<tr><td class="heure-col">'+P.lib+'</td>'+JOURS.map((j,ji)=>{
+      const on=sl.some(x=>x.jour===j&&periodeDe(x)===r);
+      return '<td style="text-align:center;height:46px"><input type="checkbox" id="ecc-'+ji+'-'+r+'" style="width:22px;height:22px"'+(on?' checked':'')+'></td>';
+    }).join('')+'</tr>';
+  });
+  document.getElementById('ecc-grille').innerHTML=h+'</tbody></table>';
+  openModal('modal-edt-classe');
+}
+async function enregistrerEdtClasse(){
+  if(!currentClasse)return;
+  const mat=document.getElementById('ecc-mat').value.trim(),salle=document.getElementById('ecc-salle').value.trim();
+  const cid=currentClasse.id;
+  for(let r=0;r<PERIODES.length;r++){
+    for(let ji=0;ji<JOURS.length;ji++){
+      const veut=document.getElementById('ecc-'+ji+'-'+r).checked;
+      const ex=cache.slots.filter(x=>x.classe_id===cid&&x.jour===JOURS[ji]&&periodeDe(x)===r);
+      if(veut&&!ex.length){
+        const P=PERIODES[r];
+        const d=await sbInsert('slots',{ecole_id:currentClasse.ecole_id,classe_id:cid,classe:currentClasse.nom,jour:JOURS[ji],hdeb:P.d,hfin:P.f,mat,salle,lecon:'',span:1});
+        if(d)cache.slots.unshift(d);
+      }else if(!veut&&ex.length){
+        for(const x of ex){await sbDelete('slots',x.id);cache.slots=cache.slots.filter(y=>y.id!==x.id);}
+      }else if(veut&&ex.length){
+        for(const x of ex.slice(1)){await sbDelete('slots',x.id);cache.slots=cache.slots.filter(y=>y.id!==x.id);}
+        if((ex[0].mat||'')!==mat||(ex[0].salle||'')!==salle){await sbUpdate('slots',ex[0].id,{mat,salle});ex[0].mat=mat;ex[0].salle=salle;}
+      }
+    }
+  }
+  closeModal('modal-edt-classe');
+  renderEdtGlobal();renderDemainDash();
+  toast('✓ Tes cours sont enregistrés et ajoutés à l\'emploi du temps général',4000);
+}
+function renderDemainDash(){
+  const card=document.getElementById('dash-demain-card');if(!card)return;
+  const maintenant=new Date();
+  if(maintenant.getHours()<17){card.style.display='none';return;}
+  const d=new Date();d.setDate(d.getDate()+1);
+  const l=slotsDuJour(JOURS_FR[d.getDay()]);
+  card.style.display='block';
+  document.getElementById('dash-demain-titre').textContent='🌙 Emploi du temps de demain — '+d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+  document.getElementById('dash-demain').innerHTML=l.length?l.map(edtLigne).join(''):'<div class="empty">Aucune classe demain</div>';
+}
+setInterval(()=>{const v=document.querySelector('.section.show');if(v&&v.id==='dashboard'&&currentUser)renderDemainDash();},300000);
+
 // ===== SUPABASE CRUD =====
 async function sbGet(table,filters={}){
   let q=sb.from(table).select('*').eq('user_id',currentUser.id);
@@ -1729,7 +2007,8 @@ async function chargerPhotos(){
   finally{chargementPhotos=false;}
 }
 async function sbInsert(table,obj){
-  ecrituresEnCours++;try{return await _sbInsert(table,obj);}finally{ecrituresEnCours--;}
+  if(table==='eleves')planifierTri();
+  ecrituresEnCours++;try{return await _sbInsert(table,obj);}finally{ecrituresEnCours--;if(table==='eleves')planifierTri();}
 }
 async function _sbInsert(table,obj){
   setSyncStatus('syncing');
@@ -1755,6 +2034,7 @@ async function sbDelete(table,id){
   }finally{ecrituresEnCours--;}
 }
 async function sbUpdate(table,id,obj){
+  if(table==='eleves')planifierTri();
   setSyncStatus('syncing');
   if(await pret()&&navigator.onLine){
     const{data,error}=await sb.from(table).update(obj).eq('id',id).eq('user_id',currentUser.id).select().single();
@@ -1808,6 +2088,7 @@ async function loadAllData(){
       if(!cache.extras[e.classe_id])cache.extras[e.classe_id]={};
       cache.extras[e.classe_id][e.type]=e.data||[];
     });
+    cache.eleves.sort((a,b)=>cmpFr(a.nom,b.nom)||cmpFr(a.matricule,b.matricule));
     setSyncStatus('');estPremierChargement=false;cacheChargee=true;planifierSnapshot();setTimeout(chargerPhotos,50);
   }catch(e){
     if(estReseau(e)&&await chargerSnapshot()){setSyncStatus('');refreshAllSelects();toast('📴 Mode hors ligne : tes données enregistrées sur cet appareil sont affichées',4500);return true;}
@@ -1821,11 +2102,12 @@ function showTab(t){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(t).classList.add('show');
-  const tabs=['dashboard','ecoles','devoirs-global','ressources','edt-global','alertes','messagerie','parametres','admin-abo','admin-msg'];
+  const tabs=['dashboard','ecoles','devoirs-global','ressources','bibliotheque','edt-global','alertes','messagerie','parametres','admin-abo','admin-msg'];
   const idx=tabs.indexOf(t);
   if(idx>=0)document.querySelectorAll('.nav button')[idx].classList.add('active');
   if(t==='devoirs-global')renderDevoirs();
   if(t==='ressources'){renderRessources();}
+  if(t==='bibliotheque')renderBibliotheque();
   if(t==='edt-global')renderEdtGlobal();
   if(t==='alertes')renderDemain();
   if(t==='dashboard')renderDashboard();
@@ -2055,7 +2337,7 @@ async function delEleve(id){
 function updateEcolesStats(){renderEcoles();}
 function renderElevesClasse(classeId){
   const el=document.getElementById('liste-eleves-classe');
-  const arr=cache.eleves.filter(e=>e.classe_id===classeId);
+  const arr=cache.eleves.filter(e=>e.classe_id===classeId).sort((a,b)=>cmpFr(a.nom,b.nom)||cmpFr(a.matricule,b.matricule));
   if(!arr.length){el.innerHTML='<div class="empty">Aucun élève — clique sur "+ Ajouter un élève" ou importe depuis Excel</div>';return;}
   const absAl=new Map(absencesAlertes(classeId).map(a=>[a.eleve.id,a.n]));
   el.innerHTML=arr.map((e,i)=>`
@@ -2423,14 +2705,14 @@ function filterSlotClasses(){
   document.getElementById('sl-classe').innerHTML='<option value="">--</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
 }
 async function addSlotGlobal(){
-  const hdeb=document.getElementById('sl-hdeb').value;
-  const hfin=document.getElementById('sl-hfin').value;
+  const P=PERIODES[+document.getElementById('sl-periode').value];
   const ecoleId=document.getElementById('sl-ecole').value;
   const classeId=document.getElementById('sl-classe').value;
   if(!ecoleId||!classeId)return toast('Choisir une école et une classe');
-  if(hIdx(hdeb)>=hIdx(hfin))return toast('Heure fin doit être après début');
+  const jour=document.getElementById('sl-jour').value;
+  if(cache.slots.some(x=>x.classe_id===classeId&&x.jour===jour&&periodeDe(x)===PERIODES.indexOf(P)))return toast('Ce créneau existe déjà pour cette classe');
   const cl=cache.classes.find(c=>c.id===classeId);
-  const obj={ecole_id:ecoleId,classe_id:classeId,classe:cl?cl.nom:'',jour:document.getElementById('sl-jour').value,hdeb,hfin,mat:document.getElementById('sl-mat').value,salle:document.getElementById('sl-salle').value,lecon:document.getElementById('sl-lecon').value,span:hIdx(hfin)-hIdx(hdeb)};
+  const obj={ecole_id:ecoleId,classe_id:classeId,classe:cl?cl.nom:'',jour,hdeb:P.d,hfin:P.f,mat:document.getElementById('sl-mat').value,salle:document.getElementById('sl-salle').value,lecon:document.getElementById('sl-lecon').value,span:1};
   const data=await sbInsert('slots',obj);
   if(!data)return;
   cache.slots.unshift(data);
@@ -2466,43 +2748,24 @@ function renderEdtGlobal(){
   const fe=document.getElementById('edt-global-ecole').value;
   const fc=document.getElementById('edt-global-classe').value;
   let slots=cache.slots;
-  if(fe)slots=slots.filter(s=>s.ecole_id==fe);
-  if(fc)slots=slots.filter(s=>s.classe_id==fc);
-  if(!slots.length){el.innerHTML='<div class="empty">Aucun créneau — clique sur "+ Ajouter un créneau"</div>';return;}
-  // Affichage grille
-  const occ={};
-  slots.forEach(s=>{
-    const ji=JOURS.indexOf(s.jour),hi=hIdx(s.hdeb);
-    for(let r=hi;r<hi+(s.span||1);r++){
-      if(!occ[r])occ[r]={};
-      occ[r][ji]=r===hi?{slot:s,first:true}:{skip:true};
-    }
-  });
-  let html=`<table class="edt-table">
-    <thead><tr><th style="width:55px">Heure</th>${JOURS.map(j=>`<th>${j}</th>`).join('')}</tr></thead>
-    <tbody>`;
-  for(let r=0;r<HEURES.length-1;r++){
-    html+=`<tr><td class="heure-col">${HEURES[r]}<br><span style="font-size:8px;opacity:.6">→${HEURES[r+1]}</span></td>`;
-    for(let j=0;j<6;j++){
-      const cell=occ[r]?occ[r][j]:null;
-      if(cell&&cell.skip)continue;
-      if(cell&&cell.first){
-        const s=cell.slot;
-        const ec=cache.ecoles.find(e=>e.id==s.ecole_id);
-        const col=ec?ec.couleur:'#0B4FBF';
-        html+=`<td rowspan="${s.span||1}"><div class="edt-slot" style="background:${col}15;border-left:3px solid ${col};min-height:${(s.span||1)*42}px">
-          <button class="edt-del" onclick="delSlot('${s.id}')">✕</button>
-          ${ec?`<span style="font-size:8px;font-weight:700;color:${col}">${ec.abr}</span> `:''}
-          <strong style="font-size:9px;color:${col}">${s.mat}</strong>
-          <br><span style="font-size:9px;font-weight:600">${s.classe}</span>
-          ${s.salle?`<br><span style="font-size:8px;color:#888">${s.salle}</span>`:''}
-          ${s.lecon?`<br><span style="font-size:8px;color:#666;font-style:italic">${s.lecon}</span>`:''}
-        </div></td>`;
-      }else html+=`<td></td>`;
-    }
+  if(fe)slots=slots.filter(x=>x.ecole_id==fe);
+  if(fc)slots=slots.filter(x=>x.classe_id==fc);
+  let html=`<table class="edt-table edt-grille"><thead><tr><th class="edt-coin"><span class="c-j">JOURS</span><span class="c-h">HORAIRES</span></th>${JOURS.map(j=>`<th>${j.toUpperCase()}</th>`).join('')}</tr></thead><tbody>`;
+  PERIODES.forEach((P,r)=>{
+    html+=`<tr><td class="heure-col">${P.lib}</td>`;
+    JOURS.forEach(j=>{
+      const l=slots.filter(x=>x.jour===j&&periodeDe(x)===r);
+      if(!l.length){html+='<td></td>';return;}
+      html+='<td style="padding:0">'+l.map(x=>{
+        const ec=cache.ecoles.find(e=>e.id==x.ecole_id);
+        const col=ec&&ec.couleur?ec.couleur:'#0B4FBF';
+        return `<div class="edt-bloc" style="background:${col}"><button class="edt-del" style="color:#fff" onclick="delSlot('${x.id}')">✕</button><strong>${resEsc(x.classe||getClasseNomGlobal(x.classe_id))}</strong>${x.mat?`<span class="e-mat">${resEsc(x.mat)}</span>`:''}${x.salle?`<span class="e-mat">Salle ${resEsc(x.salle)}</span>`:''}<span class="e-abr">${resEsc(ec?ec.abr:'')}</span></div>`;
+      }).join('')+'</td>';
+    });
     html+='</tr>';
-  }
+  });
   html+='</tbody></table>';
+  if(!slots.length)html+='<div class="empty">Aucun cours pour le moment. Dans chaque classe, touche « 🗓️ Mes cours » pour choisir tes jours et périodes : ils apparaissent ici automatiquement.</div>';
   el.innerHTML=html;
 }
 
@@ -3180,7 +3443,7 @@ function edtLigne(sl){
     <strong>${sl.hdeb}–${sl.hfin}</strong> · <strong style="color:${col}">${ec?ec.abr:''}</strong> · <strong>${sl.classe||getClasseNomGlobal(sl.classe_id)}</strong>${sl.mat?' — '+sl.mat:''}${sl.salle?' · Salle '+sl.salle:''}${sl.lecon?'<div style="color:#888;font-size:11px">📖 '+sl.lecon+'</div>':''}
   </div>`;
 }
-function slotsDuJour(nomJour){return cache.slots.filter(s=>s.jour===nomJour).sort((a,b)=>hIdx(a.hdeb)-hIdx(b.hdeb));}
+function slotsDuJour(nomJour){return cache.slots.filter(s=>s.jour===nomJour).sort((a,b)=>minutes(a.hdeb)-minutes(b.hdeb));}
 function renderDemain(){
   const el=document.getElementById('demain-liste');
   const d=new Date();d.setDate(d.getDate()+1);
@@ -3197,6 +3460,7 @@ function renderDemain(){
   }
 }
 function renderDashboard(){
+  renderDemainDash();
   renderDashAbsences();
   const d=new Date();
   const moy=(arr)=>{const v=arr.filter(n=>n.note!==null&&n.note!==''&&!isNaN(parseFloat(n.note))).map(n=>parseFloat(n.note)/(parseFloat(n.bareme)||20)*20);return v.length?(v.reduce((a,b)=>a+b,0)/v.length):null;};
@@ -3719,7 +3983,7 @@ function ouvrirMenu(){
   const adm=estAdmin(),cur=sectionActuelle(),n=nbNonLus();
   const items=adm
     ?[['admin-abo','💼 Abonnements'],['admin-msg','📨 Messages',1],['parametres','🔒 Compte']]
-    :[['dashboard','🏠 Tableau de bord'],['ecoles','🏫 Écoles'],['devoirs-global','📋 Devoirs'],['ressources','📁 Ressources'],['edt-global','🗓️ Emploi du temps'],['alertes','🔔 Alertes'],['messagerie','💬 Messagerie',2],['propositions','💡 Propositions',1],['parametres','⚙️ Paramètres']];
+    :[['dashboard','🏠 Tableau de bord'],['ecoles','🏫 Écoles'],['devoirs-global','📋 Devoirs'],['ressources','📁 Ressources'],['bibliotheque','🏛️ Bibliothèque'],['edt-global','🗓️ Emploi du temps'],['alertes','🔔 Alertes'],['messagerie','💬 Messagerie',2],['propositions','💡 Propositions',1],['parametres','⚙️ Paramètres']];
   document.getElementById('menu-liste').innerHTML=items.filter(x=>!(monCycle==='primaire'&&x[0]==='devoirs-global')).map(([id,label,b])=>
     `<button class="m-item${cur===id?' actif':''}" onclick="menuAller('${id}')"><span>${label}</span>${b&&(b===2?chatTotal():n)>0?`<span class="badge-notif" style="display:inline-block">${b===2?chatTotal():n}</span>`:''}</button>`).join('')+
     `<div style="border-top:1px solid #e5e5e0;margin:8px 0"></div><button class="m-item" style="color:#c0392b" onclick="fermerMenu();logout()">🚪 Déconnexion</button>`;

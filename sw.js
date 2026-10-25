@@ -1,7 +1,7 @@
-// KOTO — service worker : l'application s'ouvre même sans internet.
+// KOTO — service worker : fonctionnement sans internet.
 // Les données (Supabase) ne sont jamais mises en cache ici : elles sont gardées par l'application elle-même.
-const VERSION='koto-v2';
-const COEUR=['./','index.html','manifest.json','icon-192.png','icon-512.png','apple-touch-icon.png'];
+const VERSION='koto-v4';
+const COEUR=['./','index.html','manifest.json','icon-192.png','icon-512.png','apple-touch-icon.png','favicon-32.png'];
 const BIBLIOTHEQUES=[
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2'
@@ -23,10 +23,9 @@ self.addEventListener('fetch',e=>{
   const memeSite=url.origin===location.origin;
   const cdn=/cdn\.jsdelivr\.net|cdnjs\.cloudflare\.com/.test(url.hostname);
   if(memeSite){
-    // réseau d'abord (toujours la dernière version), copie locale si pas d'internet
     e.respondWith(fetch(req).then(r=>{if(r.ok){const c=r.clone();caches.open(VERSION).then(x=>x.put(req,c));}return r;}).catch(()=>caches.match(req,{ignoreSearch:true}).then(r=>r||caches.match('index.html'))));
   }else if(cdn){
-    // bibliothèques : copie locale d'abord
     e.respondWith(caches.match(req).then(r=>r||fetch(req).then(n=>{const c=n.clone();caches.open(VERSION).then(x=>x.put(req,c));return n;})));
   }
 });
+
