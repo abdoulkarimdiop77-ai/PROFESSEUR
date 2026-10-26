@@ -216,6 +216,8 @@ body.dark .stat{background:#0f3460}
 /* DEVOIR ÉLÈVE */
 .eleve-page{display:none;position:fixed;inset:0;background:#f5f5f0;z-index:2000;overflow-y:auto;padding:16px}
 .eleve-page.show{display:block}
+body.examen .eleve-page{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+body.examen .eleve-page textarea{user-select:text;-webkit-user-select:text}
 /* SEANCE */
 .seance-card{border:1px solid #e5e5e0;border-radius:9px;padding:12px;margin-bottom:9px;background:#fff}
 /* DRIVE LINK */
@@ -346,11 +348,24 @@ body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
       <div class="card-title">🔐 Connexion élève</div>
       <div class="form-group"><label>Nom complet</label><input id="ep-nom" placeholder="Fatoumata Diallo"></div>
       <div class="form-group"><label>Mot de passe</label><input id="ep-pwd" type="password"></div>
+      <div style="background:#FFF3DC;border:1px solid #F5D08A;border-radius:8px;padding:9px 11px;margin-bottom:9px;font-size:11.5px;color:#5c3d00;line-height:1.5">
+        <b>⚠️ Règles du devoir surveillé</b><br>
+        • Le <b>chrono démarre dès que tu te connectes</b>.<br>
+        • Ne quitte <b>jamais</b> cette page : changer d'application, ouvrir une notification, verrouiller l'écran, recharger la page ou ouvrir une fenêtre par-dessus <b>bloque immédiatement ton devoir</b> (fraude suspectée, ton professeur est prévenu).<br>
+        • Avant de commencer, active le mode <b>« Ne pas déranger »</b> de ton téléphone et ferme les autres applications.<br>
+        • Garde ta connexion internet active jusqu'à l'envoi.
+      </div>
       <div id="ep-err" style="font-size:11px;color:#c0392b;margin-bottom:7px"></div>
-      <button class="btn btn-primary" onclick="eleveLogin()">Connexion →</button>
+      <button class="btn btn-primary" onclick="eleveLogin()">Commencer le devoir →</button>
     </div>
-    <div id="ep-form" style="display:none"><div id="ep-questions"></div><button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="eleveSubmit()">📤 Envoyer</button></div>
-    <div id="ep-done" style="display:none" class="card"><div style="text-align:center;padding:20px"><div style="font-size:36px">✅</div><div style="font-size:15px;font-weight:600;margin-top:6px">Devoir envoyé !</div></div></div>
+    <div id="ep-form" style="display:none">
+      <div style="position:sticky;top:0;z-index:5;margin:-2px 0 8px"><div id="ep-chrono" style="background:#0B4FBF;color:#fff;text-align:center;font-weight:700;font-size:18px;padding:8px;border-radius:9px;box-shadow:0 2px 8px rgba(0,0,0,.2)">⏱ 00:00</div></div>
+      <div id="ep-questions"></div>
+      <div id="ep-envoi-msg" style="font-size:12px;color:#c0392b;margin-top:8px;text-align:center"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="eleveSubmit()">📤 Envoyer</button>
+    </div>
+    <div id="ep-done" style="display:none" class="card"><div style="text-align:center;padding:20px"><div style="font-size:36px">✅</div><div style="font-size:15px;font-weight:600;margin-top:6px" data-etat>Devoir envoyé !</div></div></div>
+    <div id="ep-bloque" style="display:none;border:2px solid #c0392b;background:#fff5f5" class="card"><div style="text-align:center;padding:20px"><div style="font-size:42px">🚫</div><div style="font-size:16px;font-weight:700;color:#c0392b;margin-top:6px">Devoir bloqué</div><div style="font-size:12px;margin-top:8px;color:#444">Tu as quitté l'application pendant le devoir : cela est considéré comme une <b>fraude suspectée</b>.</div><div style="font-size:11px;color:#791F1F;margin-top:6px">Motif : <span id="ep-bloque-motif"></span></div><div style="font-size:11px;color:#555;margin-top:8px" id="ep-bloque-etat"></div></div></div>
   </div>
 </div>
 
@@ -462,6 +477,8 @@ body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
         </div>
         <div class="form-group"><label>Contenu du cours</label><textarea id="sj-contenu" placeholder="Résumé..."></textarea></div>
         <div class="form-group"><label>Observations</label><textarea id="sj-obs" placeholder="Remarques..."></textarea></div>
+        <div class="form-group"><label>📎 Importer la leçon (Word, PDF, PowerPoint…)</label><input type="file" id="sj-fichier" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg" onchange="seanceFichiersChoisis(this)"><div id="sj-fichier-info" style="font-size:10px;color:#0B4FBF;margin-top:3px"></div></div>
+        <input type="file" id="sj-ajout-input" multiple style="display:none" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg" onchange="seanceAjoutEnvoi(this)">
         <div style="display:flex;gap:7px">
           <button class="btn btn-primary" onclick="enregistrerSeance()">💾 Enregistrer</button>
           <button class="btn" onclick="toggleFormSeance()">Annuler</button>
@@ -743,9 +760,11 @@ body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
         <select id="notes-mat-filter" onchange="renderNotesClasse()" style="width:160px">
           <option value="">Toutes matières</option>
         </select>
+        <select id="notes-mois" onchange="renderNotesClasse()" style="width:190px"></select>
         <button class="btn btn-primary btn-sm" onclick="sauvegarderNotesClasse()">💾 Sauvegarder</button>
+        <button class="btn btn-warn btn-sm" id="notes-print-mois" onclick="imprimerFicheMois()">🖨️ Imprimer la fiche du mois</button>
         <button class="btn btn-info btn-sm" onclick="exporterNotesExcel()">📊 Excel</button>
-        <button class="btn btn-warn btn-sm" onclick="exporterNotesPDF()">📄 PDF</button>
+        <button class="btn btn-sm" onclick="exporterNotesPDF()">📄 Fiche générale (PDF)</button>
       </div>
     </div>
     <div class="alert-info alert-box" style="font-size:11px">
@@ -1172,6 +1191,12 @@ body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
     </div>
     <div class="form-group"><label>Consignes</label><textarea id="dv-consignes"></textarea></div>
     <div class="form-group"><label>📎 Lien fichier sujet</label><input id="dv-drive-link" placeholder="https://drive.google.com/..."></div>
+    <div style="background:#FFF7E6;border:1px solid #F5D08A;border-radius:8px;padding:9px 11px;margin:8px 0">
+      <strong style="font-size:12px">📥 Importer un devoir Word ou PDF</strong>
+      <div style="font-size:10.5px;color:#666;margin:3px 0 6px">KOTO lit ton fichier et le transforme en <b>QCM</b> et <b>questions ouvertes</b> (les images d'un Word sont reprises). Numérote les questions (1. 2. 3.) et les choix (A) B) C) D)). Tu peux ensuite tout corriger.</div>
+      <input type="file" id="dv-import" accept=".docx,.pdf,.txt" onchange="dvImporter(this)">
+      <div id="dv-import-info" style="font-size:11px;margin-top:5px"></div>
+    </div>
     <div style="border-top:1px solid #e5e5e0;margin:10px 0;padding-top:10px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <strong style="font-size:12px">Questions en ligne (optionnel)</strong>
@@ -2532,12 +2557,13 @@ function ouvrirNotesClasse(){
   if(mats.length){
     document.getElementById('notes-mat-filter').innerHTML='<option value="">Toutes matières</option>'+mats.map(m=>`<option>${m}</option>`).join('');
   }
+  notesInitMois();
   goTo('_notes');
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
   document.getElementById('vue-notes').classList.add('show');
   renderNotesClasse();
 }
-function renderNotesClasse(){
+function renderNotesGenerale(){
   const el=document.getElementById('notes-classe-content');
   const eleves=cache.eleves.filter(e=>e.classe_id===currentClasse.id);
   if(!eleves.length){el.innerHTML='<div class="empty">Aucun élève dans cette classe</div>';return;}
@@ -2636,6 +2662,12 @@ function noteChanged(input){
   // Update couleur
   input.style.background=noteBg(val);
   input.style.color=noteColor(val);
+  const tr=input.closest('tr'),mc=tr&&tr.querySelector('.moy-mois');
+  if(mc){
+    const vs=[...tr.querySelectorAll('.note-input')].map(x=>parseFloat(x.value)).filter(n=>!isNaN(n));
+    const m=vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null;
+    mc.textContent=fmtNote(m);mc.style.background=m===null?'':noteBg(m);mc.style.color=m===null?'':noteColor(m);
+  }
 }
 
 async function sauvegarderNotesClasse(){
@@ -2661,7 +2693,8 @@ async function sauvegarderNotesClasse(){
   }
   notesChanges={};
   setSyncStatus('');
-  toast(`${saved} note(s) sauvegardée(s) ✓`);
+  renderNotesClasse();
+  toast(`${saved} note(s) sauvegardée(s) ✓ — fiche générale à jour`);
 }
 
 async function exporterNotesExcel(){
@@ -2696,20 +2729,103 @@ async function exporterNotesExcel(){
   toast('Fichier Excel téléchargé ✓');
 }
 
-function exporterNotesPDF(){
+// ===== FICHES DE NOTES : PAR MOIS + GÉNÉRALE =====
+function notesValeurs(e,mat){
+  const oral=Array(9).fill(null),ecrit=Array(9).fill(null);
+  cache.notes.filter(n=>n.eleve_id===e.id&&n.classe_id===currentClasse.id&&(!mat||n.mat===mat)).forEach(n=>{
+    if(n.mois_idx!==undefined&&n.mois_idx!==null){
+      if(n.type_note==='oral')oral[n.mois_idx]=n.note;
+      else if(n.type_note==='ecrit')ecrit[n.mois_idx]=n.note;
+    }
+  });
+  getExtra('bonus',currentClasse.id).filter(b=>b.eleveId===e.id).forEach(b=>{
+    const i=parseInt(b.moisIdx||0);
+    if(i>=0&&i<9){oral[i]=Math.min(20,(parseFloat(oral[i])||0)+b.points);}
+  });
+  getExtra('sanctions',currentClasse.id).filter(s=>s.eleveId===e.id&&s.points>0).forEach(s=>{
+    const i=parseInt(s.moisIdx||0);
+    if(i>=0&&i<9){oral[i]=Math.max(0,(parseFloat(oral[i])||0)-s.points);}
+  });
+  return{oral,ecrit};
+}
+function moyenneListe(a){
+  const v=a.filter(n=>n!==null&&n!==''&&n!==undefined&&!isNaN(parseFloat(n))).map(n=>parseFloat(n));
+  return v.length?v.reduce((s,n)=>s+n,0)/v.length:null;
+}
+function fmtNote(n){return n===null||n===undefined||isNaN(n)?'—':(Math.round(n*100)/100).toString().replace('.',',');}
+function notesMoisChoisi(){
+  const s=document.getElementById('notes-mois');
+  return(!s||s.value==='')?null:parseInt(s.value);
+}
+function notesInitMois(){
+  const s=document.getElementById('notes-mois');
+  const d=new Date();
+  const idx=(d.getFullYear()-2026)*12+d.getMonth()-9;
+  s.innerHTML='<option value="">📚 Fiche générale (tous les mois)</option>'+MOIS.map((m,i)=>`<option value="${i}">🗓️ Fiche de ${m}</option>`).join('');
+  s.value=(idx>=0&&idx<9)?String(idx):'';
+}
+function renderNotesClasse(){
+  const mi=notesMoisChoisi();
+  const b=document.getElementById('notes-print-mois');
+  if(b)b.style.display=mi===null?'none':'';
+  if(mi===null)renderNotesGenerale();else renderNotesMois(mi);
+}
+function renderNotesMois(mi){
   const el=document.getElementById('notes-classe-content');
+  const eleves=cache.eleves.filter(e=>e.classe_id===currentClasse.id);
+  if(!eleves.length){el.innerHTML='<div class="empty">Aucun élève dans cette classe</div>';return;}
+  const mat=document.getElementById('notes-mat-filter').value;
+  const lignes=eleves.map(e=>{const v=notesValeurs(e,mat);return{e,o:v.oral[mi],x:v.ecrit[mi]};});
+  const mo=moyenneListe(lignes.map(l=>l.o)),mx=moyenneListe(lignes.map(l=>l.x)),mm=moyenneListe(lignes.map(l=>moyenneListe([l.o,l.x])));
+  let html=`<div class="alert-info alert-box" style="font-size:12px;margin-bottom:8px">🗓️ <strong>Fiche de ${MOIS[mi]}</strong> — remplis les notes du mois puis clique sur <strong>💾 Sauvegarder</strong> : elles vont automatiquement dans la <strong>fiche générale</strong>.<br>Moyenne de la classe : Oral <strong>${fmtNote(mo)}</strong> · Écrit <strong>${fmtNote(mx)}</strong> · Mois <strong>${fmtNote(mm)}</strong></div>
+  <table class="notes-table"><thead><tr><th class="nom-col">N°</th><th class="nom-col" style="min-width:170px">Prénom & Nom</th><th style="min-width:80px">Matricule</th><th style="background:#E6F1FB;color:#0C447C;min-width:80px">Oral /20</th><th style="background:#E1F5EE;color:#085041;min-width:80px">Écrit /20</th><th style="min-width:80px">Moyenne du mois</th></tr></thead><tbody>`;
+  lignes.forEach((l,i)=>{
+    const e=l.e,m=moyenneListe([l.o,l.x]);
+    html+=`<tr><td style="color:#888;font-size:11px">${i+1}</td><td class="nom-col"><strong>${resEsc(e.nom)}</strong></td><td><span class="matricule-badge" style="font-size:9px">${resEsc(e.matricule||'—')}</span></td>
+    <td style="padding:2px"><input class="note-input oral" type="number" step="0.5" min="0" max="20" inputmode="decimal" style="width:100%;min-width:64px" value="${l.o!==null&&l.o!==undefined?l.o:''}" placeholder="—" data-eleve="${e.id}" data-mois="${mi}" data-type="oral" onchange="noteChanged(this)"></td>
+    <td style="padding:2px"><input class="note-input ecrit" type="number" step="0.5" min="0" max="20" inputmode="decimal" style="width:100%;min-width:64px" value="${l.x!==null&&l.x!==undefined?l.x:''}" placeholder="—" data-eleve="${e.id}" data-mois="${mi}" data-type="ecrit" onchange="noteChanged(this)"></td>
+    <td><span class="moy-cell moy-mois" style="background:${m===null?'':noteBg(m)};color:${m===null?'':noteColor(m)}">${fmtNote(m)}</span></td></tr>`;
+  });
+  el.innerHTML=html+'</tbody></table>';
+}
+function ficheStatique(mi){
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
-  const printContent=`
-    <div style="padding:16px;font-family:Arial">
-      <h2 style="text-align:center;font-size:16px">${ec?ec.nom:''}</h2>
-      <h3 style="text-align:center;font-size:14px;color:#555">Fiche de notes — Classe : ${currentClasse.nom} — Année 2026-2027</h3>
-      <p style="text-align:center;font-size:11px;color:#888">Imprimé le ${new Date().toLocaleDateString('fr-FR')}</p>
-      <div style="overflow-x:auto;margin-top:10px">${el.innerHTML}</div>
-    </div>`;
+  const mat=document.getElementById('notes-mat-filter').value;
+  const eleves=cache.eleves.filter(e=>e.classe_id===currentClasse.id);
+  const th='style="background:#eef2fb"';
+  let tete=`<div style="text-align:center"><div style="font-size:17px;font-weight:700">${resEsc(ec?ec.nom:'')}</div>
+    <div style="font-size:14px;margin-top:3px">FICHE DE NOTES${mi===null?' — GÉNÉRALE':' — '+resEsc(MOIS[mi]).toUpperCase()}</div>
+    <div style="font-size:12px;color:#444;margin-top:2px">Classe : <b>${resEsc(currentClasse.nom)}</b>${mat?' · Matière : <b>'+resEsc(mat)+'</b>':''} · Année scolaire 2026-2027</div></div>`;
+  let tab;
+  if(mi!==null){
+    const lignes=eleves.map(e=>{const v=notesValeurs(e,mat);return{e,o:v.oral[mi],x:v.ecrit[mi]};});
+    tab=`<table><thead><tr><th ${th}>N°</th><th ${th} style="text-align:left">Prénom & Nom</th><th ${th}>Matricule</th><th ${th}>Oral /20</th><th ${th}>Écrit /20</th><th ${th}>Moyenne</th><th ${th} style="width:28%">Observations</th></tr></thead><tbody>`+
+      lignes.map((l,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${resEsc(l.e.nom)}</td><td>${resEsc(l.e.matricule||'')}</td><td>${fmtNote(l.o)}</td><td>${fmtNote(l.x)}</td><td><b>${fmtNote(moyenneListe([l.o,l.x]))}</b></td><td></td></tr>`).join('')+
+      `<tr><td colspan="3" style="text-align:right"><b>Moyenne de la classe</b></td><td><b>${fmtNote(moyenneListe(lignes.map(l=>l.o)))}</b></td><td><b>${fmtNote(moyenneListe(lignes.map(l=>l.x)))}</b></td><td><b>${fmtNote(moyenneListe(lignes.map(l=>moyenneListe([l.o,l.x]))))}</b></td><td></td></tr></tbody></table>`;
+  }else{
+    tab=`<table><thead><tr><th ${th} rowspan="2">N°</th><th ${th} rowspan="2" style="text-align:left">Prénom & Nom</th>${MOIS.map(m=>`<th ${th} colspan="2">${resEsc(m)}</th>`).join('')}<th ${th} rowspan="2">Moy.</th></tr><tr>${MOIS.map(()=>`<th ${th}>O</th><th ${th}>É</th>`).join('')}</tr></thead><tbody>`+
+      eleves.map((e,i)=>{const v=notesValeurs(e,mat);return`<tr><td>${i+1}</td><td style="text-align:left;white-space:nowrap">${resEsc(e.nom)}</td>${MOIS.map((m,k)=>`<td>${fmtNote(v.oral[k])}</td><td>${fmtNote(v.ecrit[k])}</td>`).join('')}<td><b>${fmtNote(moyenneListe([...v.oral,...v.ecrit]))}</b></td></tr>`;}).join('')+`</tbody></table>
+      <div style="font-size:10px;margin-top:4px">O = note orale · É = note écrite (sur 20)</div>`;
+  }
+  const pied=`<div style="display:flex;justify-content:space-between;margin-top:26px;font-size:12px"><div>Fait le ${new Date().toLocaleDateString('fr-FR')}</div><div style="text-align:center">Le professeur<br><br><br>____________________</div></div>`;
+  return`<html><head><meta charset="utf-8"><title>Fiche de notes</title><style>@page{size:${mi===null?'landscape':'portrait'};margin:12mm}body{font-family:Arial,sans-serif;font-size:${mi===null?'9':'12'}px;color:#111}table{border-collapse:collapse;width:100%;margin-top:12px}th,td{border:1px solid #888;padding:${mi===null?'2px 3px':'5px 6px'};text-align:center}</style></head><body>${tete}${tab}${pied}</body></html>`;
+}
+function imprimerFiche(mi){
   const w=window.open('','_blank');
-  w.document.write('<html><head><style>body{font-family:Arial;font-size:10px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #ccc;padding:3px 4px}th{background:#f0f0f0}</style></head><body>'+printContent+'</body></html>');
-  w.document.close();w.print();
-  toast('Ouverture PDF ✓ — Utilise "Enregistrer en PDF" dans l\'imprimante');
+  if(!w)return toast('Autorise les fenêtres pop-up pour imprimer',4500);
+  w.document.write(ficheStatique(mi));w.document.close();w.focus();
+  setTimeout(()=>{try{w.print();}catch(e){}},400);
+}
+async function imprimerFicheMois(){
+  const mi=notesMoisChoisi();
+  if(mi===null)return toast('Choisis d\'abord un mois');
+  if(Object.keys(notesChanges).length)await sauvegarderNotesClasse();
+  imprimerFiche(mi);
+}
+async function exporterNotesPDF(){
+  if(Object.keys(notesChanges).length)await sauvegarderNotesClasse();
+  imprimerFiche(null);
+  toast('Choisis « Enregistrer en PDF » dans l\'impression',5000);
 }
 
 // ===== EDT GLOBAL =====
@@ -2821,16 +2937,76 @@ function toggleFormSeance(){
 async function enregistrerSeance(){
   const date=document.getElementById('sj-date').value;
   const mat=document.getElementById('sj-mat').value.trim();
-  const lecon=document.getElementById('sj-lecon').value.trim();
-  if(!date||!mat||!lecon)return toast('Date, matière et leçon requis');
-  const seance={id:Date.now(),date,mat,lecon,hdeb:document.getElementById('sj-hdeb').value,hfin:document.getElementById('sj-hfin').value,contenu:document.getElementById('sj-contenu').value.trim(),obs:document.getElementById('sj-obs').value.trim(),presences:{}};
+  let lecon=document.getElementById('sj-lecon').value.trim();
+  const inp=document.getElementById('sj-fichier');
+  const fichiers=[...(inp.files||[])];
+  if(!lecon&&fichiers.length)lecon=fichiers[0].name.replace(/\.[^.]+$/,'');
+  if(!date||!mat||!lecon)return toast('Date, matière et leçon (ou un fichier) requis');
+  if(fichiers.length&&!navigator.onLine)return toast('Importer un fichier demande internet. Enregistre sans fichier ou reconnecte-toi.',5000);
+  const joints=[];
+  for(const f of fichiers){
+    if(f.size>25*1048576){toast(f.name+' dépasse 25 Mo : ignoré',4500);continue;}
+    const path=currentUser.id+'/seances/'+resUid()+'-'+resNomSur(f.name);
+    const{error}=await sb.storage.from(RES_BUCKET).upload(path,f,{contentType:f.type||resMime({nom:f.name}),upsert:false});
+    if(error){
+      if(/bucket|not found|row-level|policy|security/i.test(error.message)){openModal('modal-res-aide');toast('Il faut d\'abord activer le stockage (une seule fois)',5000);}
+      else toast('Envoi impossible : '+error.message,5000);
+      return;
+    }
+    joints.push({nom:f.name,path,taille:f.size});
+  }
+  const seance={id:Date.now(),date,mat,lecon,hdeb:document.getElementById('sj-hdeb').value,hfin:document.getElementById('sj-hfin').value,contenu:document.getElementById('sj-contenu').value.trim(),obs:document.getElementById('sj-obs').value.trim(),presences:{},fichiers:joints};
   cache.eleves.filter(e=>e.classe_id===currentCahierClasseId).forEach(e=>{seance.presences[e.id]='P';});
   const seances=getExtra('seances',currentCahierClasseId);
   seances.push(seance);
   await saveExtra('seances',currentCahierClasseId,seances);
   toggleFormSeance();
   ['sj-mat','sj-lecon','sj-hdeb','sj-hfin','sj-contenu','sj-obs'].forEach(id=>document.getElementById(id).value='');
+  inp.value='';document.getElementById('sj-fichier-info').textContent='';
   renderSeances();toast('Séance enregistrée ✓');
+}
+function seanceFichiersChoisis(inp){
+  const n=(inp.files||[]).length;
+  document.getElementById('sj-fichier-info').textContent=n?('📎 '+[...inp.files].map(f=>f.name).join(', ')):'';
+}
+async function seanceOuvrir(seanceId,idx){
+  const s=getExtra('seances',currentCahierClasseId).find(x=>x.id===seanceId);
+  const f=s&&(s.fichiers||[])[idx];if(!f)return;
+  if(!navigator.onLine)return toast('Ouvrir la leçon demande internet',4000);
+  const{data,error}=await sb.storage.from(RES_BUCKET).createSignedUrl(f.path,3600);
+  if(error||!data)return toast('Fichier introuvable');
+  window.open(data.signedUrl,'_blank','noopener');
+}
+let seanceAjoutId=null;
+function seanceAjouterFichier(seanceId){
+  seanceAjoutId=seanceId;
+  document.getElementById('sj-ajout-input').click();
+}
+async function seanceAjoutEnvoi(inp){
+  const files=[...inp.files];inp.value='';
+  if(!files.length||seanceAjoutId===null)return;
+  if(!navigator.onLine)return toast('Importer un fichier demande internet',4500);
+  const seances=getExtra('seances',currentCahierClasseId);
+  const s=seances.find(x=>x.id===seanceAjoutId);if(!s)return;
+  s.fichiers=s.fichiers||[];
+  for(const f of files){
+    if(f.size>25*1048576){toast(f.name+' dépasse 25 Mo : ignoré',4500);continue;}
+    const path=currentUser.id+'/seances/'+resUid()+'-'+resNomSur(f.name);
+    const{error}=await sb.storage.from(RES_BUCKET).upload(path,f,{contentType:f.type||resMime({nom:f.name}),upsert:false});
+    if(error){toast('Envoi impossible : '+error.message,5000);continue;}
+    s.fichiers.push({nom:f.name,path,taille:f.size});
+  }
+  await saveExtra('seances',currentCahierClasseId,seances);
+  renderSeances();toast('Leçon ajoutée ✓');
+}
+async function seanceRetirerFichier(seanceId,idx){
+  if(!confirm('Retirer ce fichier de la séance ?'))return;
+  const seances=getExtra('seances',currentCahierClasseId);
+  const s=seances.find(x=>x.id===seanceId);if(!s||!s.fichiers)return;
+  const f=s.fichiers.splice(idx,1)[0];
+  await saveExtra('seances',currentCahierClasseId,seances);
+  try{if(f&&navigator.onLine)await sb.storage.from(RES_BUCKET).remove([f.path]);}catch(e){}
+  renderSeances();
 }
 async function togglePresence(seanceId,eleveId){
   const seances=getExtra('seances',currentCahierClasseId);
@@ -2843,9 +3019,16 @@ async function togglePresence(seanceId,eleveId){
   btn.textContent=s.presences[eleveId];
 }
 async function delSeance(seanceId){
-  const seances=getExtra('seances',currentCahierClasseId).filter(s=>s.id!==seanceId);
+  const anc=getExtra('seances',currentCahierClasseId);
+  const s=anc.find(x=>x.id===seanceId);
+  const seances=anc.filter(x=>x.id!==seanceId);
   await saveExtra('seances',currentCahierClasseId,seances);
+  try{if(s&&(s.fichiers||[]).length&&navigator.onLine)await sb.storage.from(RES_BUCKET).remove(s.fichiers.map(f=>f.path));}catch(e){}
   renderSeances();
+}
+function seanceChips(s){
+  const fs=s.fichiers||[];
+  return `<div style="margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:2px">${fs.map((f,i)=>`<span class="file-chip" style="cursor:pointer" onclick="seanceOuvrir(${s.id},${i})">${resIcone(f.nom)} ${resEsc(f.nom)} <b onclick="event.stopPropagation();seanceRetirerFichier(${s.id},${i})" style="color:#c0392b;margin-left:3px">✕</b></span>`).join('')}<button class="btn btn-xs" onclick="seanceAjouterFichier(${s.id})">📎 Ajouter la leçon (Word/PDF)</button></div>`;
 }
 function renderSeances(){
   const el=document.getElementById('liste-seances');
@@ -2864,6 +3047,7 @@ function renderSeances(){
           <div style="font-size:13px;font-weight:600;margin-top:3px">${s.lecon}</div>
           ${s.contenu?`<div style="font-size:11px;color:#666;margin-top:2px">${s.contenu}</div>`:''}
           ${s.obs?`<div style="font-size:11px;color:#888;font-style:italic">💬 ${s.obs}</div>`:''}
+          ${seanceChips(s)}
         </div>
         <div style="display:flex;gap:5px;align-items:center">
           <span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:20px;font-size:10px">✓ ${nbP}</span>
@@ -3105,22 +3289,252 @@ function getClasseNomGlobal(id){const c=cache.classes.find(x=>x.id===id);return 
 // ===== DEVOIRS =====
 let dvQArr=[];
 function ajouterQuestion(type){
-  dvQArr.push({id:Date.now(),type,enonce:'',options:type==='qcm'?['','','','']:null,reponse:''});
+  dvQArr.push({id:Date.now(),type,enonce:'',options:type==='qcm'?['','','','']:null,reponse:'',image:''});
   renderQBuilder();
 }
+// ===== IMPORT D'UN DEVOIR WORD / PDF → QCM + QUESTIONS OUVERTES =====
+const DV_LIBS={
+  mammoth:'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js',
+  pdfjs:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
+  pdfworker:'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
+};
+const dvLibsCharge={};
+function dvCharger(cle){
+  if(dvLibsCharge[cle])return dvLibsCharge[cle];
+  dvLibsCharge[cle]=new Promise((ok,ko)=>{
+    const s=document.createElement('script');s.src=DV_LIBS[cle];
+    s.onload=ok;s.onerror=()=>{delete dvLibsCharge[cle];ko(new Error('Impossible de charger l\'outil de lecture (internet requis).'));};
+    document.head.appendChild(s);
+  });
+  return dvLibsCharge[cle];
+}
+// --- Lignes depuis du HTML (Word) ---
+function dvLignesHtml(html){
+  const doc=new DOMParser().parseFromString(html,'text/html');
+  const out=[];
+  function propre(el){
+    let t='';const imgs=[];
+    el.childNodes.forEach(n=>{
+      if(n.nodeType===3){t+=n.textContent;}
+      else if(n.nodeType===1){
+        const tg=n.tagName;
+        if(tg==='OL'||tg==='UL')return;
+        if(tg==='IMG'){const s=n.getAttribute('src')||'';if(/^data:image\//i.test(s))imgs.push(s);return;}
+        if(tg==='BR'){t+=' ';return;}
+        const r=propre(n);t+=r.t;r.imgs.forEach(i=>imgs.push(i));
+      }
+    });
+    return{t:t.replace(/\s+/g,' ').trim(),imgs};
+  }
+  function walk(parent,niveau){
+    [...parent.children].forEach(ch=>{
+      const tg=ch.tagName;
+      if(tg==='OL'||tg==='UL'){
+        const items=[...ch.children].filter(x=>x.tagName==='LI');
+        const prev=out[out.length-1];
+        const options=niveau>0||!!(prev&&prev.kind!=='opt'&&items.length>=2&&items.length<=6&&/[?:]\s*$/.test(prev.t)&&items.every(li=>propre(li).t.length<=200));
+        items.forEach((li,k)=>{
+          const r=propre(li);
+          if(r.t||r.imgs.length)out.push({t:r.t,imgs:r.imgs,kind:options?'opt':'q',idx:k});
+          walk(li,niveau+1);
+        });
+      }else if(tg==='TABLE'){
+        [...ch.querySelectorAll('tr')].forEach(tr=>{
+          const r=propre(tr);if(r.t||r.imgs.length)out.push({t:r.t,imgs:r.imgs,kind:'p'});
+        });
+      }else{
+        const r=propre(ch);
+        if(r.t||r.imgs.length)out.push({t:r.t,imgs:r.imgs,kind:'p'});
+        if(ch.querySelector&&ch.querySelector('ol,ul'))walk(ch,niveau);
+      }
+    });
+  }
+  walk(doc.body,0);
+  return out;
+}
+// --- Lignes depuis un PDF (texte seulement) ---
+async function dvLignesPdf(buf){
+  await dvCharger('pdfjs');
+  pdfjsLib.GlobalWorkerOptions.workerSrc=DV_LIBS.pdfworker;
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const out=[];
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const tc=await page.getTextContent();
+    const rows=[];
+    tc.items.forEach(it=>{
+      if(!it.str||!it.str.trim())return;
+      const y=it.transform[5],x=it.transform[4];
+      let r=rows.find(r=>Math.abs(r.y-y)<3);
+      if(!r){r={y,items:[]};rows.push(r);}
+      r.items.push({x,s:it.str});
+    });
+    rows.sort((a,b)=>b.y-a.y);
+    rows.forEach(r=>{
+      r.items.sort((a,b)=>a.x-b.x);
+      const t=r.items.map(i=>i.s).join(' ').replace(/\s+/g,' ').trim();
+      if(t)out.push({t,imgs:[],kind:'p'});
+    });
+  }
+  return out;
+}
+// --- Analyse des lignes → questions ---
+function dvParser(lignes){
+  const RQ_MOT=/^\s*(?:question|exercice|exo|q)\s*(?:n°\s*)?(\d{1,3})\s*[.)\]:\-–—]?\s*(.*)$/i;
+  const RQ_NUM=/^\s*(?:n°\s*)?(\d{1,3})\s*[.)\]:\-–—]\s*(.*)$/;
+  const ROPT=/^\s*\(?([A-Ha-h])\s*[.)\]\-–:]\s+(.*)$/;
+  const RREP=/^\s*(?:bonnes?\s+r[ée]ponses?|r[ée]ponses?(?:\s+(?:correcte|attendue|juste|exacte))?|corrig[ée]|solution)\s*[:\-–]\s*(.*)$/i;
+  const MARQUE=/\s*(?:[✓✔☑]|\(\s*(?:correct|bonne r[ée]ponse|vrai)\s*\)|\*)\s*$/i;
+  const qs=[];let cur=null;const preambule=[];
+  function nouvelle(txt,imgs){cur={enonce:txt||'',options:[],repLettre:null,repMarque:-1,repTexte:'',imgs:[...(imgs||[])]};qs.push(cur);}
+  function ajouteOpt(txt,imgs,lettre){
+    let marque=false;
+    if(/^\s*[✓✔☑]/.test(txt)){marque=true;txt=txt.replace(/^\s*[✓✔☑]\s*/,'');}
+    if(MARQUE.test(txt)){marque=true;txt=txt.replace(MARQUE,'');}
+    cur.options.push(txt.trim());
+    if(marque)cur.repMarque=cur.options.length-1;
+    if(imgs&&imgs.length)cur.imgs.push(...imgs);
+  }
+  lignes.forEach(L=>{
+    const t=(L.t||'').trim();
+    if(!t&&!(L.imgs&&L.imgs.length))return;
+    if(L.kind==='q'){const m=t.match(RQ_MOT)||t.match(RQ_NUM);nouvelle(m?m[2]:t,L.imgs);return;}
+    if(L.kind==='opt'&&cur){const m=t.match(ROPT);ajouteOpt(m?m[2]:t,L.imgs);return;}
+    let m=t.match(RQ_MOT)||t.match(RQ_NUM);
+    if(m){nouvelle(m[2],L.imgs);return;}
+    if(!cur){if(t)preambule.push(t);return;}
+    m=t.match(ROPT);
+    if(m&&(cur.options.length>0||cur.enonce)){ajouteOpt(m[2],L.imgs);return;}
+    m=t.match(RREP);
+    if(m){
+      const v=m[1].trim();
+      const l=v.match(/^\(?([A-Ha-h])\b\)?[\s.)]*(?:$|[-–:,])/);
+      if(l&&cur.options.length)cur.repLettre=l[1].toUpperCase().charCodeAt(0)-65;
+      else cur.repTexte=v;
+      return;
+    }
+    if(!t){if(L.imgs&&L.imgs.length)cur.imgs.push(...L.imgs);return;}
+    if(cur.options.length===0)cur.enonce+=(cur.enonce?' ':'')+t;
+    else cur.options[cur.options.length-1]+=' '+t;
+    if(L.imgs&&L.imgs.length)cur.imgs.push(...L.imgs);
+  });
+  let resultat=qs;
+  if(!resultat.length){
+    resultat=[];
+    lignes.forEach(L=>{if((L.t||'').trim().endsWith('?'))resultat.push({enonce:L.t.trim(),options:[],repLettre:null,repMarque:-1,repTexte:'',imgs:L.imgs||[]});});
+  }
+  const questions=resultat.map((q,i)=>{
+    let opts=q.options;
+    if(opts.length===1){q.enonce+=' '+opts[0];opts=[];}
+    const qcm=opts.length>=2;
+    let rep='';
+    if(qcm){
+      if(q.repMarque>=0)rep=String(q.repMarque);
+      else if(q.repLettre!==null&&q.repLettre<opts.length)rep=String(q.repLettre);
+    }else rep=q.repTexte||'';
+    return{id:Date.now()+i,type:qcm?'qcm':'open',enonce:q.enonce.trim(),options:qcm?opts:null,reponse:rep,image:'',_imgs:q.imgs};
+  }).filter(q=>q.enonce||q.options);
+  return{questions,consignes:preambule.join('\n')};
+}
+// --- Images : réduction pour que le devoir reste léger ---
+function dvCompresser(src,maxW=900,qual=0.72){
+  return new Promise(res=>{
+    const im=new Image();
+    im.onload=()=>{
+      try{
+        const r=Math.min(1,maxW/Math.max(im.width,im.height));
+        const c=document.createElement('canvas');c.width=Math.max(1,Math.round(im.width*r));c.height=Math.max(1,Math.round(im.height*r));
+        const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);g.drawImage(im,0,0,c.width,c.height);
+        res(c.toDataURL('image/jpeg',qual));
+      }catch(e){res('');}
+    };
+    im.onerror=()=>res('');
+    im.src=src;
+  });
+}
+function dvLireFichierImage(f){
+  return new Promise(res=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=()=>res('');r.readAsDataURL(f);});
+}
+async function dvImage(i,input){
+  const f=(input.files||[])[0];input.value='';
+  if(!f||!dvQArr[i])return;
+  if(!/^image\//.test(f.type))return toast('Choisis une image (JPG, PNG…)');
+  const d=await dvCompresser(await dvLireFichierImage(f));
+  if(!d)return toast('Image illisible');
+  dvQArr[i].image=d;renderQBuilder();toast('Image ajoutée ✓');
+}
+async function dvImporter(input){
+  const f=(input.files||[])[0];input.value='';
+  if(!f)return;
+  const info=document.getElementById('dv-import-info');
+  const ext=(f.name.split('.').pop()||'').toLowerCase();
+  if(!['docx','pdf','txt'].includes(ext)){info.innerHTML='<span style="color:#c0392b">Format non pris en charge. Utilise un fichier <b>.docx</b> (Word), <b>.pdf</b> ou <b>.txt</b>. (Pour un ancien .doc : ouvre-le dans Word et « Enregistrer sous » .docx.)</span>';return;}
+  if(f.size>15*1048576){info.innerHTML='<span style="color:#c0392b">Fichier trop lourd (15 Mo maximum).</span>';return;}
+  info.textContent='⏳ Lecture du fichier…';
+  try{
+    let lignes;
+    if(ext==='docx'){
+      if(!navigator.onLine)throw new Error('Internet requis pour lire un fichier Word la première fois.');
+      await dvCharger('mammoth');
+      const r=await mammoth.convertToHtml({arrayBuffer:await f.arrayBuffer()});
+      lignes=dvLignesHtml(r.value);
+    }else if(ext==='pdf'){
+      if(!navigator.onLine)throw new Error('Internet requis pour lire un PDF la première fois.');
+      lignes=await dvLignesPdf(await f.arrayBuffer());
+    }else{
+      lignes=(await f.text()).split(/\r?\n/).map(t=>({t,imgs:[],kind:'p'}));
+    }
+    if(!lignes.length)throw new Error('Aucun texte trouvé. Un PDF scanné (photo) ne peut pas être lu : utilise la version Word.');
+    const rep=dvParser(lignes);
+    if(!rep.questions.length)throw new Error('Aucune question détectée. Numérote les questions (1. 2. 3. ou Question 1) et les choix (A) B) C) D)).');
+    let nbImg=0,sansImg=0;
+    for(const q of rep.questions){
+      if(q._imgs&&q._imgs.length){
+        const d=await dvCompresser(q._imgs[0]);
+        if(d&&d.length>3000){q.image=d;nbImg++;}
+        if(q._imgs.length>1)sansImg+=q._imgs.length-1;
+      }
+      delete q._imgs;
+    }
+    if(dvQArr.length&&!confirm('Remplacer les '+dvQArr.length+' question(s) déjà saisies par celles du fichier ?')){info.textContent='Import annulé.';return;}
+    dvQArr=rep.questions;
+    const t=document.getElementById('dv-titre');if(!t.value.trim())t.value=f.name.replace(/\.[^.]+$/,'');
+    const c=document.getElementById('dv-consignes');if(!c.value.trim()&&rep.consignes)c.value=rep.consignes.slice(0,600);
+    renderQBuilder();
+    const nq=dvQArr.filter(q=>q.type==='qcm').length,no=dvQArr.length-nq,sr=dvQArr.filter(q=>q.type==='qcm'&&q.reponse==='').length;
+    info.innerHTML=`<span style="color:#085041">✅ <b>${dvQArr.length}</b> question(s) détectée(s) : <b>${nq}</b> QCM, <b>${no}</b> ouverte(s)${nbImg?`, <b>${nbImg}</b> image(s)`:''}.</span><br><span style="color:#8a5a00">👉 Vérifie chaque question ci-dessous${sr?` et <b>coche la bonne réponse</b> des ${sr} QCM sans réponse`:''}.${sansImg?` ${sansImg} image(s) en plus n'ont pas été reprises (1 image par question).`:''}${ext==='pdf'?' (Les images d\'un PDF ne sont pas reprises : ajoute-les avec « 🖼️ Ajouter une image ».)':''}</span>`;
+  }catch(e){
+    info.innerHTML='<span style="color:#c0392b">❌ '+resEsc(e.message||e)+'</span>';
+  }
+}
+function dvToggleType(i){
+  const q=dvQArr[i];if(!q)return;
+  if(q.type==='qcm'){q.type='open';q.options=null;q.reponse='';}
+  else{q.type='qcm';q.options=['','','',''];q.reponse='';}
+  renderQBuilder();
+}
+function dvAjouterOption(i){const q=dvQArr[i];if(q&&q.options&&q.options.length<8){q.options.push('');renderQBuilder();}}
+function dvRetirerImage(i){if(dvQArr[i]){dvQArr[i].image='';renderQBuilder();}}
 function renderQBuilder(){
   const el=document.getElementById('questions-builder');
   if(!dvQArr.length){el.innerHTML='';return;}
-  el.innerHTML=dvQArr.map((q,i)=>`
-    <div style="background:#f9f9f7;border-radius:6px;padding:9px;margin-bottom:7px;border-left:3px solid ${q.type==='qcm'?'#1565C0':'#0B4FBF'}">
-      <div style="display:flex;justify-content:space-between;margin-bottom:5px">
-        <span style="font-size:10px;font-weight:600">${q.type==='qcm'?'🔵 QCM':'🟢 Ouverte'} Q${i+1}</span>
-        <button class="btn btn-danger btn-xs" onclick="dvQArr.splice(${i},1);renderQBuilder()">✕</button>
+  el.innerHTML=dvQArr.map((q,i)=>{
+    const qcm=q.type==='qcm';
+    return`<div style="background:#f9f9f7;border-radius:6px;padding:9px;margin-bottom:7px;border-left:3px solid ${qcm?'#1565C0':'#0B4FBF'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;gap:5px">
+        <span style="font-size:10px;font-weight:600">${qcm?'🔵 QCM':'🟢 Ouverte'} Q${i+1}</span>
+        <span style="display:flex;gap:4px"><button class="btn btn-xs" onclick="dvToggleType(${i})">↔ ${qcm?'Passer en ouverte':'Passer en QCM'}</button><button class="btn btn-danger btn-xs" onclick="dvQArr.splice(${i},1);renderQBuilder()">✕</button></span>
       </div>
-      <textarea onchange="dvQArr[${i}].enonce=this.value" placeholder="Énoncé..." style="min-height:36px;margin-bottom:5px">${q.enonce}</textarea>
-      ${q.type==='qcm'?q.options.map((opt,oi)=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><input type="radio" name="c_${q.id}" value="${oi}" ${q.reponse==oi?'checked':''} onchange="dvQArr[${i}].reponse='${oi}'" style="width:auto"><input type="text" value="${opt}" placeholder="Option ${oi+1}" onchange="dvQArr[${i}].options[${oi}]=this.value" style="flex:1"></div>`).join(''):`<textarea onchange="dvQArr[${i}].reponse=this.value" placeholder="Réponse attendue...">${q.reponse}</textarea>`}
-    </div>`).join('');
+      <textarea onchange="dvQArr[${i}].enonce=this.value" placeholder="Énoncé..." style="min-height:36px;margin-bottom:5px">${resEsc(q.enonce)}</textarea>
+      ${q.image?`<div style="margin-bottom:5px"><img src="${q.image}" style="max-width:100%;max-height:170px;border:1px solid #ddd;border-radius:6px;display:block"><button class="btn btn-danger btn-xs" style="margin-top:3px" onclick="dvRetirerImage(${i})">Retirer l'image</button></div>`
+        :`<label class="btn btn-xs" style="margin-bottom:5px;cursor:pointer">🖼️ Ajouter une image (analyse / interprétation)<input type="file" accept="image/*" style="display:none" onchange="dvImage(${i},this)"></label>`}
+      ${qcm?(q.options||[]).map((opt,oi)=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><input type="radio" name="c_${q.id}" value="${oi}" ${q.reponse==oi&&q.reponse!==''?'checked':''} onchange="dvQArr[${i}].reponse='${oi}'" style="width:auto" title="Bonne réponse"><input type="text" value="${resEsc(opt)}" placeholder="Option ${oi+1}" onchange="dvQArr[${i}].options[${oi}]=this.value" style="flex:1"></div>`).join('')+
+        `<div style="display:flex;justify-content:space-between;align-items:center"><button class="btn btn-xs" onclick="dvAjouterOption(${i})">+ option</button>${q.reponse===''?'<span style="font-size:10px;color:#c0392b">⚠ coche la bonne réponse (●)</span>':''}</div>`
+        :`<textarea onchange="dvQArr[${i}].reponse=this.value" placeholder="Réponse attendue (pour toi)...">${resEsc(q.reponse)}</textarea>`}
+    </div>`;
+  }).join('');
 }
+
 function filterClassesDevoir(){
   const eid=document.getElementById('dv-ecole').value;
   const arr=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
@@ -3139,6 +3553,7 @@ async function saveDevoir(){
   cache.devoirs.unshift(data);
   dvQArr=[];['dv-titre','dv-consignes','dv-mat','dv-drive-link'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('questions-builder').innerHTML='';
+  document.getElementById('dv-import-info').innerHTML='';
   closeModal('modal-add-devoir');renderDevoirs();toast('Devoir créé ✓ — Partage le lien !',4000);
 }
 function getLien(code){return window.location.href.split('?')[0]+'?devoir='+code;}
@@ -3153,25 +3568,43 @@ async function voirResultats(id){
   const dv=cache.devoirs.find(x=>x.id===id);if(!dv)return;
   const{data:copies}=await sb.from('copies').select('*').eq('devoir_id',id);
   document.getElementById('res-titre').textContent='Résultats — '+dv.titre;
-  let html=`<div style="font-size:12px;color:#666;margin-bottom:9px">${(copies||[]).length} copie(s)</div>`;
+  const nbF=(copies||[]).filter(c=>c.fraude).length;
+  let html=`<div style="font-size:12px;color:#666;margin-bottom:9px">${(copies||[]).length} copie(s)${nbF?` · <b style="color:#c0392b">🚨 ${nbF} devoir(s) bloqué(s)</b>`:''}</div>`;
   if(!copies||!copies.length)html+='<div class="empty">Aucune copie</div>';
   else(copies||[]).forEach(cp=>{
     const el=cache.eleves.find(e=>e.id==cp.eleve_id);
-    html+=`<div style="border:1px solid #e5e5e0;border-radius:7px;padding:9px 12px;margin-bottom:7px">
-      <div style="font-weight:600;margin-bottom:5px">${el?resEsc(el.nom):'Élève'}</div>`;
+    const qcms=(dv.questions||[]).filter(q=>q.type==='qcm');
+    let bon=0;(dv.questions||[]).forEach((q,i)=>{if(q.type==='qcm'&&q.reponse!==''&&q.reponse==(cp.reponses||[])[i])bon++;});
+    const dsec=cp.duree_sec;
+    html+=`<div style="border:1px solid ${cp.fraude?'#e8a5a5':'#e5e5e0'};border-radius:7px;padding:9px 12px;margin-bottom:7px;${cp.fraude?'background:#fff5f5':''}">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">
+        <div style="font-weight:600">${el?resEsc(el.nom):'Élève'}</div>
+        <div style="font-size:11px;color:#555">${qcms.length?`QCM : <b>${bon}/${qcms.length}</b>`:''}${dsec!=null?` · ⏱ ${Math.floor(dsec/60)} min ${dsec%60} s`:''}</div>
+      </div>
+      ${cp.fraude?`<div style="background:#FCEBEB;color:#791F1F;border-radius:6px;padding:6px 8px;font-size:11px;margin-bottom:5px">🚨 <b>Devoir bloqué — fraude suspectée</b><br>${resEsc(cp.motif||'')}<br><button class="btn btn-sm" style="margin-top:5px" onclick="devoirDebloquer('${cp.id}','${id}')">🔓 Autoriser l'élève à recommencer</button></div>`
+        :(cp.motif?`<div style="background:#FFF3DC;color:#8a5a00;border-radius:6px;padding:5px 8px;font-size:11px;margin-bottom:5px">⏰ ${resEsc(cp.motif)}</div>`:'')}`;
     (dv.questions||[]).forEach((q,i)=>{
       const rep=(cp.reponses||[])[i]||'—';
       const ok=q.type==='qcm'?q.reponse==rep:null;
       html+=`<div style="background:#f9f9f7;border-radius:5px;padding:5px 8px;margin-bottom:4px;font-size:11px">
-        <div style="font-weight:600">Q${i+1} : ${resEsc(q.enonce)}</div>
+        <div style="font-weight:600">Q${i+1} : ${resEsc(q.enonce)}${q.image?' 🖼️':''}</div>
         <div>→ ${q.type==='qcm'?`<span style="color:${ok?'#085041':'#c0392b'}">${resEsc((q.options||[])[parseInt(rep)]||rep)} ${ok?'✓':'✗'}</span>`:resEsc(rep)}</div>
-        ${q.type==='qcm'&&!ok?`<div style="color:#085041;font-size:10px">✓ ${resEsc((q.options||[])[parseInt(q.reponse)])}</div>`:''}
+        ${q.type==='qcm'&&!ok?`<div style="color:#085041;font-size:10px">✓ ${resEsc((q.options||[])[parseInt(q.reponse)]||'(non définie)')}</div>`:''}
+        ${q.type==='open'&&q.reponse?`<div style="color:#085041;font-size:10px">Attendu : ${resEsc(q.reponse)}</div>`:''}
       </div>`;
     });
     html+='</div>';
   });
   document.getElementById('res-content').innerHTML=html;
   openModal('modal-resultats');
+}
+async function devoirDebloquer(copieId,devoirId){
+  if(!confirm('Autoriser cet élève à refaire le devoir ? Sa copie bloquée sera supprimée.'))return;
+  const{data,error}=await sb.rpc('devoir_debloquer',{p_copie:String(copieId)});
+  if(error||(data&&data.ok===false))return toast('Impossible : '+(error?error.message:(data.message||'')),5000);
+  cache.copies=cache.copies.filter(c=>String(c.id)!==String(copieId));
+  toast('Élève débloqué ✓ — il peut se reconnecter');
+  renderDevoirs();voirResultats(devoirId);
 }
 async function delDevoir(id){
   if(!confirm('Supprimer ?'))return;
@@ -3234,36 +3667,142 @@ async function refreshDevoir(){
   document.getElementById('eleve-page').classList.add('show');
 }
 let currentDevoirCode='';
+let exam={actif:false,bloque:false,fs:false,tick:null,debut:0,dureeSec:0,wl:null,pret:false,pasEnvoye:null};
+function examHtmlQuestions(dv){
+  let html='';
+  (dv.questions||[]).forEach((q,i)=>{
+    const img=(q.image&&/^data:image\//i.test(q.image))?`<img src="${q.image}" style="max-width:100%;border:1px solid #ddd;border-radius:7px;margin-bottom:8px;display:block" draggable="false">`:'';
+    html+=`<div class="card" style="margin-bottom:7px">
+      <div style="font-size:11px;font-weight:600;color:${q.type==='qcm'?'#1565C0':'#0B4FBF'};margin-bottom:5px">Q${i+1} — ${q.type==='qcm'?'QCM':'Question ouverte'}</div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:8px;white-space:pre-wrap">${resEsc(q.enonce)}</div>${img}
+      ${q.type==='qcm'?(q.options||[]).map((opt,oi)=>`<label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:12px"><input type="radio" name="q_${i}" value="${oi}" style="width:auto"> ${resEsc(opt)}</label>`).join(''):`<textarea id="rep_${i}" placeholder="Ta réponse..." style="min-height:70px"></textarea>`}
+    </div>`;
+  });
+  return html;
+}
+function examCollecter(){
+  const dv=cache.devoirs[0];
+  return(dv.questions||[]).map((q,i)=>q.type==='qcm'?((document.querySelector(`input[name="q_${i}"]:checked`)||{}).value||''):((document.getElementById('rep_'+i)||{}).value||''));
+}
+function examBloquerEvt(e){
+  if(!exam.actif)return;
+  if(e.target&&e.target.tagName==='TEXTAREA'&&e.type!=='paste'&&e.type!=='copy'&&e.type!=='cut'&&e.type!=='contextmenu'&&e.type!=='drop')return;
+  e.preventDefault();
+}
+function examFmt(s){s=Math.max(0,Math.round(s));const m=Math.floor(s/60),r=s%60;return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');}
+function examTick(){
+  if(!exam.actif)return;
+  const ecoule=(Date.now()-exam.debut)/1000;
+  const c=document.getElementById('ep-chrono');
+  if(exam.dureeSec>0){
+    const reste=exam.dureeSec-ecoule;
+    c.textContent='⏱ '+examFmt(reste);
+    c.style.background=reste<=300?'#c0392b':'#0B4FBF';
+    if(reste<=0){examTerminer('Temps écoulé');return;}
+  }else{c.textContent='⏱ '+examFmt(ecoule);}
+  if(!document.hasFocus())examViolation('Sortie de l\'application (perte de focus)');
+}
+function examVisib(){if(document.hidden)examViolation('Application quittée ou mise en arrière-plan');}
+function examBlur(){setTimeout(()=>{if(exam.actif&&!document.hasFocus())examViolation('Autre application ou fenêtre ouverte par-dessus');},350);}
+function examFsChange(){if(exam.actif&&exam.fs&&!document.fullscreenElement&&!document.webkitFullscreenElement)examViolation('Sortie du mode plein écran');}
+function examAvantQuitter(e){if(exam.actif){e.preventDefault();e.returnValue='';}}
+function examListeners(on){
+  const f=on?'addEventListener':'removeEventListener';
+  document[f]('visibilitychange',examVisib);
+  window[f]('pagehide',examVisib);
+  window[f]('blur',examBlur);
+  document[f]('fullscreenchange',examFsChange);
+  document[f]('webkitfullscreenchange',examFsChange);
+  window[f]('beforeunload',examAvantQuitter);
+  ['copy','cut','paste','contextmenu','dragstart','drop','selectstart'].forEach(ev=>document[f](ev,examBlurEvtSafe));
+}
+const examBlurEvtSafe=e=>examBloquerEvt(e);
+async function examNettoyer(){
+  examListeners(false);
+  clearInterval(exam.tick);exam.tick=null;
+  try{if(exam.wl){await exam.wl.release();exam.wl=null;}}catch(e){}
+  try{if(document.fullscreenElement&&document.exitFullscreen)await document.exitFullscreen();else if(document.webkitFullscreenElement&&document.webkitExitFullscreen)document.webkitExitFullscreen();}catch(e){}
+  exam.fs=false;
+  document.body.classList.remove('examen');
+}
+function examDemarrer(dureeSec){
+  exam.actif=true;exam.bloque=false;exam.debut=Date.now();exam.dureeSec=dureeSec||0;exam.pret=false;
+  document.body.classList.add('examen');
+  examListeners(true);
+  const el=document.documentElement;
+  try{
+    const rf=el.requestFullscreen||el.webkitRequestFullscreen;
+    if(rf){const p=rf.call(el);if(p&&p.then)p.then(()=>{exam.fs=true;}).catch(()=>{});else exam.fs=true;}
+  }catch(e){}
+  try{if(navigator.wakeLock)navigator.wakeLock.request('screen').then(w=>{exam.wl=w;}).catch(()=>{});}catch(e){}
+  examTick();
+  exam.tick=setInterval(examTick,1000);
+  // le contrôle du focus ne démarre qu'après 1,5 s (le temps que le plein écran s'installe)
+  setTimeout(()=>{exam.pret=true;},1500);
+}
+async function examEnvoyer(reps,fraude,motif){
+  const{data:res,error}=await sb.rpc('devoir_rendre',{p_code:currentDevoirCode,p_eleve_id:currentEleveDevoir.id,p_pwd:currentEleveDevoir.pwd,p_reponses:reps,p_fraude:!!fraude,p_motif:motif||''});
+  if(error)throw error;
+  if(res&&res.ok===false)throw new Error(res.message||'Envoi refusé');
+}
+async function examViolation(motif){
+  if(!exam.actif||exam.bloque||!exam.pret)return;
+  exam.bloque=true;exam.actif=false;
+  const reps=examCollecter();
+  document.getElementById('ep-form').style.display='none';
+  const b=document.getElementById('ep-bloque');b.style.display='block';
+  document.getElementById('ep-bloque-motif').textContent=motif;
+  examNettoyer();
+  exam.pasEnvoye=null;
+  const essayer=async()=>{
+    try{await examEnvoyer(reps,true,motif);exam.pasEnvoye=null;document.getElementById('ep-bloque-etat').textContent='Ton professeur a été informé automatiquement.';}
+    catch(e){document.getElementById('ep-bloque-etat').textContent='Connexion en cours pour prévenir ton professeur…';setTimeout(essayer,4000);}
+  };
+  essayer();
+}
+async function examTerminer(motif){
+  if(!exam.actif)return;
+  exam.actif=false;
+  const reps=examCollecter();
+  await examNettoyer();
+  document.getElementById('ep-form').style.display='none';
+  const d=document.getElementById('ep-done');d.style.display='block';
+  const txt=d.querySelector('[data-etat]');
+  txt.textContent=motif?(motif+' — envoi de ta copie…'):'Envoi de ta copie…';
+  const essayer=async()=>{
+    try{await examEnvoyer(reps,false,motif||'');txt.textContent=motif?(motif+' — copie envoyée !'):'Devoir envoyé !';}
+    catch(e){txt.textContent='Envoi en cours… garde cette page ouverte';setTimeout(essayer,4000);}
+  };
+  essayer();
+}
 async function eleveLogin(){
   const nom=document.getElementById('ep-nom').value.trim();
   const pwd=document.getElementById('ep-pwd').value.trim();
   const err=document.getElementById('ep-err');
   const dv=cache.devoirs[0];
+  if(!nom||!pwd){err.textContent='Écris ton nom complet et ton mot de passe.';return;}
   const{data:r,error}=await sb.rpc('devoir_login',{p_code:currentDevoirCode,p_nom:nom,p_pwd:pwd});
   if(error||!r){err.textContent='Erreur de connexion. Réessaie.';return;}
   if(!r.ok){err.textContent=r.message||'Nom ou mot de passe incorrect.';return;}
   currentEleveDevoir={id:r.eleve_id,nom:r.nom,pwd};
   document.getElementById('ep-login').style.display='none';
-  let html=`<div class="card" style="margin-bottom:9px">${dv.consignes?`<div style="font-size:12px;color:#555;background:#f9f9f7;border-radius:6px;padding:7px;margin-bottom:7px">${resEsc(dv.consignes)}</div>`:''}${dv.drive_link&&/^https?:\/\//i.test(dv.drive_link)?`<a href="${resEsc(dv.drive_link)}" target="_blank" rel="noopener" class="btn btn-info btn-sm">📎 Ouvrir le sujet</a>`:''}</div>`;
-  (dv.questions||[]).forEach((q,i)=>{
-    html+=`<div class="card" style="margin-bottom:7px">
-      <div style="font-size:11px;font-weight:600;color:${q.type==='qcm'?'#1565C0':'#0B4FBF'};margin-bottom:5px">Q${i+1} — ${q.type==='qcm'?'QCM':'Question ouverte'}</div>
-      <div style="font-size:13px;font-weight:500;margin-bottom:8px">${resEsc(q.enonce)}</div>
-      ${q.type==='qcm'?(q.options||[]).map((opt,oi)=>`<label style="display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:4px;cursor:pointer;font-size:12px"><input type="radio" name="q_${i}" value="${oi}" style="width:auto"> ${resEsc(opt)}</label>`).join(''):`<textarea id="rep_${i}" placeholder="Ta réponse..." style="min-height:70px"></textarea>`}
-    </div>`;
-  });
+  const dureeSec=(parseInt(r.duree)||0)*60;
+  let html=`<div class="card" style="margin-bottom:9px">${dv.consignes?`<div style="font-size:12px;color:#555;background:#f9f9f7;border-radius:6px;padding:7px;margin-bottom:7px;white-space:pre-wrap">${resEsc(dv.consignes)}</div>`:''}${dv.drive_link&&/^https?:\/\//i.test(dv.drive_link)?`<div style="font-size:11px;color:#8a5a00">📎 Un fichier sujet existe, mais l'ouvrir te ferait sortir de l'application : le devoir serait bloqué. Utilise seulement les questions ci-dessous.</div>`:''}</div>`;
+  html+=examHtmlQuestions(dv);
   document.getElementById('ep-questions').innerHTML=html;
   document.getElementById('ep-form').style.display='block';
+  document.getElementById('ep-envoi-msg').textContent='';
+  window.scrollTo(0,0);
+  examDemarrer(dureeSec);
 }
+let examConfirme=false;
 async function eleveSubmit(){
-  const dv=cache.devoirs[0];
-  const reps=(dv.questions||[]).map((q,i)=>q.type==='qcm'?(document.querySelector(`input[name="q_${i}"]:checked`)||{}).value||'':(document.getElementById('rep_'+i)||{}).value||'');
-  if(reps.some(r=>r==='')&&!confirm('Questions incomplètes. Envoyer quand même ?'))return;
-  const{data:res,error}=await sb.rpc('devoir_soumettre',{p_code:currentDevoirCode,p_eleve_id:currentEleveDevoir.id,p_pwd:currentEleveDevoir.pwd,p_reponses:reps});
-  if(error){toast('Erreur : '+error.message);return;}
-  if(res&&res.ok===false){toast(res.message||'Envoi refusé');return;}
-  document.getElementById('ep-form').style.display='none';
-  document.getElementById('ep-done').style.display='block';
+  const reps=examCollecter();
+  const vides=reps.filter(r=>r==='').length;
+  const m=document.getElementById('ep-envoi-msg');
+  if(vides&&!examConfirme){examConfirme=true;m.textContent=vides+' question(s) sans réponse. Clique encore sur « Envoyer » pour envoyer quand même.';return;}
+  examConfirme=false;m.textContent='';
+  await examTerminer('');
 }
 
 // ===== RESSOURCES : DOSSIERS + FICHIERS (Supabase Storage) =====
