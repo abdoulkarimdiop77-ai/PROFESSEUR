@@ -283,16 +283,16 @@ body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [
 .nav button{--nb:#0B4FBF;border-bottom:3px solid var(--nb)!important;border-bottom-color:var(--nb)!important}
 .nav button:not(.active){opacity:.82}
 .nav button.active{opacity:1;color:var(--nb)!important;background:rgba(0,0,0,.04);font-weight:700}
-.nav button[onclick*="'dashboard'"]{--nb:#0B4FBF}
+.nav button[onclick*="'dashboard'"]{--nb:#2F6FE0}
 .nav button[onclick*="'ecoles'"]{--nb:#2E9E3E}
 .nav button[onclick*="'devoirs-global'"]{--nb:#F08A00}
 .nav button[onclick*="'ressources'"]{--nb:#E5A800}
 .nav button[onclick*="'bibliotheque'"]{--nb:#1E90FF}
-.nav button[onclick*="'edt-global'"]{--nb:#0A3A9E}
-.nav button[onclick*="'alertes'"]{--nb:#E65100}
+.nav button[onclick*="'edt-global'"]{--nb:#4A72D6}
+.nav button[onclick*="'alertes'"]{--nb:#F2742B}
 .nav button[onclick*="'messagerie'"]{--nb:#29A8F0}
-.nav button[onclick*="'parametres'"]{--nb:#5B6B8C}
-.nav button[onclick*="'admin-abo'"]{--nb:#0A3A9E}
+.nav button[onclick*="'parametres'"]{--nb:#7A8DB5}
+.nav button[onclick*="'admin-abo'"]{--nb:#4A72D6}
 .nav button[onclick*="'admin-msg'"]{--nb:#29A8F0}
 .nav button[onclick*="'ecoles'"]::before{content:""}
 body.dark .section .card-title{color:#cfe0ff}
@@ -307,6 +307,15 @@ body.dark .nav button.active{background:rgba(255,255,255,.08)}
 body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
 .section .card{background:#fff}
 .section .card-title{font-weight:700}
+/* cases de l'onglet remplies de leur couleur */
+.nav{gap:3px;padding:4px 4px 0;background:transparent!important;border-bottom:none!important}
+.nav button{background:var(--nb)!important;color:#fff!important;border-radius:8px 8px 0 0;border-bottom:4px solid rgba(255,255,255,.0)!important;font-weight:600;opacity:1!important;text-shadow:0 1px 1px rgba(0,0,0,.18)}
+.nav button.active{box-shadow:inset 0 -5px 0 #fff,0 2px 6px rgba(0,0,0,.2);font-weight:800;filter:none}
+.nav button:not(.active):hover{filter:brightness(1.08)}
+.nav button[onclick*="'ressources'"]{color:#4a3500!important;text-shadow:none}
+.nav button[onclick*="'ressources'"].active{box-shadow:inset 0 -5px 0 #4a3500,0 2px 6px rgba(0,0,0,.2)}
+#menu-drawer .m-item{margin-bottom:6px;border-left-width:8px;border-left-style:solid;font-weight:700;text-shadow:0 1px 1px rgba(0,0,0,.15)}
+#menu-drawer .m-item.actif{outline:3px solid #fff;box-shadow:0 0 0 5px rgba(0,0,0,.18)}
 </style>
 </head>
 <body>
@@ -1951,6 +1960,7 @@ function appliquerTeinte(){
   document.body.style.setProperty('--tint',TEINTES[id]||'#f3f7ff');
 }
 
+const TAB_COULEURS={'dashboard':'#2F6FE0','ecoles':'#2E9E3E','devoirs-global':'#F08A00','ressources':'#E5A800','bibliotheque':'#1E90FF','edt-global':'#4A72D6','alertes':'#F2742B','messagerie':'#29A8F0','propositions':'#29A8F0','parametres':'#7A8DB5','admin-abo':'#4A72D6','admin-msg':'#29A8F0'};
 // ===== SUPABASE CRUD =====
 async function sbGet(table,filters={}){
   let q=sb.from(table).select('*').eq('user_id',currentUser.id);
@@ -3996,7 +4006,7 @@ function ouvrirMenu(){
     ?[['admin-abo','💼 Abonnements'],['admin-msg','📨 Messages',1],['parametres','🔒 Compte']]
     :[['dashboard','🏠 Tableau de bord'],['ecoles','🏫 Écoles'],['devoirs-global','📋 Devoirs'],['ressources','📁 Ressources'],['bibliotheque','🏛️ Bibliothèque'],['edt-global','🗓️ Emploi du temps'],['alertes','🔔 Alertes'],['messagerie','💬 Messagerie',2],['propositions','💡 Propositions',1],['parametres','⚙️ Paramètres']];
   document.getElementById('menu-liste').innerHTML=items.filter(x=>!(monCycle==='primaire'&&x[0]==='devoirs-global')).map(([id,label,b])=>
-    `<button class="m-item${cur===id?' actif':''}" onclick="menuAller('${id}')"><span>${label}</span>${b&&(b===2?chatTotal():n)>0?`<span class="badge-notif" style="display:inline-block">${b===2?chatTotal():n}</span>`:''}</button>`).join('')+
+    `<button class="m-item${cur===id?' actif':''}" style="background:${(TAB_COULEURS[id]||'#2F6FE0')};color:${id==='ressources'?'#4a3500':'#fff'};border-color:rgba(0,0,0,.15)" onclick="menuAller('${id}')"><span>${label}</span>${b&&(b===2?chatTotal():n)>0?`<span class="badge-notif" style="display:inline-block">${b===2?chatTotal():n}</span>`:''}</button>`).join('')+
     `<div style="border-top:1px solid #e5e5e0;margin:8px 0"></div><button class="m-item" style="color:#c0392b" onclick="fermerMenu();logout()">🚪 Déconnexion</button>`;
   document.getElementById('menu-drawer').style.display='block';
 }
