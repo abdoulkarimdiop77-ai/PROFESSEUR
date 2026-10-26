@@ -266,17 +266,17 @@ body.admin-mode #breadcrumb{display:none}
 @keyframes kspin{to{transform:rotate(360deg)}}
 body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [onclick*="regenererCodesClasse"],body.cycle-primaire [onclick*="exporterCodesClasse"]{display:none!important}
 /* couleurs par onglet (palette du logo) */
-.section{--acc:#0B4FBF}
+.section{--acc:#2F6FE0}
 #ecoles,#vue-classes,#vue-eleves{--acc:#2E9E3E}
-#vue-notes{--acc:#1B7F36}
+#vue-notes{--acc:#3FAE5A}
 #devoirs-global{--acc:#F08A00}
 #ressources{--acc:#E5A800}
 #bibliotheque{--acc:#1E90FF}
-#edt-global{--acc:#0A3A9E}
-#alertes{--acc:#E65100}
+#edt-global{--acc:#4A72D6}
+#alertes{--acc:#F2742B}
 #messagerie{--acc:#29A8F0}
-#parametres{--acc:#5B6B8C}
-#admin-abo{--acc:#0A3A9E}
+#parametres{--acc:#7A8DB5}
+#admin-abo{--acc:#4A72D6}
 #admin-msg{--acc:#29A8F0}
 .section .card{border-top:3px solid var(--acc)}
 .section .card-title{color:var(--acc)}
@@ -298,12 +298,15 @@ body.cycle-primaire .nav button[onclick*="devoirs-global"],body.cycle-primaire [
 body.dark .section .card-title{color:#cfe0ff}
 body.dark .nav button.active{background:rgba(255,255,255,.08)}
 .edt-grille td{height:64px;min-width:78px}
-.edt-grille th{background:#0A3A9E}
+.edt-grille th{background:#3D6BD8}
 .edt-grille td.heure-col{font-size:11px;font-weight:700;color:#222;background:#fff;width:70px}
-.edt-coin{position:relative;height:46px;background:linear-gradient(to top right,transparent 48.5%,#fff 49.5%,#fff 50.5%,transparent 51.5%),#0A3A9E!important}
+.edt-coin{position:relative;height:46px;background:linear-gradient(to top right,transparent 48.5%,#fff 49.5%,#fff 50.5%,transparent 51.5%),#3D6BD8!important}
 .edt-coin .c-j{position:absolute;top:3px;right:6px;font-size:9px}.edt-coin .c-h{position:absolute;bottom:3px;left:5px;font-size:9px}
 .edt-bloc{position:relative;color:#fff;text-align:center;padding:6px 4px 4px;min-height:62px;display:flex;flex-direction:column;justify-content:center;gap:1px;border-bottom:1px solid rgba(255,255,255,.4)}
 .edt-bloc strong{font-size:12px}.edt-bloc .e-mat{font-size:9px;opacity:.95}.edt-bloc .e-abr{font-size:10px;font-weight:800;letter-spacing:1px;margin-top:3px;background:rgba(0,0,0,.22);border-radius:10px;padding:0 7px;align-self:center}
+body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
+.section .card{background:#fff}
+.section .card-title{font-weight:700}
 </style>
 </head>
 <body>
@@ -1939,6 +1942,14 @@ function renderDemainDash(){
   document.getElementById('dash-demain').innerHTML=l.length?l.map(edtLigne).join(''):'<div class="empty">Aucune classe demain</div>';
 }
 setInterval(()=>{const v=document.querySelector('.section.show');if(v&&v.id==='dashboard'&&currentUser)renderDemainDash();},300000);
+
+
+// ===== TEINTE DE LA PAGE SELON L'ONGLET =====
+const TEINTES={'dashboard':'#e9f1fe','ecoles':'#e8f6ec','vue-classes':'#e8f6ec','vue-eleves':'#e8f6ec','vue-notes':'#e6f6ed','devoirs-global':'#fff1dd','ressources':'#fff7d9','bibliotheque':'#e4f2ff','edt-global':'#e8eefb','alertes':'#ffece2','messagerie':'#e3f6fd','parametres':'#eef1f7','admin-abo':'#e8eefb','admin-msg':'#e3f6fd'};
+function appliquerTeinte(){
+  const id=sectionActuelle();
+  document.body.style.setProperty('--tint',TEINTES[id]||'#f3f7ff');
+}
 
 // ===== SUPABASE CRUD =====
 async function sbGet(table,filters={}){
@@ -4004,6 +4015,7 @@ showTab=function(t){
 };
 goTo=function(...a){_goTo(...a);majRetour();};
 function majRetour(){
+  appliquerTeinte();
   const b=document.getElementById('btn-retour');if(!b)return;
   const cur=sectionActuelle();
   b.style.display=(cur&&cur!==accueilId())?'':'none';
