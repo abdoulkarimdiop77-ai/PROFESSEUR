@@ -450,7 +450,13 @@ body.dark .kpi{background:#16213e;border-color:#0f3460}
 }
 /* ===== MISE EN PAGE « APPLICATION » : barre latérale, bannière, tuiles ===== */
 :root{--hh:68px;--sbw:246px}
-body:not(.dark){background:var(--tint,#d3d9e6)!important}
+body:not(.dark){background:var(--pagebg,#0B24D6) fixed!important;background-color:var(--tint,#0B24D6)!important;min-height:100vh}
+body:not(.dark) .breadcrumb{background:rgba(255,255,255,.92)}
+body:not(.dark) .main>.section>*:not(.card):not(.dash-banner):not(.dash-kpis):not(.dash-grid):not(table):not(.empty) {color:#fff}
+body:not(.dark) .main>.section>div:not(.card)>strong,body:not(.dark) .main>.section>div:not(.card)>div>strong,body:not(.dark) .main>.section>div:not(.card)>span{color:#fff!important}
+body:not(.dark) .main>.section>div:not(.card)>span[style*="#888"]{color:rgba(255,255,255,.7)!important}
+body:not(.dark) .section .empty,body:not(.dark) .main>.section>.empty{color:rgba(255,255,255,.7)}
+body:not(.dark) .section .card .empty{color:#9aa7c2}
 /* En-tête */
 header{min-height:var(--hh);padding:0 22px;background:linear-gradient(90deg,#08236B 0%,#0A3A9B 55%,#0B4FBF 100%);border-bottom:3px solid var(--k-orange)}
 .h-logo{display:flex;align-items:center;gap:11px;margin:0}
@@ -2308,12 +2314,16 @@ setInterval(()=>{const v=document.querySelector('.section.show');if(v&&v.id==='d
 
 
 // ===== TEINTE DE LA PAGE SELON L'ONGLET =====
-const TEINTES={'dashboard':'#e9f1fe','ecoles':'#e8f6ec','vue-classes':'#e8f6ec','vue-eleves':'#e8f6ec','vue-notes':'#e6f6ed','devoirs-global':'#fff1dd','ressources':'#fff7d9','bibliotheque':'#e4f2ff','edt-global':'#e8eefb','alertes':'#ffece2','messagerie':'#e3f6fd','parametres':'#eef1f7','admin-abo':'#e8eefb','admin-msg':'#e3f6fd'};
+const TEINTES={
+ bleu:['#3F7BFF','#0B24D6','#030A3E'],violet:['#A14BE0','#5A0E9C','#1E0236'],vert:['#3FAE3F','#0A6B0A','#012A01'],
+ orange:['#D9691A','#8A3A05','#2C1002'],rose:['#C4189A','#8A0670','#2A0220'],cyan:['#2FB4E8','#0B58B8','#041A4A'],
+ rouge:['#E0463C','#8E1236','#2A0414'],ardoise:['#5C74B8','#1E2F72','#080E2A']};
+const TEINTE_ONGLET={'dashboard':'bleu','ecoles':'violet','vue-classes':'violet','vue-eleves':'violet','vue-notes':'violet','devoirs-global':'vert','ressources':'orange','bibliotheque':'rose','edt-global':'cyan','alertes':'rouge','messagerie':'violet','parametres':'ardoise','admin-abo':'bleu','admin-msg':'rose'};
 function appliquerTeinte(){
-  const id=sectionActuelle();
-  const base=TEINTES[id]||'#f3f7ff',k=0.86;
-  const c=[1,3,5].map(i=>Math.round(parseInt(base.slice(i,i+2),16)*k));
-  document.body.style.setProperty('--tint','rgb('+c.join(',')+')');
+  const t=TEINTES[TEINTE_ONGLET[sectionActuelle()]||'bleu'];
+  const bg='radial-gradient(ellipse 60% 38% at 50% 30%,'+t[0]+'66 0%,transparent 70%),radial-gradient(ellipse 80% 30% at 50% 0%,'+t[0]+'88 0%,transparent 75%),linear-gradient(180deg,'+t[1]+' 0%,'+t[2]+' 100%)';
+  document.body.style.setProperty('--tint',t[1]);
+  document.body.style.setProperty('--pagebg',bg);
 }
 
 const TAB_COULEURS={'dashboard':'#2F6FE0','ecoles':'#2E9E3E','devoirs-global':'#F08A00','ressources':'#E5A800','bibliotheque':'#1E90FF','edt-global':'#4A72D6','alertes':'#F2742B','messagerie':'#29A8F0','propositions':'#29A8F0','parametres':'#7A8DB5','admin-abo':'#4A72D6','admin-msg':'#29A8F0'};
