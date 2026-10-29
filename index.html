@@ -345,7 +345,7 @@ header h1 .h-sous{letter-spacing:.3px;font-weight:500}
 .nav button.active{box-shadow:inset 0 -4px 0 #fff,0 -2px 10px rgba(10,46,134,.2)}
 .main{padding:16px 14px 40px}
 /* Cartes */
-body:not(.dark) .card{background:#fff;border:1px solid var(--k-line);border-top:3px solid var(--acc,var(--k-royal));border-radius:var(--k-r);box-shadow:var(--k-sh1);padding:15px 17px;margin-bottom:14px}
+body:not(.dark) .card{background:#fff;border:1px solid var(--k-line);border-radius:var(--k-r);box-shadow:var(--k-sh1);padding:15px 17px;margin-bottom:14px}
 .card-title{font-size:13.5px;font-weight:700;letter-spacing:.2px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
 .section .card-title{color:var(--k-ink)}
 body.dark .section .card-title{color:#cfe0ff}
@@ -462,6 +462,120 @@ body.dark .kpi{background:#16213e;border-color:#0f3460}
   .main{padding:12px 10px 40px}
   .modal{padding:16px 15px;border-radius:16px}
   .nav button{padding:9px 12px}
+}
+/* ===== MISE EN PAGE « APPLICATION » : barre latérale, bannière, tuiles ===== */
+:root{--hh:68px;--sbw:246px}
+body:not(.dark){background:#EDF2FB!important}
+/* En-tête */
+header{min-height:var(--hh);padding:0 22px;background:linear-gradient(90deg,#08236B 0%,#0A3A9B 55%,#0B4FBF 100%);border-bottom:3px solid var(--k-orange)}
+.h-logo{display:flex;align-items:center;gap:11px;margin:0}
+.h-txt{display:flex;flex-direction:column;line-height:1.05}
+.h-koto{font-size:26px;font-weight:800;letter-spacing:3px}
+.h-sous{font-size:12.5px;font-weight:700;color:#FBBF3A;letter-spacing:.2px;opacity:1}
+.h-tag{display:none;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17px;color:#E8EEFF;margin-left:18px;padding-left:20px;border-left:1px solid rgba(255,255,255,.3)}
+.hbell{position:relative;width:38px;height:38px;border-radius:12px;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.14);color:#fff;font-size:17px;cursor:pointer}
+.hbell:hover{background:rgba(255,255,255,.26)}
+.hbell .badge-notif{position:absolute;top:-5px;right:-5px;margin:0}
+/* Barre latérale (ordinateur) */
+.side-quote{display:none}
+#bottom-nav{display:none}
+@media(min-width:960px){
+  .h-tag{display:block}
+  .nav{position:fixed;left:0;top:var(--hh);bottom:0;width:var(--sbw);flex-direction:column;flex-wrap:nowrap;gap:5px;padding:18px 12px 14px;overflow-y:auto;overflow-x:hidden;z-index:200;border-radius:0;background:linear-gradient(180deg,#08236B 0%,#0A3A9B 65%,#0B4FBF 100%)!important}
+  .nav button[data-r]{display:flex;align-items:center;gap:11px;width:100%;text-align:left;padding:12px 14px;border-radius:12px;font-size:14px;font-weight:600;background:transparent!important;color:#E4ECFF!important;text-shadow:none!important;box-shadow:none!important;filter:none!important;transform:none!important;border-bottom:none!important;opacity:1!important;letter-spacing:.1px}
+  .nav button[data-r]:hover{background:rgba(255,255,255,.12)!important}
+  .nav button[data-r].active{background:linear-gradient(135deg,#2F86F7,#0B5FD8)!important;color:#fff!important;box-shadow:0 8px 18px rgba(0,0,0,.28)!important}
+  .nav button[data-r] .badge-notif{margin-left:auto}
+  .side-quote{display:block;margin-top:auto;padding:16px 14px;border-radius:16px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);color:#E8EEFF;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:14px;line-height:1.5;text-align:center}
+  .side-quote::after{content:"";display:block;width:60px;height:3px;border-radius:3px;background:var(--k-orange);margin:10px auto 0}
+  .breadcrumb,#abo-banner,.main{margin-left:var(--sbw)}
+  .main{padding:20px 22px 40px}
+}
+/* Barre du bas (téléphone) */
+@media(max-width:959px){
+  .nav{display:none!important}
+  #bottom-nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:400;background:#fff;border-top:1px solid var(--k-line);box-shadow:0 -6px 24px rgba(10,46,134,.14);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  #bottom-nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:none;background:transparent;font-size:10.5px;font-weight:600;color:var(--k-mute);padding:5px 2px;border-radius:12px;cursor:pointer}
+  #bottom-nav button i{font-style:normal;font-size:20px;line-height:1.1}
+  #bottom-nav button.on{color:var(--k-royal);background:#EAF2FF}
+  body.admin-mode #bottom-nav [data-r="p"]{display:none}
+  body:not(.admin-mode) #bottom-nav [data-r="a"]{display:none}
+  body.cycle-primaire #bottom-nav .bn-devoirs{display:none}
+  .main{padding-bottom:96px}
+  .toast{bottom:92px}
+  .h-sous{font-size:11px}.h-koto{font-size:21px}
+  .breadcrumb{margin-left:0}
+}
+/* Bannière de bienvenue */
+.dash-banner{position:relative;overflow:hidden;border-radius:18px;padding:26px 28px;margin-bottom:16px;color:#fff;min-height:150px;display:flex;align-items:center;background:radial-gradient(500px 220px at 85% 20%,rgba(41,168,240,.35),transparent 70%),linear-gradient(110deg,#08236B 0%,#0A3A9B 55%,#0B4FBF 100%);box-shadow:var(--k-sh2)}
+.db-txt{position:relative;z-index:2}
+.db-hello{font-size:17px;font-weight:700}
+.db-nom{font-size:34px;font-weight:800;line-height:1.1;margin:2px 0 6px}
+.db-sub{font-size:14.5px;opacity:.92}
+.db-bar{width:46px;height:4px;border-radius:4px;background:var(--k-orange);margin-top:12px}
+.db-tag{position:absolute;z-index:2;right:300px;top:30px;font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:19px;line-height:1.35;color:#fff;text-align:left;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+.db-art{position:absolute;right:0;bottom:0;height:100%;width:auto;max-width:48%;opacity:.95}
+@media(max-width:1180px){.db-tag{display:none}}
+@media(max-width:959px){.dash-banner{padding:20px 18px;min-height:130px}.db-nom{font-size:26px}.db-art{max-width:46%;opacity:.75}.db-sub{font-size:13px;max-width:58%}}
+/* Tuiles colorées */
+.dash-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.kpi2{display:flex;align-items:center;gap:14px;padding:18px 18px;border-radius:16px;color:#fff;cursor:pointer;background:linear-gradient(135deg,var(--g1),var(--g2));box-shadow:0 8px 20px color-mix(in srgb,var(--g2) 38%,transparent);transition:transform .15s,box-shadow .15s}
+.kpi2:hover{transform:translateY(-3px);box-shadow:0 14px 28px color-mix(in srgb,var(--g2) 45%,transparent)}
+.k2-ic{width:54px;height:54px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-size:26px;flex-shrink:0;box-shadow:0 3px 10px rgba(0,0,0,.18)}
+.k2-t{display:flex;flex-direction:column;line-height:1.1;flex:1}
+.k2-t b{font-size:34px;font-weight:800}
+.k2-t span{font-size:13.5px;font-weight:600;opacity:.95;margin-top:2px}
+.kpi2>i{font-style:normal;width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
+@media(max-width:959px){.dash-kpis{grid-template-columns:1fr 1fr;gap:10px}.kpi2{padding:13px 12px;gap:10px}.k2-ic{width:42px;height:42px;font-size:21px}.k2-t b{font-size:26px}.k2-t span{font-size:12px}.kpi2>i{display:none}}
+/* Grille du tableau de bord */
+.dash-grid{display:grid;grid-template-columns:minmax(270px,330px) minmax(0,1fr) 310px;gap:16px;align-items:start}
+.dash-grid .card{margin-bottom:16px}
+@media(max-width:1250px){.dash-grid{grid-template-columns:minmax(260px,340px) minmax(0,1fr)}.dg-right{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.dg-right .card{margin-bottom:0}}
+@media(max-width:959px){.dash-grid{grid-template-columns:1fr}.dg-left{order:1}.dg-center{order:2}.dg-right{order:3;grid-template-columns:1fr}}
+/* Emploi du temps */
+.edt-ligne{display:flex;align-items:center;gap:11px;padding:9px 6px;border-bottom:1px solid #edf1f9}
+.edt-ligne:last-child{border-bottom:none}
+.el-pill{color:#fff;font-size:11.5px;font-weight:700;padding:6px 11px;border-radius:20px;white-space:nowrap;box-shadow:0 2px 6px rgba(10,46,134,.2)}
+.el-info{flex:1;display:flex;flex-direction:column;line-height:1.25;min-width:0}
+.el-info strong{font-size:13px}
+.el-info span{font-size:11.5px;color:var(--k-mute)}
+.el-info small{font-size:10.5px;color:#8a97b3}
+.el-abr{font-size:11px;letter-spacing:.8px}
+/* Colonne de droite */
+.date-card{display:flex;align-items:center;gap:14px;padding:16px 18px!important}
+.dc-ic{width:54px;height:54px;border-radius:16px;background:#E3EEFF;display:flex;align-items:center;justify-content:center;font-size:28px}
+.dc-j{font-size:14px;font-weight:600;color:var(--k-mute)}
+.dc-d{font-size:21px;font-weight:800;color:var(--k-navy);line-height:1.15}
+.dc-s{font-size:11.5px;color:var(--k-mute);margin-top:3px}
+.shortcut{display:flex;align-items:center;gap:11px;width:100%;padding:10px 12px;margin-bottom:8px;border:1px solid var(--k-line);border-radius:12px;background:#fff;font-size:13.5px;font-weight:600;color:var(--k-ink);cursor:pointer;text-align:left;transition:transform .12s,box-shadow .15s,border-color .15s}
+.shortcut:hover{transform:translateX(3px);border-color:#a9c2f2;box-shadow:var(--k-sh1)}
+.shortcut i{margin-left:auto;font-style:normal;color:var(--k-mute);font-size:18px}
+.sc-ic{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px}
+body.cycle-primaire .sc-devoir{display:none}
+.act{display:flex;align-items:flex-start;gap:10px;padding:7px 2px;border-bottom:1px solid #f0f3fa}
+.act:last-child{border-bottom:none}
+.act-dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0}
+.act-t{flex:1;display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.act-t b{font-size:12.5px}
+.act-t small{font-size:11px;color:var(--k-mute);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.act em{font-style:normal;font-size:10.5px;color:#8a97b3}
+.dash-foot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:11.5px;color:var(--k-mute);padding:10px 4px 0}
+body.dark .shortcut{background:#16213e;border-color:#0f3460;color:#e0e0e0}
+body.dark .dc-d{color:#cfe0ff}
+
+.nav button::before{display:none!important;content:none!important}
+@media(max-width:959px){
+  header{flex-wrap:nowrap;gap:6px;padding:0 10px;min-height:58px}
+  header>div:first-child{flex-wrap:nowrap!important;gap:6px!important;min-width:0}
+  .h-sous{display:none}
+  .h-logo img{width:32px!important;height:32px!important}
+  .hright{flex-wrap:nowrap;gap:6px}
+  .hp-set{display:none!important}
+  .h-logo{gap:7px}.h-koto{font-size:19px;letter-spacing:2px}
+  #user-name{display:none}
+  .user-badge{padding:3px 6px}
+  .menu-btn{padding:6px 10px}
+  #btn-retour{padding:6px 9px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01ms!important}}
 @media print{header,.nav,.breadcrumb{display:none!important}body:not(.dark) .card{box-shadow:none}}
@@ -833,15 +947,16 @@ body.dark .kpi{background:#16213e;border-color:#0f3460}
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
       <button id="btn-retour" class="menu-btn" style="display:none" onclick="retour()">← Retour</button>
       <button class="menu-btn" onclick="ouvrirMenu()">☰ MENU<span id="menu-badge" class="badge-notif"></span></button>
-    <h1 style="display:flex;align-items:center;gap:9px"><img src="icon-192.png" alt="" style="width:30px;height:30px;border-radius:8px"> KOTO <span style="font-size:11px;font-weight:400;opacity:.8" class="h-sous">Cahier du Professeur</span></h1>
+    <h1 class="h-logo"><img src="icon-192.png" alt="" style="width:40px;height:40px;border-radius:11px"><span class="h-txt"><span class="h-koto">KOTO</span><span class="h-sous">Cahier du Professeur</span></span></h1><div class="h-tag">Ensemble pour une éducation de qualité</div>
     </div>
     <div class="hright">
       <span class="sync-dot" id="sync-dot"></span>
+      <button class="hbell" onclick="showTab('alertes')" title="Alertes">🔔<span id="bell-badge" class="badge-notif"></span></button>
       <div class="user-badge" onclick="showTab('parametres')" style="cursor:pointer">
         <span id="user-avatar" style="width:22px;height:22px;border-radius:50%;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.3);font-size:12px">👤</span>
         <span id="user-name"></span>
       </div>
-      <button class="logout-btn" onclick="showTab('parametres')" style="margin-right:2px">⚙️ Paramètres</button>
+      <button class="logout-btn hp-set" onclick="showTab('parametres')" style="margin-right:2px">⚙️ Paramètres</button>
       <button class="logout-btn" onclick="logout()">Déconnexion</button>
     </div>
   </header>
@@ -865,22 +980,62 @@ body.dark .kpi{background:#16213e;border-color:#0f3460}
     <button id="nav-admin" data-r="a" onclick="showTab('admin-abo')">💼 Abonnements</button>
     <button id="nav-admin-msg" data-r="a" onclick="showTab('admin-msg')">📨 Messages<span id="nav-msg-badge" class="badge-notif"></span></button>
     <button data-r="a" onclick="showTab('parametres')">🔒 Compte</button>
+    <div class="side-quote">« Un bon enseignant change le monde, une classe à la fois. »</div>
   </nav>
+  <div id="bottom-nav">
+    <button data-r="p" data-bn="dashboard" onclick="showTab('dashboard')"><i>🏠</i>Accueil</button>
+    <button data-r="p" data-bn="ecoles" onclick="showTab('ecoles')"><i>🏫</i>Écoles</button>
+    <button data-r="p" data-bn="devoirs-global" class="bn-devoirs" onclick="showTab('devoirs-global')"><i>📋</i>Devoirs</button>
+    <button data-r="p" data-bn="ressources" onclick="showTab('ressources')"><i>📁</i>Ressources</button>
+    <button data-r="a" data-bn="admin-abo" onclick="showTab('admin-abo')"><i>💼</i>Abonnements</button>
+    <button data-r="a" data-bn="admin-msg" onclick="showTab('admin-msg')"><i>📨</i>Messages</button>
+    <button data-r="a" data-bn="parametres" onclick="showTab('parametres')"><i>🔒</i>Compte</button>
+    <button data-bn="plus" onclick="ouvrirMenu()"><i>☰</i>Plus</button>
+  </div>
   <div id="abo-banner" style="display:none;padding:7px 14px;font-size:12px;align-items:center;gap:10px;justify-content:space-between"></div>
 
   <div class="main">
 
   <!-- TABLEAU DE BORD -->
   <div id="dashboard" class="section">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px" id="dash-stats"></div>
+    <div class="dash-banner">
+      <div class="db-txt">
+        <div class="db-hello" id="db-hello">Bonjour,</div>
+        <div class="db-nom" id="db-nom"></div>
+        <div class="db-sub">Bienvenue sur votre espace de gestion scolaire</div>
+        <div class="db-bar"></div>
+      </div>
+      <div class="db-tag">Former aujourd'hui<br>les citoyens de demain</div>
+      <svg class="db-art" viewBox="0 0 360 170" aria-hidden="true">
+        <rect x="190" y="124" width="150" height="28" rx="5" fill="#1E73E8"/><rect x="196" y="130" width="138" height="16" rx="3" fill="#EAF2FF"/>
+        <rect x="200" y="98" width="140" height="26" rx="5" fill="#F59E0B"/><rect x="206" y="104" width="128" height="14" rx="3" fill="#FFF4DC"/>
+        <rect x="184" y="72" width="150" height="26" rx="5" fill="#2E9E3E"/><rect x="190" y="78" width="138" height="14" rx="3" fill="#E6F6EA"/>
+        <rect x="92" y="96" width="62" height="58" rx="10" fill="#14264f" stroke="#4670c8" stroke-width="2"/>
+        <g stroke-linecap="round" stroke-width="9"><line x1="108" y1="98" x2="96" y2="46" stroke="#F59E0B"/><line x1="120" y1="98" x2="118" y2="36" stroke="#EF4444"/><line x1="132" y1="98" x2="140" y2="42" stroke="#29A8F0"/><line x1="144" y1="98" x2="160" y2="52" stroke="#2E9E3E"/></g>
+      </svg>
+    </div>
+    <div class="dash-kpis" id="dash-stats"></div>
     <div class="card" id="dash-absences-card" style="display:none;border-left:4px solid #c0392b"><div class="card-title" style="color:#791F1F">⚠️ Absences répétées (3 ou plus en 2 mois)</div><div id="dash-absences"></div></div>
-    <div class="two-col">
-      <div class="card"><div class="card-title" id="dash-edt-titre">🗓️ Emploi du temps du jour</div><div id="dash-edt"></div></div>
-      <div>
+    <div class="dash-grid">
+      <div class="dg-left">
+        <div class="card"><div class="card-title" id="dash-edt-titre">🗓️ Emploi du temps du jour</div><div id="dash-edt"></div></div>
         <div class="card" id="dash-demain-card" style="display:none"><div class="card-title" id="dash-demain-titre">🌙 Emploi du temps de demain</div><div id="dash-demain"></div></div>
+      </div>
+      <div class="dg-center">
         <div class="card"><div class="card-title">🏫 Écoles, classes et élèves</div><div id="dash-ecoles"></div></div>
       </div>
+      <div class="dg-right">
+        <div class="card date-card"><div class="dc-ic">📅</div><div><div class="dc-j" id="dc-jour"></div><div class="dc-d" id="dc-date"></div><div class="dc-s" id="dc-sous"></div></div></div>
+        <div class="card"><div class="card-title">⚡ Raccourcis</div>
+          <button class="shortcut" onclick="openModal('modal-add-ecole')"><span class="sc-ic" style="background:#E3EEFF">➕</span>Ajouter une école<i>›</i></button>
+          <button class="shortcut sc-devoir" onclick="showTab('devoirs-global');openModal('modal-add-devoir')"><span class="sc-ic" style="background:#FFEFD3">📋</span>Créer un devoir<i>›</i></button>
+          <button class="shortcut" onclick="showTab('edt-global')"><span class="sc-ic" style="background:#E3F6E8">🗓️</span>Emploi du temps<i>›</i></button>
+          <button class="shortcut" onclick="showTab('messagerie')"><span class="sc-ic" style="background:#E6F5FD">💬</span>Messagerie<i>›</i></button>
+        </div>
+        <div class="card"><div class="card-title">🕘 Dernières activités</div><div id="dash-activites"></div></div>
+      </div>
     </div>
+    <div class="dash-foot"><span>KOTO – Cahier du Professeur &nbsp;|&nbsp; Version 1.0</span><span id="dash-charge"></span></div>
   </div>
 
   <!-- VUE ÉCOLES -->
@@ -4313,9 +4468,7 @@ function getCoursDemain(){
 }
 function edtLigne(sl){
   const ec=cache.ecoles.find(e=>e.id==sl.ecole_id);const col=ec?ec.couleur:'#0B4FBF';
-  return `<div style="border:1px solid #e5e5e0;border-left:3px solid ${col};border-radius:7px;padding:7px 11px;margin-bottom:5px;font-size:12px">
-    <strong>${sl.hdeb}–${sl.hfin}</strong> · <strong style="color:${col}">${ec?ec.abr:''}</strong> · <strong>${sl.classe||getClasseNomGlobal(sl.classe_id)}</strong>${sl.mat?' — '+sl.mat:''}${sl.salle?' · Salle '+sl.salle:''}${sl.lecon?'<div style="color:#888;font-size:11px">📖 '+sl.lecon+'</div>':''}
-  </div>`;
+  return `<div class="edt-ligne"><span class="el-pill" style="background:${col}">${sl.hdeb} – ${sl.hfin}</span><div class="el-info"><strong>${resEsc(sl.classe||getClasseNomGlobal(sl.classe_id))}</strong><span>${resEsc(sl.mat||'')}${sl.salle?' · Salle '+resEsc(sl.salle):''}</span>${sl.lecon?'<small>📖 '+resEsc(sl.lecon)+'</small>':''}</div><b class="el-abr" style="color:${col}">${ec?resEsc(ec.abr):''}</b></div>`;
 }
 function slotsDuJour(nomJour){return cache.slots.filter(s=>s.jour===nomJour).sort((a,b)=>minutes(a.hdeb)-minutes(b.hdeb));}
 function renderDemain(){
@@ -4339,7 +4492,26 @@ function renderDashboard(){
   const d=new Date();
   const moy=(arr)=>{const v=arr.filter(n=>n.note!==null&&n.note!==''&&!isNaN(parseFloat(n.note))).map(n=>parseFloat(n.note)/(parseFloat(n.bareme)||20)*20);return v.length?(v.reduce((a,b)=>a+b,0)/v.length):null;};
   const stats=[['🏫','Écoles',cache.ecoles.length],['📚','Classes',cache.classes.length],['👥','Élèves',cache.eleves.length],['🗓️','Classes aujourd\'hui',slotsDuJour(JOURS_FR[d.getDay()]).length]];
-  document.getElementById('dash-stats').innerHTML=stats.map((x,i)=>`<div class="kpi" style="--kc:${['#0B4FBF','#2E9E3E','#F59E0B','#29A8F0'][i%4]}"><div class="k-ic">${x[0]}</div><div><div class="k-val">${x[2]}</div><div class="k-lbl">${x[1]}</div></div></div>`).join('');
+  const brut=(document.getElementById('user-name').textContent||'').replace(/ · Admin$/,'').trim();
+  document.getElementById('db-hello').textContent=(d.getHours()>=18?'Bonsoir':'Bonjour')+',';
+  document.getElementById('db-nom').textContent=brut||'Professeur';
+  document.getElementById('dash-charge').textContent=brut?('Chargé du cours : '+brut):'';
+  const cible=['ecoles','ecoles','ecoles','edt-global'],grad=[['#2A7FF2','#0B4FBF'],['#3DBE5C','#1F8F3D'],['#FBB63A','#EE8A00'],['#8B6CF6','#5B3FD6']];
+  document.getElementById('dash-stats').innerHTML=stats.map((x,i)=>`<div class="kpi2" style="--g1:${grad[i][0]};--g2:${grad[i][1]}" onclick="showTab('${cible[i]}')"><div class="k2-ic">${x[0]}</div><div class="k2-t"><b>${x[2]}</b><span>${x[1]}</span></div><i>›</i></div>`).join('');
+  const MS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+  const jn=d.toLocaleDateString('fr-FR',{weekday:'long'});
+  document.getElementById('dc-jour').textContent=jn.charAt(0).toUpperCase()+jn.slice(1);
+  document.getElementById('dc-date').textContent=d.getDate()+' '+MS[d.getMonth()]+' '+d.getFullYear();
+  const mi=(d.getFullYear()-2026)*12+d.getMonth()-9;
+  document.getElementById('dc-sous').textContent=mi>=0&&mi<9?('Mois '+(mi+1)+' sur 9 · année 2026-2027'):'Année scolaire 2026-2027';
+  const nomClasse=id=>{const c=cache.classes.find(x=>x.id===id);return c?c.nom:''};
+  const ev=[];
+  cache.eleves.forEach(e=>e.created_at&&ev.push({t:'Nouvel élève inscrit',s:e.nom+(nomClasse(e.classe_id)?' · '+nomClasse(e.classe_id):''),d:e.created_at,c:'#2E9E3E'}));
+  cache.devoirs.forEach(x=>x.created_at&&ev.push({t:'Nouveau devoir',s:(x.titre||'')+(nomClasse(x.classe_id)?' · '+nomClasse(x.classe_id):''),d:x.created_at,c:'#F59E0B'}));
+  cache.notes.forEach(x=>x.created_at&&ev.push({t:'Note enregistrée',s:(x.titre||'')+(nomClasse(x.classe_id)?' · '+nomClasse(x.classe_id):''),d:x.created_at,c:'#1E73E8'}));
+  ev.sort((a,b)=>new Date(b.d)-new Date(a.d));
+  const quand=s=>{const t=new Date(s),a=new Date();return t.toDateString()===a.toDateString()?t.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):t.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});};
+  document.getElementById('dash-activites').innerHTML=ev.length?ev.slice(0,5).map(x=>`<div class="act"><span class="act-dot" style="background:${x.c}"></span><div class="act-t"><b>${resEsc(x.t)}</b><small>${resEsc(x.s)}</small></div><em>${quand(x.d)}</em></div>`).join(''):'<div class="empty" style="padding:10px">Aucune activité récente</div>';
   document.getElementById('dash-edt-titre').textContent='🗓️ Emploi du temps — '+d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
   const sl=slotsDuJour(JOURS_FR[d.getDay()]);
   document.getElementById('dash-edt').innerHTML=sl.length?sl.map(edtLigne).join(''):'<div class="empty">Aucune classe aujourd\'hui</div>';
@@ -4877,7 +5049,13 @@ showTab=function(t){
   _showTab(t);majRetour();
 };
 goTo=function(...a){_goTo(...a);majRetour();};
+function majBottomNav(){
+  const cur=sectionActuelle();
+  const m=cur.startsWith('vue-')?'ecoles':cur;
+  document.querySelectorAll('#bottom-nav [data-bn]').forEach(b=>b.classList.toggle('on',b.dataset.bn===m));
+}
 function majRetour(){
+  majBottomNav();
   appliquerTeinte();
   const b=document.getElementById('btn-retour');if(!b)return;
   const cur=sectionActuelle();
@@ -5425,6 +5603,7 @@ function renderDashAbsences(){
   const tout=[];
   cache.classes.forEach(c=>absencesAlertes(c.id).forEach(a=>tout.push({...a,classe:c})));
   card.style.display=tout.length?'block':'none';
+  const bb=document.getElementById('bell-badge');if(bb){bb.textContent=tout.length;bb.style.display=tout.length?'inline-block':'none';}
   el.innerHTML=tout.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #f5d5d5;padding:6px 0;font-size:12px;flex-wrap:wrap"><div><strong>${resEsc(a.eleve.nom)}</strong> <span style="color:#888">· ${resEsc(a.classe.nom)}</span><br><span style="color:#791F1F">${a.n} absences en 2 mois : ${a.dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})).join(', ')}</span></div><button class="btn btn-sm" onclick="ouvrirPresencesClasse('${a.classe.id}')">Voir</button></div>`).join('');
   if(tout.length&&!absToastFait){absToastFait=true;setTimeout(()=>toast('⚠️ '+tout.length+' élève(s) avec 3 absences ou plus en 2 mois',6000),800);}
 }
