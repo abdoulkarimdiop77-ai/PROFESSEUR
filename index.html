@@ -318,6 +318,153 @@ body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
 .nav button[onclick*="'ressources'"].active{box-shadow:inset 0 -5px 0 #4a3500,0 2px 6px rgba(0,0,0,.2)}
 #menu-drawer .m-item{margin-bottom:6px;border-left-width:8px;border-left-style:solid;font-weight:700;text-shadow:0 1px 1px rgba(0,0,0,.15)}
 #menu-drawer .m-item.actif{outline:3px solid #fff;box-shadow:0 0 0 5px rgba(0,0,0,.18)}
+/* ===== KOTO PRO : habillage professionnel aux couleurs du logo ===== */
+:root{--k-navy:#0A2E86;--k-royal:#0B4FBF;--k-blue:#1E73E8;--k-sky:#29A8F0;--k-orange:#F59E0B;--k-green:#2E9E3E;
+ --k-ink:#14213D;--k-mute:#64708A;--k-line:#E1E8F5;--k-bg:#F3F7FF;
+ --k-sh1:0 1px 2px rgba(10,46,134,.06),0 4px 14px rgba(10,46,134,.07);--k-sh2:0 2px 4px rgba(10,46,134,.08),0 12px 28px rgba(10,46,134,.14);
+ --k-r:14px}
+body{font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;font-size:14px;color:var(--k-ink);-webkit-font-smoothing:antialiased;letter-spacing:.005em}
+body:not(.dark){--tint:var(--k-bg)}
+/* En-tête */
+header{background:linear-gradient(120deg,#0A2E86 0%,#0B4FBF 55%,#1E73E8 100%);border-bottom:3px solid var(--k-orange);box-shadow:0 4px 18px rgba(10,46,134,.28);padding:9px 18px}
+header h1{font-size:16px;font-weight:800;letter-spacing:2.5px}
+header h1 img{box-shadow:0 2px 8px rgba(0,0,0,.3)}
+header h1 .h-sous{letter-spacing:.3px;font-weight:500}
+.menu-btn,.logout-btn,.user-badge{border-radius:10px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);transition:background .15s,transform .15s}
+.menu-btn:hover,.logout-btn:hover,.user-badge:hover{background:rgba(255,255,255,.26)}
+.menu-btn{font-weight:700;letter-spacing:.4px}
+.user-badge{padding:4px 11px}
+/* Fil d'Ariane */
+.breadcrumb{background:rgba(255,255,255,.85);backdrop-filter:blur(6px);border-bottom:1px solid var(--k-line);padding:8px 18px;font-size:12px}
+.breadcrumb a{color:var(--k-royal);font-weight:600}
+/* Onglets : cases colorées, forme soignée */
+.nav{padding:8px 10px 0;gap:4px}
+.nav button{padding:10px 15px;font-size:12px;border-radius:11px 11px 0 0;letter-spacing:.2px;transition:transform .15s,filter .15s,box-shadow .15s}
+.nav button:not(.active){filter:saturate(.92) brightness(.97)}
+.nav button:not(.active):hover{transform:translateY(-1px);filter:brightness(1.08)}
+.nav button.active{box-shadow:inset 0 -4px 0 #fff,0 -2px 10px rgba(10,46,134,.2)}
+.main{padding:16px 14px 40px}
+/* Cartes */
+body:not(.dark) .card{background:#fff;border:1px solid var(--k-line);border-top:3px solid var(--acc,var(--k-royal));border-radius:var(--k-r);box-shadow:var(--k-sh1);padding:15px 17px;margin-bottom:14px}
+.card-title{font-size:13.5px;font-weight:700;letter-spacing:.2px;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.section .card-title{color:var(--k-ink)}
+body.dark .section .card-title{color:#cfe0ff}
+.section>div>strong,.section>strong,#ecoles strong,#vue-classes strong,#vue-eleves strong,#vue-notes strong{color:var(--k-ink)}
+/* Formulaires */
+label{font-size:11.5px;color:var(--k-mute);font-weight:600;margin-bottom:4px;letter-spacing:.2px}
+input,select,textarea{border:1.5px solid #d6dff0;border-radius:10px;padding:8px 11px;font-size:13px;background:#fbfcff;transition:border-color .15s,box-shadow .15s,background .15s}
+input:hover,select:hover,textarea:hover{border-color:#b6c6e6}
+input:focus,select:focus,textarea:focus{border-color:var(--k-royal);box-shadow:0 0 0 4px rgba(11,79,191,.14);background:#fff}
+input[type=checkbox],input[type=radio]{accent-color:var(--k-royal);box-shadow:none}
+/* Boutons */
+.btn{border-radius:10px;padding:8px 15px;font-size:12.5px;font-weight:600;border:1.5px solid #d6dff0;background:#fff;color:var(--k-ink);box-shadow:0 1px 2px rgba(10,46,134,.05);transition:transform .12s,box-shadow .15s,background .15s,filter .15s}
+.btn:hover{background:#eef3ff;border-color:#b6c6e6;transform:translateY(-1px);box-shadow:0 4px 10px rgba(10,46,134,.1)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:linear-gradient(135deg,#1E73E8,#0B4FBF);color:#fff;border-color:#0B4FBF;box-shadow:0 3px 10px rgba(11,79,191,.32)}
+.btn-primary:hover{background:linear-gradient(135deg,#2A7FF2,#0A45A8);border-color:#0A45A8;box-shadow:0 6px 16px rgba(11,79,191,.38)}
+.btn-info{background:linear-gradient(135deg,#38B6F5,#1E90E8);color:#fff;border-color:#1E90E8;box-shadow:0 3px 10px rgba(30,144,232,.3)}
+.btn-info:hover{background:linear-gradient(135deg,#4BC0FA,#1783DA);border-color:#1783DA}
+.btn-warn{background:linear-gradient(135deg,#FBB63A,#F59E0B);color:#fff;border-color:#E58F00;box-shadow:0 3px 10px rgba(245,158,11,.32);text-shadow:0 1px 1px rgba(0,0,0,.12)}
+.btn-warn:hover{background:linear-gradient(135deg,#FDC050,#EE9300);border-color:#D98400}
+.btn-danger{color:#c0392b;background:transparent;border-color:transparent;box-shadow:none}
+.btn-danger:hover{background:#fdecec;border-color:#f5c2c2;box-shadow:none}
+.btn-sm{padding:5px 11px;font-size:11.5px;border-radius:9px}
+.btn-xs{padding:3px 8px;font-size:10.5px;border-radius:8px}
+.btn:focus-visible,.menu-btn:focus-visible,.nav button:focus-visible{outline:3px solid rgba(245,158,11,.55);outline-offset:2px}
+/* Tableaux */
+table{font-size:12.5px}
+th{background:#EEF3FC;color:#55618A;font-size:10.5px;letter-spacing:.7px;padding:9px 10px;border-bottom:1.5px solid var(--k-line)}
+td{padding:9px 10px;border-bottom:1px solid #edf1f9}
+tr:hover td{background:#F6F9FF}
+.notes-table th{font-size:9.5px;padding:7px 4px}
+.note-input{border-radius:7px;border:1.5px solid #d6dff0;padding:5px 4px}
+.moy-cell{border-radius:8px;padding:4px 8px}
+/* Étiquettes */
+.badge,.badge-stat{border-radius:20px}
+.matricule-badge{background:linear-gradient(135deg,#1E73E8,#0A2E86);box-shadow:0 1px 4px rgba(10,46,134,.3);letter-spacing:.5px}
+/* Écoles, classes, élèves, ressources */
+.ecole-card,.classe-card,.dossier-card,.ressource-card,.eleve-row,.seance-card,.msg-item,.corbeille-item{border:1px solid var(--k-line);border-radius:var(--k-r);box-shadow:var(--k-sh1)}
+body:not(.dark) .ecole-card,body:not(.dark) .classe-card,body:not(.dark) .dossier-card,body:not(.dark) .ressource-card,body:not(.dark) .eleve-row,body:not(.dark) .seance-card{background:#fff}
+.ecole-card,.classe-card,.dossier-card{transition:transform .18s,box-shadow .18s,border-color .18s}
+.ecole-card:hover,.classe-card:hover,.dossier-card:hover{transform:translateY(-3px);box-shadow:var(--k-sh2);border-color:#a9c2f2}
+.ecole-card{padding:18px;border-top:4px solid var(--k-royal)}
+.ecole-card .ec-abr{font-size:30px;font-weight:800;letter-spacing:1px}
+.ecole-card .ec-stat{background:#F1F6FF;border-radius:10px}
+.ecole-card .ec-stat-val{color:var(--k-royal);font-weight:800}
+.classe-card{border-left:4px solid var(--k-sky)}
+.classe-card .cl-nom{color:var(--k-navy);font-weight:800}
+.eleve-row{padding:10px 12px;margin-bottom:7px}
+.eleve-row:hover{background:#F6F9FF;border-color:#a9c2f2;transform:translateX(2px)}
+.eleve-avatar,.photo-preview-big{border:2.5px solid var(--k-sky);background:#E8F1FF}
+.ressource-card:hover{background:#F6F9FF;border-color:#a9c2f2}
+.file-chip{background:#EAF2FF;border:1px solid #b9d3fb;color:#0A3C99;border-radius:20px}
+/* Sous-onglets, alertes, chips */
+.sub-tab{border-radius:20px;padding:6px 14px;font-size:11.5px;font-weight:600;border:1.5px solid #d6dff0;color:var(--k-mute);transition:all .15s}
+.sub-tab:hover{background:#EEF3FF;color:var(--k-royal)}
+.sub-tab.active{background:linear-gradient(135deg,#1E73E8,#0B4FBF);color:#fff;border-color:#0B4FBF;box-shadow:0 3px 10px rgba(11,79,191,.3)}
+.alert-box{border-radius:12px;padding:11px 14px}
+.alert-info{background:#EAF3FF;color:#0A3C99;border:1px solid #bcd6fb}
+.alert-success{background:#E6F6EA;color:#14612A;border:1px solid #a9dcb7}
+.alert-warn{background:#FFF3DA;color:#7a4a00;border:1px solid #f7d58e}
+.eleve-rappel{border-radius:12px;padding:9px 11px}
+.sanction-chip{border-radius:20px}
+.nav button.active{color:#fff!important}
+.nav button[onclick*="'ressources'"].active{color:#4a3500!important}
+/* Fenêtres */
+.modal-overlay{background:rgba(8,28,80,.55);backdrop-filter:blur(3px)}
+.modal{border-radius:18px;padding:20px 22px;box-shadow:0 24px 70px rgba(5,20,70,.4);border-top:5px solid var(--k-royal)}
+.modal-header{padding-bottom:11px;border-bottom:1px solid var(--k-line);margin-bottom:15px}
+.modal-header h2{font-size:16px;font-weight:800;color:var(--k-navy)}
+body.dark .modal-header h2{color:#cfe0ff}
+.modal-close{width:32px;height:32px;border-radius:10px;color:var(--k-mute);transition:background .15s}
+.modal-close:hover{background:#eef3ff;color:var(--k-ink)}
+/* Notification */
+.toast{background:linear-gradient(135deg,#0A2E86,#0B4FBF);border-left:4px solid var(--k-orange);border-radius:12px;padding:12px 18px;box-shadow:var(--k-sh2);font-size:12.5px}
+/* Menu latéral */
+#menu-drawer{background:rgba(8,28,80,.5);backdrop-filter:blur(2px)}
+#menu-drawer .panneau{border-radius:0 20px 20px 0;padding:0 14px 16px;box-shadow:8px 0 36px rgba(5,20,70,.35)}
+#menu-drawer .m-titre{margin:0 -14px 14px;padding:16px 16px;background:linear-gradient(120deg,#0A2E86,#0B4FBF 60%,#1E73E8);color:#fff;border-bottom:3px solid var(--k-orange);border-radius:0 20px 0 0;letter-spacing:2px}
+#menu-drawer .m-titre img{box-shadow:0 2px 8px rgba(0,0,0,.3)}
+#menu-drawer .m-item{border-radius:12px;font-size:13.5px;padding:12px 14px;box-shadow:0 2px 6px rgba(10,46,134,.12);transition:transform .12s}
+#menu-drawer .m-item:hover{transform:translateX(3px)}
+/* Tableau de bord */
+.kpi{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--k-line);border-radius:var(--k-r);padding:14px 15px;box-shadow:var(--k-sh1);position:relative;overflow:hidden}
+.kpi::after{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--kc)}
+.kpi .k-ic{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:21px;background:color-mix(in srgb,var(--kc) 14%,#fff);flex-shrink:0}
+.kpi .k-val{font-size:26px;font-weight:800;line-height:1;color:var(--kc)}
+.kpi .k-lbl{font-size:11px;color:var(--k-mute);margin-top:4px;font-weight:600}
+body.dark .kpi{background:#16213e;border-color:#0f3460}
+/* Emploi du temps */
+.edt-grille{border-radius:12px;overflow:hidden}
+.edt-grille th,.edt-table th{background:linear-gradient(135deg,#1E73E8,#0B4FBF)}
+.edt-table td,.edt-grille td{border-color:#e6ecf8}
+.edt-bloc{border-radius:9px;box-shadow:0 2px 6px rgba(10,46,134,.2)}
+/* Connexion */
+.auth-page{background:radial-gradient(900px 500px at 15% 10%,rgba(41,168,240,.35),transparent 60%),radial-gradient(700px 500px at 90% 95%,rgba(245,158,11,.22),transparent 60%),linear-gradient(150deg,#0A2E86,#0B4FBF 60%,#0A3FA6);padding:18px}
+.auth-card{border-radius:24px;padding:34px 30px;box-shadow:0 30px 80px rgba(3,16,60,.5);border-top:5px solid var(--k-orange)}
+.auth-logo h1{color:var(--k-navy);font-weight:800}
+.auth-logo p{color:var(--k-mute);font-size:12.5px}
+.auth-tabs{background:#EEF3FC;border-radius:12px;padding:4px;border-bottom:none;gap:4px}
+.auth-tab{border-radius:9px;border-bottom:none;margin-bottom:0;font-weight:700;color:var(--k-mute);transition:all .15s}
+.auth-tab.active{background:#fff;color:var(--k-royal);box-shadow:0 2px 8px rgba(10,46,134,.15)}
+.auth-input{border:1.5px solid #d6dff0;border-radius:11px;padding:11px 13px;font-size:13.5px;background:#fbfcff}
+.auth-input:focus{border-color:var(--k-royal);box-shadow:0 0 0 4px rgba(11,79,191,.14);background:#fff}
+.auth-btn{background:linear-gradient(135deg,#1E73E8,#0B4FBF);border-radius:12px;padding:13px;font-size:14.5px;font-weight:700;letter-spacing:.3px;box-shadow:0 8px 20px rgba(11,79,191,.4);transition:transform .12s,box-shadow .15s}
+.auth-btn:hover{background:linear-gradient(135deg,#2A7FF2,#0A45A8);transform:translateY(-1px);box-shadow:0 12px 26px rgba(11,79,191,.45)}
+/* Page élève */
+.eleve-page{background:var(--k-bg)}
+/* Divers */
+.spinner{border-color:#dbe5f7;border-top-color:var(--k-royal)}
+.empty{color:#9aa7c2}
+::-webkit-scrollbar{height:8px;width:8px}::-webkit-scrollbar-thumb{background:#c4d3ef;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#9db6e6}
+@media(max-width:700px){
+  header{padding:8px 12px}header h1{font-size:15px}
+  .main{padding:12px 10px 40px}
+  .modal{padding:16px 15px;border-radius:16px}
+  .nav button{padding:9px 12px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation-duration:.01ms!important}}
+@media print{header,.nav,.breadcrumb{display:none!important}body:not(.dark) .card{box-shadow:none}}
 </style>
 </head>
 <body>
@@ -366,6 +513,35 @@ body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
     </div>
     <div id="ep-done" style="display:none" class="card"><div style="text-align:center;padding:20px"><div style="font-size:36px">✅</div><div style="font-size:15px;font-weight:600;margin-top:6px" data-etat>Devoir envoyé !</div></div></div>
     <div id="ep-bloque" style="display:none;border:2px solid #c0392b;background:#fff5f5" class="card"><div style="text-align:center;padding:20px"><div style="font-size:42px">🚫</div><div style="font-size:16px;font-weight:700;color:#c0392b;margin-top:6px">Devoir bloqué</div><div style="font-size:12px;margin-top:8px;color:#444">Tu as quitté l'application pendant le devoir : cela est considéré comme une <b>fraude suspectée</b>.</div><div style="font-size:11px;color:#791F1F;margin-top:6px">Motif : <span id="ep-bloque-motif"></span></div><div style="font-size:11px;color:#555;margin-top:8px" id="ep-bloque-etat"></div></div></div>
+  </div>
+</div>
+
+
+<!-- MODAL : CHOISIR DES FICHIERS DANS MES RESSOURCES -->
+<div class="modal-overlay" id="modal-res-pick">
+  <div class="modal">
+    <div class="modal-header"><h2>📁 Mes Ressources</h2><button class="modal-close" onclick="closeModal('modal-res-pick')">✕</button></div>
+    <div style="font-size:11px;color:#666;margin-bottom:7px">Coche les fichiers à joindre à la séance. Aucun envoi : le fichier reste dans tes Ressources.</div>
+    <input id="rpk-search" placeholder="🔎 Rechercher un fichier..." oninput="renderPickRessources()" style="margin-bottom:8px">
+    <div id="rpk-liste" style="max-height:48vh;overflow-y:auto"></div>
+    <button class="btn btn-primary" style="width:100%;margin-top:9px" onclick="validerPickRessources()">✓ Joindre les fichiers cochés</button>
+  </div>
+</div>
+<!-- MODAL : ENVOYER UN FICHIER DES RESSOURCES AU CAHIER JOURNAL -->
+<div class="modal-overlay" id="modal-res-cahier">
+  <div class="modal">
+    <div class="modal-header"><h2>📔 Envoyer au cahier journal</h2><button class="modal-close" onclick="closeModal('modal-res-cahier')">✕</button></div>
+    <div id="rcj-fichier" style="font-size:13px;font-weight:600;margin-bottom:9px"></div>
+    <div class="form-group"><label>Classe</label><select id="rcj-classe" onchange="rcjMajSeances()"></select></div>
+    <div class="form-group"><label>Séance</label><select id="rcj-seance" onchange="rcjMajNouvelle()"></select></div>
+    <div id="rcj-nouvelle">
+      <div class="two-eq">
+        <div class="form-group"><label>Date</label><input type="date" id="rcj-date"></div>
+        <div class="form-group"><label>Matière</label><input id="rcj-mat" placeholder="Biologie"></div>
+      </div>
+      <div class="form-group"><label>Leçon</label><input id="rcj-lecon" placeholder="Titre de la leçon"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="rcjEnvoyer()">📤 Envoyer au cahier</button>
   </div>
 </div>
 
@@ -477,7 +653,7 @@ body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
         </div>
         <div class="form-group"><label>Contenu du cours</label><textarea id="sj-contenu" placeholder="Résumé..."></textarea></div>
         <div class="form-group"><label>Observations</label><textarea id="sj-obs" placeholder="Remarques..."></textarea></div>
-        <div class="form-group"><label>📎 Importer la leçon (Word, PDF, PowerPoint…)</label><input type="file" id="sj-fichier" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg" onchange="seanceFichiersChoisis(this)"><div id="sj-fichier-info" style="font-size:10px;color:#0B4FBF;margin-top:3px"></div></div>
+        <div class="form-group"><label>📎 Importer la leçon (Word, PDF, PowerPoint…)</label><input type="file" id="sj-fichier" multiple accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg" onchange="seanceFichiersChoisis(this)"><div style="margin-top:5px"><button type="button" class="btn btn-sm btn-info" onclick="ouvrirPickRessources({type:'form'})">📁 Joindre depuis mes Ressources</button></div><div id="sj-fichier-info" style="font-size:11px;color:#0B4FBF;margin-top:4px"></div></div>
         <input type="file" id="sj-ajout-input" multiple style="display:none" accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg" onchange="seanceAjoutEnvoi(this)">
         <div style="display:flex;gap:7px">
           <button class="btn btn-primary" onclick="enregistrerSeance()">💾 Enregistrer</button>
@@ -513,6 +689,12 @@ body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
         <div class="two-eq">
           <div class="form-group"><label>Leçon à rappeler</label><input id="rp-lecon" placeholder="La cellule vivante"></div>
           <div class="form-group"><label>Nombre d'élèves</label><input type="number" id="rp-nb" value="5" min="1"></div>
+        </div>
+        <div class="form-group"><label>Type d'évaluation du rappel</label>
+          <select id="rp-mode" onchange="renderInterroges()">
+            <option value="points">Points en plus / en moins (ajoutés à la note orale du mois)</option>
+            <option value="note">Note orale du mois /20 (donnée à partir du rappel)</option>
+          </select>
         </div>
         <div class="form-group"><label>Mois concerné (pour les notes orales)</label>
           <select id="rp-mois">
@@ -690,7 +872,7 @@ body:not(.dark){background:var(--tint,#f3f7ff);transition:background .35s}
 
   <!-- TABLEAU DE BORD -->
   <div id="dashboard" class="section">
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:10px" id="dash-stats"></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:14px" id="dash-stats"></div>
     <div class="card" id="dash-absences-card" style="display:none;border-left:4px solid #c0392b"><div class="card-title" style="color:#791F1F">⚠️ Absences répétées (3 ou plus en 2 mois)</div><div id="dash-absences"></div></div>
     <div class="two-col">
       <div class="card"><div class="card-title" id="dash-edt-titre">🗓️ Emploi du temps du jour</div><div id="dash-edt"></div></div>
@@ -2327,53 +2509,6 @@ async function saveNewEleve(){
   toast('Élève ajouté ✓ — Matricule : '+mat);
 }
 
-// Mise à jour fiche élève (sans date de naissance)
-function ouvrirFicheEleve(id){
-  const e=cache.eleves.find(x=>x.id===id);if(!e)return;
-  document.getElementById('fiche-titre').textContent='👤 '+e.nom;
-  const notes=cache.notes.filter(n=>n.eleve_id===id);
-  const moy=notes.length?(notes.reduce((s,n)=>s+n.note/n.bareme*20,0)/notes.length).toFixed(2):'—';
-  let html=`
-    <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap">
-      <div style="width:80px;height:80px;border-radius:50%;overflow:hidden;background:#E6EEFB;display:flex;align-items:center;justify-content:center;font-size:30px;border:2px solid #0B4FBF;flex-shrink:0">
-        ${e.photo?`<img src="${e.photo}" style="width:80px;height:80px;object-fit:cover">`:'👤'}
-      </div>
-      <div style="flex:1">
-        <div style="font-size:16px;font-weight:700">${e.nom}</div>
-        <div style="margin-top:4px"><span class="matricule-badge">${e.matricule||'—'}</span></div>
-        <div style="font-size:11px;color:#888;margin-top:3px">🔑 Mdp devoir : <code style="background:#f0f0eb;padding:1px 5px;border-radius:3px">${e.pwd||'—'}</code></div>
-      </div>
-      <div style="text-align:center;background:#E6EEFB;border-radius:9px;padding:10px 14px">
-        <div style="font-size:24px;font-weight:700;color:#0B4FBF">${moy}</div>
-        <div style="font-size:10px;color:#0B4FBF">/20 Moyenne</div>
-      </div>
-    </div>
-    <div style="margin-bottom:12px;padding:8px;background:#f9f9f7;border-radius:7px">
-      <div style="font-size:11px;font-weight:600;margin-bottom:6px">📷 Modifier la photo</div>
-      <div style="display:flex;gap:7px">
-        <input type="file" accept="image/*" capture="camera" onchange="updatePhotoEleve('${e.id}',this)" style="font-size:11px;flex:1">
-      </div>
-    </div>`;
-  // Notes
-  html+=`<div style="font-weight:600;font-size:13px;margin-bottom:7px;border-bottom:1px solid #e5e5e0;padding-bottom:5px">📊 Notes récentes</div>`;
-  html+=notes.length?'<table><thead><tr><th>Évaluation</th><th>Type</th><th>Matière</th><th>Note</th></tr></thead><tbody>'+
-    notes.slice(0,8).map(n=>`<tr><td>${n.titre}</td><td>${n.type||'—'}</td><td>${n.mat||'—'}</td><td><span style="padding:2px 7px;border-radius:20px;font-size:11px;font-weight:600;background:${noteBg(n.note)};color:${noteColor(n.note)}">${n.note}/${n.bareme}</span></td></tr>`).join('')+'</tbody></table>':
-    '<div class="empty" style="padding:8px">Aucune note</div>';
-  // Observations
-  html+=`<div style="margin-top:12px">
-    <div style="font-weight:600;font-size:13px;margin-bottom:7px;border-bottom:1px solid #e5e5e0;padding-bottom:5px">📝 Observations</div>
-    ${(e.observations||[]).map((obs,i)=>`<div style="background:#f9f9f7;border-radius:6px;padding:6px 9px;margin-bottom:4px;font-size:12px;display:flex;justify-content:space-between">
-      <div><span style="font-size:10px;color:#888">${obs.date}</span><br>${obs.texte}</div>
-      <button class="btn btn-danger btn-xs" onclick="delObsEleve('${e.id}',${i})">✕</button>
-    </div>`).join('')||'<div class="empty" style="padding:8px">Aucune observation</div>'}
-    <div style="display:flex;gap:6px;margin-top:8px">
-      <input id="obs-new-${e.id}" placeholder="Nouvelle observation..." style="flex:1">
-      <button class="btn btn-primary btn-sm" onclick="addObsEleve('${e.id}')">+ Ajouter</button>
-    </div>
-  </div>`;
-  document.getElementById('fiche-eleve-content').innerHTML=html;
-  openModal('modal-eleve');
-}
 async function delEleve(id){
   if(!confirm('Supprimer cet élève ?'))return;
   await sbDelete('eleves',id);
@@ -2497,6 +2632,16 @@ function ouvrirFicheEleve(id){
         <div style="font-size:10px;color:#0B4FBF">/20 Moyenne</div>
       </div>
     </div>`;
+  // Modifier les informations
+  html+=`<div style="margin-bottom:12px;padding:10px;background:#FFF9E8;border:1px solid #F3DFA2;border-radius:7px">
+    <div style="font-size:12px;font-weight:700;margin-bottom:7px">✏️ Modifier les informations</div>
+    <div class="two-eq">
+      <div class="form-group"><label>Prénom</label><input id="fe-prenom" value="${resEsc(e.prenom||(e.nom||'').split(' ')[0]||'')}"></div>
+      <div class="form-group"><label>Nom</label><input id="fe-nom" value="${resEsc(e.nom_famille||(e.nom||'').split(' ').slice(1).join(' ')||'')}"></div>
+    </div>
+    <div class="form-group"><label>Matricule</label><input id="fe-mat" value="${resEsc(e.matricule||'')}"></div>
+    <button class="btn btn-primary btn-sm" onclick="enregistrerInfosEleve('${e.id}')">💾 Enregistrer les modifications</button>
+  </div>`;
   // Modifier photo
   html+=`<div style="margin-bottom:12px;padding:8px;background:#f9f9f7;border-radius:7px">
     <div style="font-size:11px;font-weight:600;margin-bottom:6px">📷 Modifier la photo</div>
@@ -2521,6 +2666,32 @@ function ouvrirFicheEleve(id){
   </div>`;
   document.getElementById('fiche-eleve-content').innerHTML=html;
   openModal('modal-eleve');
+}
+async function enregistrerInfosEleve(id){
+  const e=cache.eleves.find(x=>x.id===id);if(!e)return;
+  const prenom=document.getElementById('fe-prenom').value.trim().replace(/\s+/g,' ');
+  const nomF=document.getElementById('fe-nom').value.trim().replace(/\s+/g,' ');
+  const mat=document.getElementById('fe-mat').value.trim();
+  if(!prenom||!nomF)return toast('Prénom et nom requis');
+  if(!mat)return toast('Le matricule ne peut pas être vide');
+  if(cache.eleves.some(x=>x.id!==id&&(x.matricule||'').toLowerCase()===mat.toLowerCase()))return toast('Ce matricule est déjà utilisé par un autre élève',4500);
+  const ancienNom=e.nom,nom=prenom+' '+nomF;
+  await sbUpdate('eleves',id,{nom,prenom,nom_famille:nomF,matricule:mat});
+  e.nom=nom;e.prenom=prenom;e.nom_famille=nomF;e.matricule=mat;
+  if(ancienNom!==nom){
+    for(const t of ['sanctions','bonus','rappels']){
+      const arr=getExtra(t,e.classe_id);let change=false;
+      arr.forEach(x=>{
+        if(x.eleveId===id&&x.nom!==nom){x.nom=nom;change=true;}
+        (x.eleves||[]).forEach(y=>{if(y.eleveId===id&&y.nom!==nom){y.nom=nom;change=true;}});
+      });
+      if(change)await saveExtra(t,e.classe_id,arr);
+    }
+  }
+  planifierTri&&planifierTri();
+  if(currentClasse)renderElevesClasse(currentClasse.id);
+  ouvrirFicheEleve(id);
+  toast('Informations de l\'élève modifiées ✓'+(ancienNom!==nom?' — il devra utiliser son nouveau nom pour les devoirs en ligne':''),5000);
 }
 async function updatePhotoEleve(id,input){
   const file=input.files[0];if(!file)return;
@@ -2921,7 +3092,7 @@ function ouvrirCahier(){
   document.getElementById('sj-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('sanc-date').value=new Date().toISOString().split('T')[0];
   showCahierTab('cj-seances');
-  renderSeances();renderSanctions();renderBonus();renderHistoriqueRappels();prInit();
+  renderSeances();renderSanctions();renderBonus();renderHistoriqueRappels();prInit();rpInitMois();
   openModal('modal-cahier');
 }
 function showCahierTab(id){
@@ -2941,9 +3112,10 @@ async function enregistrerSeance(){
   const inp=document.getElementById('sj-fichier');
   const fichiers=[...(inp.files||[])];
   if(!lecon&&fichiers.length)lecon=fichiers[0].name.replace(/\.[^.]+$/,'');
+  if(!lecon&&seanceRessPend.length)lecon=seanceRessPend[0].nom.replace(/\.[^.]+$/,'');
   if(!date||!mat||!lecon)return toast('Date, matière et leçon (ou un fichier) requis');
   if(fichiers.length&&!navigator.onLine)return toast('Importer un fichier demande internet. Enregistre sans fichier ou reconnecte-toi.',5000);
-  const joints=[];
+  const joints=[...seanceRessPend];
   for(const f of fichiers){
     if(f.size>25*1048576){toast(f.name+' dépasse 25 Mo : ignoré',4500);continue;}
     const path=currentUser.id+'/seances/'+resUid()+'-'+resNomSur(f.name);
@@ -2962,20 +3134,116 @@ async function enregistrerSeance(){
   await saveExtra('seances',currentCahierClasseId,seances);
   toggleFormSeance();
   ['sj-mat','sj-lecon','sj-hdeb','sj-hfin','sj-contenu','sj-obs'].forEach(id=>document.getElementById(id).value='');
-  inp.value='';document.getElementById('sj-fichier-info').textContent='';
+  inp.value='';seanceRessPend=[];seanceInfoMaj();
   renderSeances();toast('Séance enregistrée ✓');
 }
-function seanceFichiersChoisis(inp){
-  const n=(inp.files||[]).length;
-  document.getElementById('sj-fichier-info').textContent=n?('📎 '+[...inp.files].map(f=>f.name).join(', ')):'';
+let seanceRessPend=[];
+function seanceFichiersChoisis(){seanceInfoMaj();}
+function seanceInfoMaj(){
+  const inp=document.getElementById('sj-fichier');
+  const noms=[...(inp.files||[])].map(f=>'📎 '+resEsc(f.name));
+  const res=seanceRessPend.map((r,i)=>`📁 ${resEsc(r.nom)} <b style="color:#c0392b;cursor:pointer" onclick="seanceRessPend.splice(${i},1);seanceInfoMaj()">✕</b>`);
+  document.getElementById('sj-fichier-info').innerHTML=[...noms,...res].join('<br>');
 }
 async function seanceOuvrir(seanceId,idx){
   const s=getExtra('seances',currentCahierClasseId).find(x=>x.id===seanceId);
   const f=s&&(s.fichiers||[])[idx];if(!f)return;
+  if(f.resId){
+    const r=resFichiers().find(x=>x.id===f.resId);
+    if(r)return r.path?resOuvrirFichier(r.id):resOuvrirLien(r.id);
+    if(!f.path&&!f.url)return toast('Ce fichier n\'est plus dans tes Ressources',4500);
+  }
+  if(f.url&&!f.path){if(/^https?:\/\//i.test(f.url))window.open(f.url,'_blank','noopener');return;}
   if(!navigator.onLine)return toast('Ouvrir la leçon demande internet',4000);
   const{data,error}=await sb.storage.from(RES_BUCKET).createSignedUrl(f.path,3600);
-  if(error||!data)return toast('Fichier introuvable');
+  if(error||!data)return toast('Fichier introuvable (supprimé des Ressources ?)',4500);
   window.open(data.signedUrl,'_blank','noopener');
+}
+// ===== LIAISON RESSOURCES ↔ CAHIER JOURNAL =====
+let resPickCible=null;
+function ressourceVersSeance(f){return{nom:f.nom,resId:f.id,path:f.path||'',url:f.url||'',taille:f.taille||0,ressource:true};}
+function ouvrirPickRessources(cible){
+  resPickCible=cible;
+  document.getElementById('rpk-search').value='';
+  renderPickRessources();
+  openModal('modal-res-pick');
+}
+function renderPickRessources(){
+  const q=(document.getElementById('rpk-search').value||'').toLowerCase().trim();
+  const liste=resFichiers().filter(f=>!q||(f.nom||'').toLowerCase().includes(q));
+  const el=document.getElementById('rpk-liste');
+  if(!liste.length){el.innerHTML='<div class="empty">'+(resFichiers().length?'Aucun fichier trouvé':'Aucun fichier dans tes Ressources : importe-les d\'abord dans l\'onglet Ressources')+'</div>';return;}
+  const groupes={};
+  liste.forEach(f=>{const n=resNomDossier(f.dossier||'root');(groupes[n]=groupes[n]||[]).push(f);});
+  el.innerHTML=Object.keys(groupes).sort((a,b)=>a.localeCompare(b,'fr')).map(n=>`<div style="font-size:11px;font-weight:700;color:#0B4FBF;margin:8px 0 3px">📁 ${resEsc(n)}</div>`+
+    groupes[n].map(f=>`<label style="display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid #e5e5e0;border-radius:6px;margin-bottom:3px;cursor:pointer;font-size:12px"><input type="checkbox" value="${f.id}" style="width:auto"> ${resIcone(f.nom,f.url)} <span style="flex:1;word-break:break-word">${resEsc(f.nom)}</span><span style="font-size:10px;color:#888">${f.taille?resTaille(f.taille):''}</span></label>`).join('')).join('');
+}
+async function validerPickRessources(){
+  const ids=[...document.querySelectorAll('#rpk-liste input:checked')].map(c=>c.value);
+  if(!ids.length)return toast('Coche au moins un fichier');
+  const choisis=resFichiers().filter(f=>ids.includes(f.id)).map(ressourceVersSeance);
+  const cible=resPickCible;
+  if(cible&&cible.type==='form'){
+    choisis.forEach(c=>{if(!seanceRessPend.some(x=>x.resId===c.resId))seanceRessPend.push(c);});
+    seanceInfoMaj();
+    closeModal('modal-res-pick');
+    return toast(choisis.length+' fichier(s) à joindre ✓ — pense à enregistrer la séance');
+  }
+  if(cible&&cible.type==='seance'){
+    const seances=getExtra('seances',currentCahierClasseId);
+    const s=seances.find(x=>x.id===cible.id);if(!s)return;
+    s.fichiers=s.fichiers||[];
+    choisis.forEach(c=>{if(!s.fichiers.some(x=>x.resId===c.resId))s.fichiers.push(c);});
+    await saveExtra('seances',currentCahierClasseId,seances);
+    renderSeances();closeModal('modal-res-pick');
+    toast('Leçon liée à la séance ✓');
+  }
+}
+let rcjFichierId=null;
+function aujIsoLocal(){return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().split('T')[0];}
+function rcjOuvrir(fid){
+  const f=resFichiers().find(x=>x.id===fid);if(!f)return;
+  if(!cache.classes.length)return toast('Crée d\'abord une école et une classe');
+  rcjFichierId=fid;
+  document.getElementById('rcj-fichier').textContent=resIcone(f.nom,f.url)+' '+f.nom;
+  document.getElementById('rcj-classe').innerHTML=cache.classes.map(c=>{const e=cache.ecoles.find(x=>x.id===c.ecole_id);return`<option value="${c.id}">${resEsc((e?e.abr+' — ':'')+c.nom)}</option>`;}).join('');
+  if(currentClasse&&cache.classes.some(c=>c.id===currentClasse.id))document.getElementById('rcj-classe').value=currentClasse.id;
+  document.getElementById('rcj-date').value=aujIsoLocal();
+  document.getElementById('rcj-mat').value='';
+  document.getElementById('rcj-lecon').value=f.nom.replace(/\.[^.]+$/,'');
+  rcjMajSeances();
+  openModal('modal-res-cahier');
+}
+function rcjMajSeances(){
+  const cid=document.getElementById('rcj-classe').value;
+  const seances=getExtra('seances',cid).slice().reverse();
+  document.getElementById('rcj-seance').innerHTML='<option value="__new">➕ Nouvelle séance</option>'+seances.map(s=>`<option value="${s.id}">${resEsc(s.date+' · '+s.lecon)}</option>`).join('');
+  rcjMajNouvelle();
+}
+function rcjMajNouvelle(){document.getElementById('rcj-nouvelle').style.display=document.getElementById('rcj-seance').value==='__new'?'block':'none';}
+async function rcjEnvoyer(){
+  const f=resFichiers().find(x=>x.id===rcjFichierId);if(!f)return;
+  const cid=document.getElementById('rcj-classe').value;
+  const choix=document.getElementById('rcj-seance').value;
+  const seances=getExtra('seances',cid);
+  const entree=ressourceVersSeance(f);
+  if(choix==='__new'){
+    const date=document.getElementById('rcj-date').value,mat=document.getElementById('rcj-mat').value.trim(),lecon=document.getElementById('rcj-lecon').value.trim();
+    if(!date||!mat||!lecon)return toast('Date, matière et leçon requis');
+    const s={id:Date.now(),date,mat,lecon,hdeb:'',hfin:'',contenu:'',obs:'',presences:{},fichiers:[entree]};
+    cache.eleves.filter(e=>e.classe_id===cid).forEach(e=>{s.presences[e.id]='P';});
+    seances.push(s);
+  }else{
+    const s=seances.find(x=>String(x.id)===choix);if(!s)return;
+    s.fichiers=s.fichiers||[];
+    if(s.fichiers.some(x=>x.resId===entree.resId))return toast('Ce fichier est déjà dans cette séance');
+    s.fichiers.push(entree);
+  }
+  await saveExtra('seances',cid,seances);
+  closeModal('modal-res-cahier');
+  if(currentCahierClasseId===cid)renderSeances();
+  const c=cache.classes.find(x=>x.id===cid);
+  toast('Leçon envoyée au cahier journal de '+(c?c.nom:'la classe')+' ✓',4000);
 }
 let seanceAjoutId=null;
 function seanceAjouterFichier(seanceId){
@@ -3005,7 +3273,7 @@ async function seanceRetirerFichier(seanceId,idx){
   const s=seances.find(x=>x.id===seanceId);if(!s||!s.fichiers)return;
   const f=s.fichiers.splice(idx,1)[0];
   await saveExtra('seances',currentCahierClasseId,seances);
-  try{if(f&&navigator.onLine)await sb.storage.from(RES_BUCKET).remove([f.path]);}catch(e){}
+  try{if(f&&!f.ressource&&navigator.onLine)await sb.storage.from(RES_BUCKET).remove([f.path]);}catch(e){}
   renderSeances();
 }
 async function togglePresence(seanceId,eleveId){
@@ -3023,12 +3291,12 @@ async function delSeance(seanceId){
   const s=anc.find(x=>x.id===seanceId);
   const seances=anc.filter(x=>x.id!==seanceId);
   await saveExtra('seances',currentCahierClasseId,seances);
-  try{if(s&&(s.fichiers||[]).length&&navigator.onLine)await sb.storage.from(RES_BUCKET).remove(s.fichiers.map(f=>f.path));}catch(e){}
+  try{if(s&&(s.fichiers||[]).some(f=>!f.ressource)&&navigator.onLine)await sb.storage.from(RES_BUCKET).remove(s.fichiers.filter(f=>!f.ressource).map(f=>f.path));}catch(e){}
   renderSeances();
 }
 function seanceChips(s){
   const fs=s.fichiers||[];
-  return `<div style="margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:2px">${fs.map((f,i)=>`<span class="file-chip" style="cursor:pointer" onclick="seanceOuvrir(${s.id},${i})">${resIcone(f.nom)} ${resEsc(f.nom)} <b onclick="event.stopPropagation();seanceRetirerFichier(${s.id},${i})" style="color:#c0392b;margin-left:3px">✕</b></span>`).join('')}<button class="btn btn-xs" onclick="seanceAjouterFichier(${s.id})">📎 Ajouter la leçon (Word/PDF)</button></div>`;
+  return `<div style="margin-top:5px;display:flex;flex-wrap:wrap;align-items:center;gap:2px">${fs.map((f,i)=>`<span class="file-chip" style="cursor:pointer" onclick="seanceOuvrir(${s.id},${i})">${f.ressource?'📁':resIcone(f.nom)} ${resEsc(f.nom)} <b onclick="event.stopPropagation();seanceRetirerFichier(${s.id},${i})" style="color:#c0392b;margin-left:3px">✕</b></span>`).join('')}<button class="btn btn-xs" onclick="seanceAjouterFichier(${s.id})">📎 Importer (Word/PDF)</button><button class="btn btn-xs btn-info" onclick="ouvrirPickRessources({type:'seance',id:${s.id}})">📁 Depuis mes Ressources</button></div>`;
 }
 function renderSeances(){
   const el=document.getElementById('liste-seances');
@@ -3080,7 +3348,7 @@ function tiragAleatoire(){
   const eleves=cache.eleves.filter(e=>e.classe_id===currentCahierClasseId);
   if(!eleves.length)return toast('Aucun élève');
   const shuffled=[...eleves].sort(()=>Math.random()-0.5);
-  elevesInterrogesLocal=shuffled.slice(0,Math.min(nb,eleves.length)).map(e=>({eleveId:e.id,nom:e.nom,statut:'pending',bonus:0}));
+  elevesInterrogesLocal=shuffled.slice(0,Math.min(nb,eleves.length)).map(e=>({eleveId:e.id,nom:e.nom,statut:'pending',bonus:'',retrait:'',note:''}));
   document.getElementById('rp-lecon-titre').textContent=lecon;
   document.getElementById('zone-tirage').style.display='block';
   document.getElementById('zone-choix-manuel').style.display='none';
@@ -3101,72 +3369,118 @@ function confirmerChoixManuel(){
   const lecon=document.getElementById('rp-lecon').value.trim();
   const checked=[...document.querySelectorAll('#liste-choix-manuel input:checked')];
   if(!checked.length)return toast('Sélectionne au moins un élève');
-  elevesInterrogesLocal=checked.map(c=>({eleveId:c.value,nom:c.dataset.nom,statut:'pending',bonus:0}));
+  elevesInterrogesLocal=checked.map(c=>({eleveId:c.value,nom:c.dataset.nom,statut:'pending',bonus:'',retrait:'',note:''}));
   document.getElementById('rp-lecon-titre').textContent=lecon;
   document.getElementById('zone-tirage').style.display='block';
   document.getElementById('zone-choix-manuel').style.display='none';
   renderInterroges();
 }
+function rpMode(){const s=document.getElementById('rp-mode');return s?s.value:'points';}
+function rpSet(i,k,v){
+  const n=parseFloat(String(v).replace(',','.'));
+  elevesInterrogesLocal[i][k]=(v===''||isNaN(n))?'':n;
+}
+function rpInitMois(){
+  const d=new Date(),idx=(d.getFullYear()-2026)*12+d.getMonth()-9;
+  if(idx>=0&&idx<9)['rp-mois','sanc-mois','bon-mois'].forEach(id=>{const s=document.getElementById(id);if(s)s.value=String(idx);});
+}
+function fmtPts(n){return String(Math.round(n*100)/100).replace('.',',');}
 function renderInterroges(){
-  document.getElementById('liste-interroges').innerHTML=elevesInterrogesLocal.map((ei,i)=>`
-    <div class="eleve-rappel ${ei.statut}">
-      <div style="flex:1">
-        <strong>${ei.nom}</strong>
-        ${ei.statut==='bon'?`<span style="color:#0B4FBF;font-size:11px;margin-left:6px">✓ Bon récitant ${ei.bonus>0?'(+'+ei.bonus+' pts)':''}</span>`:''}
-        ${ei.statut==='sanction'?`<span style="color:#c0392b;font-size:11px;margin-left:6px">✗ Pas répondu</span>`:''}
+  const mode=rpMode();
+  const champ=(i,k,lib,couleur)=>`<div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap"><span style="font-size:11px;color:${couleur};font-weight:600">${lib}</span><input type="number" min="0" max="20" step="0.25" inputmode="decimal" placeholder="0,25 à 20" value="${elevesInterrogesLocal[i][k]===''||elevesInterrogesLocal[i][k]===undefined?'':elevesInterrogesLocal[i][k]}" oninput="rpSet(${i},'${k}',this.value)" style="width:96px"><span style="font-size:11px;color:#888">${k==='note'?'/20':'pts'}</span></div>`;
+  document.getElementById('liste-interroges').innerHTML=elevesInterrogesLocal.map((ei,i)=>{
+    let st=mode==='note'?'pending':ei.statut,corps='';
+    if(mode==='note'){
+      corps=champ(i,'note','Note orale','#0B4FBF');
+    }else if(ei.statut==='pending'){
+      corps=`<button class="btn btn-primary btn-sm" onclick="marquerBon(${i})">✓ A rappelé</button>
+          <button class="btn btn-sm" style="background:#FCEBEB;color:#791F1F;border-color:#f5b8b8" onclick="marquerSanction(${i})">✗ N'a pas rappelé</button>`;
+    }else if(ei.statut==='bon'){
+      corps=champ(i,'bonus','Points à ajouter','#085041');
+    }else{
+      corps=champ(i,'retrait','Points à retirer','#791F1F');
+    }
+    return `<div class="eleve-rappel ${st}">
+      <div style="flex:1;min-width:130px">
+        <strong>${resEsc(ei.nom)}</strong>
+        ${mode!=='note'&&ei.statut==='bon'?`<span style="color:#0B4FBF;font-size:11px;margin-left:6px">✓ A rappelé</span>`:''}
+        ${mode!=='note'&&ei.statut==='sanction'?`<span style="color:#c0392b;font-size:11px;margin-left:6px">✗ N'a pas rappelé</span>`:''}
       </div>
-      <div style="display:flex;gap:5px">
-        ${ei.statut==='pending'?`
-          <button class="btn btn-primary btn-sm" onclick="marquerBon(${i})">✓ Bon</button>
-          <button class="btn btn-sm" style="background:#FCEBEB;color:#791F1F;border-color:#f5b8b8" onclick="marquerSanction(${i})">✗ Pas répondu</button>`:''}
-        ${ei.statut==='bon'?`
-          <button class="bonus-btn" onclick="ajouterBonusRapide(${i},1)">+1</button>
-          <button class="bonus-btn" onclick="ajouterBonusRapide(${i},2)">+2</button>
-          <button class="bonus-btn" onclick="ajouterBonusRapide(${i},3)">+3</button>`:''}
-        <button class="btn btn-xs" onclick="elevesInterrogesLocal[${i}].statut='pending';elevesInterrogesLocal[${i}].bonus=0;renderInterroges()">↺</button>
+      <div style="display:flex;gap:5px;align-items:center;flex-wrap:wrap">
+        ${corps}
+        <button class="btn btn-xs" title="Recommencer" onclick="elevesInterrogesLocal[${i}].statut='pending';elevesInterrogesLocal[${i}].bonus='';elevesInterrogesLocal[${i}].retrait='';elevesInterrogesLocal[${i}].note='';renderInterroges()">↺</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function marquerBon(i){elevesInterrogesLocal[i].statut='bon';renderInterroges();}
 function marquerSanction(i){elevesInterrogesLocal[i].statut='sanction';renderInterroges();}
-function ajouterBonusRapide(i,pts){elevesInterrogesLocal[i].bonus=pts;renderInterroges();}
 
+function rpValide(){
+  const mode=rpMode();
+  for(const ei of elevesInterrogesLocal){
+    const v=mode==='note'?ei.note:(ei.statut==='bon'?ei.bonus:(ei.statut==='sanction'?ei.retrait:''));
+    if(v==='')continue;
+    if(v<0||v>20){toast(ei.nom+' : la valeur doit être entre 0,25 et 20',4500);return false;}
+    if(mode!=='note'&&v>0&&v<0.25){toast(ei.nom+' : minimum 0,25 point',4500);return false;}
+  }
+  return true;
+}
+async function rpEcrireNotesOrales(classeId,moisIdx){
+  // note orale du mois = moyenne des notes données lors des rappels de ce mois
+  const rappels=getExtra('rappels',classeId).filter(r=>r.moisIdx===moisIdx);
+  const par={};
+  rappels.forEach(r=>(r.eleves||[]).forEach(e=>{if(e.statut==='note'&&typeof e.note==='number'&&!isNaN(e.note))(par[e.eleveId]=par[e.eleveId]||[]).push(e.note);}));
+  const cl=cache.classes.find(c=>c.id===classeId);if(!cl)return 0;
+  let n=0;
+  for(const eleveId of Object.keys(par)){
+    const moy=Math.round(par[eleveId].reduce((a,b)=>a+b,0)/par[eleveId].length*100)/100;
+    const ex=cache.notes.find(x=>x.eleve_id===eleveId&&x.classe_id===classeId&&x.mois_idx===moisIdx&&x.type_note==='oral');
+    if(ex){await sbUpdate('notes',ex.id,{note:moy});ex.note=moy;}
+    else{
+      const d=await sbInsert('notes',{titre:'Note '+MOIS[moisIdx],type:'Évaluation orale',type_note:'oral',mois_idx:moisIdx,mat:'—',ecole_id:cl.ecole_id,classe_id:classeId,eleve_id:eleveId,bareme:20,note:moy,obs:''});
+      if(d)cache.notes.unshift(d);
+    }
+    n++;
+  }
+  return n;
+}
 async function sauvegarderRappel(){
   const lecon=document.getElementById('rp-lecon').value.trim();
   const moisIdx=parseInt(document.getElementById('rp-mois').value);
+  const mode=rpMode();
+  if(!rpValide())return;
   const date=new Date().toLocaleDateString('fr-FR');
   const classeId=currentCahierClasseId;
+  const liste=elevesInterrogesLocal.map(ei=>mode==='note'
+    ?{eleveId:ei.eleveId,nom:ei.nom,statut:ei.note===''?'pending':'note',note:ei.note===''?null:ei.note}
+    :{eleveId:ei.eleveId,nom:ei.nom,statut:ei.statut,bonus:ei.statut==='bon'?(ei.bonus||0):0,retrait:ei.statut==='sanction'?(ei.retrait||0):0});
+  if(mode==='note'&&!liste.some(x=>x.statut==='note'))return toast('Donne au moins une note');
+  if(mode!=='note'&&!liste.some(x=>x.statut!=='pending'))return toast('Indique pour chaque élève s\'il a rappelé ou non');
 
-  // Sauvegarder le rappel
   const rappels=getExtra('rappels',classeId);
-  rappels.push({date,lecon,moisIdx,eleves:JSON.parse(JSON.stringify(elevesInterrogesLocal))});
+  rappels.push({date,lecon,moisIdx,mode,eleves:liste});
+  const ops=[saveExtra('rappels',classeId,rappels)];
+  let nbNotes=0;
 
-  // Bonus sur notes orales
-  const bonus=getExtra('bonus',classeId);
-  elevesInterrogesLocal.filter(ei=>ei.statut==='bon'&&ei.bonus>0).forEach(ei=>{
-    bonus.push({eleveId:ei.eleveId,nom:ei.nom,points:ei.bonus,moisIdx,motif:'Rappel : '+lecon,date});
-  });
-
-  // Sanctions sur notes orales (retrait de points)
-  const sanctions=getExtra('sanctions',classeId);
-  elevesInterrogesLocal.filter(ei=>ei.statut==='sanction').forEach(ei=>{
-    sanctions.push({eleveId:ei.eleveId,nom:ei.nom,motif:'Rappel de cours non effectué',detail:'Leçon : '+lecon,moisIdx,points:1,date});
-  });
-
-  await Promise.all([
-    saveExtra('rappels',classeId,rappels),
-    saveExtra('bonus',classeId,bonus),
-    saveExtra('sanctions',classeId,sanctions)
-  ]);
+  if(mode!=='note'){
+    const bonus=getExtra('bonus',classeId);
+    liste.filter(x=>x.statut==='bon'&&x.bonus>0).forEach(x=>bonus.push({eleveId:x.eleveId,nom:x.nom,points:x.bonus,moisIdx,motif:'Rappel : '+lecon,date}));
+    const sanctions=getExtra('sanctions',classeId);
+    const iso=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().split('T')[0];
+    liste.filter(x=>x.statut==='sanction').forEach(x=>sanctions.push({eleveId:x.eleveId,nom:x.nom,motif:'Rappel de cours non effectué',detail:'Leçon : '+lecon,moisIdx,points:x.retrait||0,date:iso}));
+    ops.push(saveExtra('bonus',classeId,bonus),saveExtra('sanctions',classeId,sanctions));
+  }
+  await Promise.all(ops);
+  if(mode==='note')nbNotes=await rpEcrireNotesOrales(classeId,moisIdx);
 
   elevesInterrogesLocal=[];
   document.getElementById('zone-tirage').style.display='none';
   document.getElementById('rp-lecon').value='';
   renderHistoriqueRappels();renderSanctions();renderBonus();
-  showCahierTab('cj-sanctions');
-  // Rafraîchir les notes si ouverts
+  showCahierTab(mode==='note'?'cj-rappel':'cj-sanctions');
   if(document.getElementById('vue-notes').classList.contains('show'))renderNotesClasse();
-  toast('Résultats enregistrés ✓ — Notes orales mises à jour !',4000);
+  toast(mode==='note'?`${nbNotes} note(s) orale(s) de ${MOIS[moisIdx]} enregistrée(s) ✓ (moyenne si plusieurs rappels)`:'Résultats enregistrés ✓ — Notes orales mises à jour !',4500);
 }
 
 function renderHistoriqueRappels(){
@@ -3174,18 +3488,18 @@ function renderHistoriqueRappels(){
   const rappels=getExtra('rappels',currentCahierClasseId).slice().reverse();
   if(!rappels.length){el.innerHTML='<div class="empty">Aucun rappel</div>';return;}
   el.innerHTML=rappels.map(r=>{
-    const bons=(r.eleves||[]).filter(e=>e.statut==='bon').length;
+    const bons=(r.eleves||[]).filter(e=>e.statut==='bon'||e.statut==='note').length;
     const sanc=(r.eleves||[]).filter(e=>e.statut==='sanction').length;
     return `<div style="border:1px solid #e5e5e0;border-radius:7px;padding:8px 11px;margin-bottom:7px">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
-        <div><strong>${r.lecon}</strong> <span style="color:#888;font-size:10px">${r.date} · ${MOIS[r.moisIdx]||''}</span></div>
+        <div><strong>${resEsc(r.lecon)}</strong> <span style="color:#888;font-size:10px">${r.date} · ${MOIS[r.moisIdx]||''}${r.mode==='note'?' · note orale':''}</span></div>
         <div style="display:flex;gap:5px">
           <span style="background:#E1F5EE;color:#085041;padding:2px 7px;border-radius:20px;font-size:10px">✓ ${bons}</span>
           <span style="background:#FCEBEB;color:#791F1F;padding:2px 7px;border-radius:20px;font-size:10px">✗ ${sanc}</span>
         </div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:3px">
-        ${(r.eleves||[]).map(e=>`<span style="font-size:10px;padding:1px 7px;border-radius:20px;background:${e.statut==='bon'?'#E1F5EE':e.statut==='sanction'?'#FCEBEB':'#f0f0eb'};color:${e.statut==='bon'?'#085041':e.statut==='sanction'?'#791F1F':'#555'}">${e.nom.split(' ')[0]} ${e.statut==='bon'?(e.bonus>0?'+'+e.bonus:'✓'):e.statut==='sanction'?'✗':'·'}</span>`).join('')}
+        ${(r.eleves||[]).map(e=>`<span style="font-size:10px;padding:1px 7px;border-radius:20px;background:${e.statut==='bon'?'#E1F5EE':e.statut==='sanction'?'#FCEBEB':e.statut==='note'?'#E6F1FB':'#f0f0eb'};color:${e.statut==='bon'?'#085041':e.statut==='sanction'?'#791F1F':e.statut==='note'?'#0C447C':'#555'}">${resEsc(e.nom.split(' ')[0])} ${e.statut==='bon'?(e.bonus>0?'+'+fmtPts(e.bonus):'✓'):e.statut==='sanction'?(e.retrait>0?'−'+fmtPts(e.retrait):'✗'):e.statut==='note'?fmtPts(e.note)+'/20':'·'}</span>`).join('')}
       </div>
     </div>`;
   }).join('');
@@ -3197,7 +3511,7 @@ async function ajouterSanction(){
   if(!eleveId)return toast('Choisir un élève');
   const eleve=cache.eleves.find(e=>e.id===eleveId);
   const moisIdx=parseInt(document.getElementById('sanc-mois').value);
-  const points=parseInt(document.getElementById('sanc-points').value);
+  const points=parseFloat(document.getElementById('sanc-points').value)||0;
   const sanctions=getExtra('sanctions',currentCahierClasseId);
   sanctions.push({eleveId,nom:eleve?eleve.nom:'—',motif:document.getElementById('sanc-motif').value,detail:document.getElementById('sanc-detail').value.trim(),moisIdx,points,date:document.getElementById('sanc-date').value});
   document.getElementById('sanc-detail').value='';
@@ -3251,7 +3565,7 @@ async function ajouterBonus(){
   const eleveId=document.getElementById('bon-eleve').value;
   if(!eleveId)return toast('Choisir un élève');
   const eleve=cache.eleves.find(e=>e.id===eleveId);
-  const points=parseInt(document.getElementById('bon-points').value);
+  const points=parseFloat(document.getElementById('bon-points').value)||0;
   const moisIdx=parseInt(document.getElementById('bon-mois').value);
   const bonus=getExtra('bonus',currentCahierClasseId);
   bonus.push({eleveId,nom:eleve?eleve.nom:'—',points,moisIdx,motif:document.getElementById('bon-motif').value.trim()||'Participation',date:new Date().toLocaleDateString('fr-FR')});
@@ -3893,7 +4207,7 @@ function renderRessources(){
         <div class="r-titre">${resEsc(f.nom)}</div>
         <div class="r-meta">${resEsc(meta)}</div>
         ${f.desc?`<div class="r-desc">${resEsc(f.desc)}</div>`:''}
-        <div style="margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${bOuvrir}${f.kind==='new'&&f.path?(resHL.has(f.path)?'<span style="font-size:10px;background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:20px">📥 disponible hors ligne</span>':`<button class="btn btn-sm" onclick="resGarder('${f.id}')">📥 Garder hors ligne</button>`):''}</div>
+        <div style="margin-top:5px;display:flex;gap:6px;align-items:center;flex-wrap:wrap">${bOuvrir}${f.kind==='new'?`<button class="btn btn-sm" onclick="rcjOuvrir('${f.id}')">📔 Envoyer au cahier</button>`:''}${f.kind==='new'&&f.path?(resHL.has(f.path)?'<span style="font-size:10px;background:#E1F5EE;color:#085041;padding:2px 8px;border-radius:20px">📥 disponible hors ligne</span>':`<button class="btn btn-sm" onclick="resGarder('${f.id}')">📥 Garder hors ligne</button>`):''}</div>
       </div>
       <button class="btn btn-danger btn-sm" onclick="${bSup}">✕</button>
     </div>`;
@@ -4025,7 +4339,7 @@ function renderDashboard(){
   const d=new Date();
   const moy=(arr)=>{const v=arr.filter(n=>n.note!==null&&n.note!==''&&!isNaN(parseFloat(n.note))).map(n=>parseFloat(n.note)/(parseFloat(n.bareme)||20)*20);return v.length?(v.reduce((a,b)=>a+b,0)/v.length):null;};
   const stats=[['🏫','Écoles',cache.ecoles.length],['📚','Classes',cache.classes.length],['👥','Élèves',cache.eleves.length],['🗓️','Classes aujourd\'hui',slotsDuJour(JOURS_FR[d.getDay()]).length]];
-  document.getElementById('dash-stats').innerHTML=stats.map(x=>`<div style="background:#fff;border:1px solid #e5e5e0;border-radius:9px;padding:12px;text-align:center"><div style="font-size:22px">${x[0]}</div><div style="font-size:24px;font-weight:700;color:var(--primary)">${x[2]}</div><div style="font-size:11px;color:#888">${x[1]}</div></div>`).join('');
+  document.getElementById('dash-stats').innerHTML=stats.map((x,i)=>`<div class="kpi" style="--kc:${['#0B4FBF','#2E9E3E','#F59E0B','#29A8F0'][i%4]}"><div class="k-ic">${x[0]}</div><div><div class="k-val">${x[2]}</div><div class="k-lbl">${x[1]}</div></div></div>`).join('');
   document.getElementById('dash-edt-titre').textContent='🗓️ Emploi du temps — '+d.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
   const sl=slotsDuJour(JOURS_FR[d.getDay()]);
   document.getElementById('dash-edt').innerHTML=sl.length?sl.map(edtLigne).join(''):'<div class="empty">Aucune classe aujourd\'hui</div>';
