@@ -3120,6 +3120,7 @@ function renderNotesMois(mi){
   });
   el.innerHTML=html+'</tbody></table>';
 }
+function fmtVide(n){return n===null||n===undefined||n===''||isNaN(n)?'':fmtNote(n);}
 function ficheStatique(mi){
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
   const mat=document.getElementById('notes-mat-filter').value;
@@ -3132,11 +3133,11 @@ function ficheStatique(mi){
   if(mi!==null){
     const lignes=eleves.map(e=>{const v=notesValeurs(e,mat);return{e,o:v.oral[mi],x:v.ecrit[mi]};});
     tab=`<table><thead><tr><th ${th}>N°</th><th ${th} style="text-align:left">Prénom & Nom</th><th ${th}>Matricule</th><th ${th}>Oral /20</th><th ${th}>Écrit /20</th><th ${th}>Moyenne</th><th ${th} style="width:28%">Observations</th></tr></thead><tbody>`+
-      lignes.map((l,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${resEsc(l.e.nom)}</td><td>${resEsc(l.e.matricule||'')}</td><td>${fmtNote(l.o)}</td><td>${fmtNote(l.x)}</td><td><b>${fmtNote(moyenneListe([l.o,l.x]))}</b></td><td></td></tr>`).join('')+
-      `<tr><td colspan="3" style="text-align:right"><b>Moyenne de la classe</b></td><td><b>${fmtNote(moyenneListe(lignes.map(l=>l.o)))}</b></td><td><b>${fmtNote(moyenneListe(lignes.map(l=>l.x)))}</b></td><td><b>${fmtNote(moyenneListe(lignes.map(l=>moyenneListe([l.o,l.x]))))}</b></td><td></td></tr></tbody></table>`;
+      lignes.map((l,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${resEsc(l.e.nom)}</td><td>${resEsc(l.e.matricule||'')}</td><td>${fmtVide(l.o)}</td><td>${fmtVide(l.x)}</td><td><b>${fmtVide(moyenneListe([l.o,l.x]))}</b></td><td></td></tr>`).join('')+
+      `<tr><td colspan="3" style="text-align:right"><b>Moyenne de la classe</b></td><td><b>${fmtVide(moyenneListe(lignes.map(l=>l.o)))}</b></td><td><b>${fmtVide(moyenneListe(lignes.map(l=>l.x)))}</b></td><td><b>${fmtVide(moyenneListe(lignes.map(l=>moyenneListe([l.o,l.x]))))}</b></td><td></td></tr></tbody></table>`;
   }else{
     tab=`<table><thead><tr><th ${th} rowspan="2">N°</th><th ${th} rowspan="2" style="text-align:left">Prénom & Nom</th>${MOIS.map(m=>`<th ${th} colspan="2">${resEsc(m)}</th>`).join('')}<th ${th} rowspan="2">Moy.</th></tr><tr>${MOIS.map(()=>`<th ${th}>O</th><th ${th}>É</th>`).join('')}</tr></thead><tbody>`+
-      eleves.map((e,i)=>{const v=notesValeurs(e,mat);return`<tr><td>${i+1}</td><td style="text-align:left;white-space:nowrap">${resEsc(e.nom)}</td>${MOIS.map((m,k)=>`<td>${fmtNote(v.oral[k])}</td><td>${fmtNote(v.ecrit[k])}</td>`).join('')}<td><b>${fmtNote(moyenneListe([...v.oral,...v.ecrit]))}</b></td></tr>`;}).join('')+`</tbody></table>
+      eleves.map((e,i)=>{const v=notesValeurs(e,mat);return`<tr><td>${i+1}</td><td style="text-align:left;white-space:nowrap">${resEsc(e.nom)}</td>${MOIS.map((m,k)=>`<td>${fmtVide(v.oral[k])}</td><td>${fmtVide(v.ecrit[k])}</td>`).join('')}<td><b>${fmtVide(moyenneListe([...v.oral,...v.ecrit]))}</b></td></tr>`;}).join('')+`</tbody></table>
       <div style="font-size:10px;margin-top:4px">O = note orale · É = note écrite (sur 20)</div>`;
   }
   const pied=`<div style="display:flex;justify-content:space-between;margin-top:26px;font-size:12px"><div>Fait le ${new Date().toLocaleDateString('fr-FR')}</div><div style="text-align:center">Le professeur<br><br><br>____________________</div></div>`;
