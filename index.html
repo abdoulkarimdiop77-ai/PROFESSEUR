@@ -811,6 +811,17 @@ body.dark .dc-d{color:#cfe0ff}
           <span style="display:flex;gap:6px"><button class="btn btn-sm" onclick="prToutPresent()">Tous présents</button><button class="btn btn-primary" onclick="prEnregistrer()">💾 Enregistrer</button></span>
         </div>
       </div>
+      <div class="card" id="fgp-card">
+        <div class="card-title">📊 Fiche générale de contrôle de présence</div>
+        <div style="font-size:11px;color:#667;margin-bottom:8px">Vois les absents et les retards de chaque jour, pour le mois ou la période de ton choix, puis imprime la fiche.</div>
+        <div class="form-group"><label>Mois</label><select id="fgp-mois" onchange="fgpMoisChange()"></select></div>
+        <div class="two-eq">
+          <div class="form-group"><label>Du</label><input type="date" id="fgp-du" onchange="document.getElementById('fgp-mois').value='';fgpRender()"></div>
+          <div class="form-group"><label>Au</label><input type="date" id="fgp-au" onchange="document.getElementById('fgp-mois').value='';fgpRender()"></div>
+        </div>
+        <div style="margin-bottom:8px"><button class="btn btn-primary btn-sm" onclick="fgpImprimer()">🖨️ Imprimer la fiche</button></div>
+        <div id="fgp-contenu"></div>
+      </div>
       <div class="card"><div class="card-title">📖 Historique des présences (clique sur une date pour la revoir)</div><div id="pr-historique"></div></div>
     </div>
     <!-- RAPPEL -->
@@ -864,7 +875,29 @@ body.dark .dc-d{color:#cfe0ff}
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <strong>⚠️ Sanctions</strong>
         <div style="display:flex;gap:6px">
-          <button class="btn btn-warn btn-sm no-print" onclick="imprimerSanctions()">🖨️ Imprimer</button>
+          <button class="btn btn-warn btn-sm no-print" onclick="imprimerSanctions()">🖨️ Tout imprimer</button>
+        </div>
+      </div>
+      <div id="sanc-alertes"></div>
+      <div class="card" id="sanc-print-card">
+        <div class="card-title">🖨️ Imprimer une fiche de sanctions</div>
+        <div style="font-size:11px;color:#667;margin-bottom:8px">Fiche des élèves n'ayant pas rappelé la leçon : pour aujourd'hui ou pour plusieurs jours passés.</div>
+        <div class="form-group"><label>Quelle liste ?</label>
+          <select id="sp-motif"><option value="Rappel de cours non effectué">Élèves n'ayant pas rappelé la leçon</option><option value="">Toutes les sanctions (tous les motifs)</option></select>
+        </div>
+        <div class="two-eq">
+          <div class="form-group"><label>Du</label><input type="date" id="sp-du"></div>
+          <div class="form-group"><label>Au</label><input type="date" id="sp-au"></div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+          <button class="btn btn-sm" onclick="sancPeriodeRapide('jour')">Aujourd'hui</button>
+          <button class="btn btn-sm" onclick="sancPeriodeRapide('7')">7 derniers jours</button>
+          <button class="btn btn-sm" onclick="sancPeriodeRapide('mois')">Ce mois</button>
+          <button class="btn btn-sm" onclick="sancPeriodeRapide('60')">2 derniers mois</button>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn btn-warn" onclick="sancImprimerJour()">🖨️ Fiche du jour</button>
+          <button class="btn btn-primary" onclick="sancImprimerPeriode()">🖨️ Imprimer la période choisie</button>
         </div>
       </div>
       <div class="card">
@@ -1034,6 +1067,7 @@ body.dark .dc-d{color:#cfe0ff}
       </svg>
     </div>
     <div class="dash-kpis" id="dash-stats"></div>
+    <div class="card" id="dash-sanctions-card" style="display:none;border-left:4px solid #c0392b"><div class="card-title" style="color:#791F1F">🚨 Sanctions répétées (3 ou plus en 2 mois)</div><div id="dash-sanctions"></div></div>
     <div class="card" id="dash-absences-card" style="display:none;border-left:4px solid #c0392b"><div class="card-title" style="color:#791F1F">⚠️ Absences répétées (3 ou plus en 2 mois)</div><div id="dash-absences"></div></div>
     <div class="dash-grid">
       <div class="dg-left">
@@ -2709,12 +2743,13 @@ function renderElevesClasse(classeId){
   const arr=cache.eleves.filter(e=>e.classe_id===classeId).sort((a,b)=>cmpFr(a.nom,b.nom)||cmpFr(a.matricule,b.matricule));
   if(!arr.length){el.innerHTML='<div class="empty">Aucun élève — clique sur "+ Ajouter un élève" ou importe depuis Excel</div>';return;}
   const absAl=new Map(absencesAlertes(classeId).map(a=>[a.eleve.id,a.n]));
+  const sancAl=new Map(sanctionsAlertes(classeId).map(a=>[a.eleve.id,a.n]));
   el.innerHTML=arr.map((e,i)=>`
     <div class="eleve-row" onclick="ouvrirFicheEleve('${e.id}')">
       <div class="eleve-avatar">${e.photo?`<img src="${e.photo}">`:'👤'}</div>
       <div style="flex:1">
         <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:600;font-size:13px">${e.nom}</span><span class="matricule-badge mat-petit">${e.matricule||'—'}</span></div>
-        ${absAl.has(e.id)?`<div style="margin-top:3px"><span class="sanction-chip">⚠️ ${absAl.get(e.id)} absences / 2 mois</span></div>`:''}
+        ${(absAl.has(e.id)||sancAl.has(e.id))?`<div style="margin-top:3px">${absAl.has(e.id)?`<span class="sanction-chip">⚠️ ${absAl.get(e.id)} absences / 2 mois</span>`:''}${sancAl.has(e.id)?`<span class="sanction-chip">🚨 ${sancAl.get(e.id)} sanctions / 2 mois</span>`:''}</div>`:''}
       </div>
       <div style="font-size:11px;color:#aaa">#${i+1}</div>
       <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delEleve('${e.id}')">✕</button>
@@ -3286,6 +3321,7 @@ function ouvrirCahier(){
   resetFiltreSanctionsSilencieux();
   document.getElementById('sj-date').value=new Date().toISOString().split('T')[0];
   document.getElementById('sanc-date').value=new Date().toISOString().split('T')[0];
+  sancPeriodeRapide('jour');
   showCahierTab('cj-seances');
   renderSeances();renderSanctions();renderBonus();renderHistoriqueRappels();prInit();rpInitMois();
   openModal('modal-cahier');
@@ -3676,6 +3712,13 @@ async function sauvegarderRappel(){
   showCahierTab(mode==='note'?'cj-rappel':'cj-sanctions');
   if(document.getElementById('vue-notes').classList.contains('show'))renderNotesClasse();
   toast(mode==='note'?`${nbNotes} note(s) orale(s) de ${MOIS[moisIdx]} enregistrée(s) ✓ (moyenne si plusieurs rappels)`:'Résultats enregistrés ✓ — Notes orales mises à jour !',4500);
+  if(mode!=='note'){
+    const ids=liste.filter(x=>x.statut==='sanction').map(x=>x.eleveId);
+    if(ids.length){
+      sancAlerteToast(ids);
+      setTimeout(()=>{if(confirm('Imprimer maintenant la fiche du jour des élèves n\'ayant pas rappelé la leçon ?')){const a=aujIso();sancFiche(a,a,'Rappel de cours non effectué');}},900);
+    }
+  }
 }
 
 function renderHistoriqueRappels(){
@@ -3714,6 +3757,7 @@ async function ajouterSanction(){
   renderSanctions();
   if(document.getElementById('vue-notes').classList.contains('show'))renderNotesClasse();
   toast('Sanction ajoutée ✓');
+  sancAlerteToast([eleveId]);
 }
 async function delSanction(idx){
   const sanctions=getExtra('sanctions',currentCahierClasseId);
@@ -3722,39 +3766,6 @@ async function delSanction(idx){
   renderSanctions();
   if(document.getElementById('vue-notes').classList.contains('show'))renderNotesClasse();
 }
-function imprimerSanctions(){
-  const classeId=currentCahierClasseId;
-  const cl=cache.classes.find(x=>x.id===classeId);
-  const ec=cache.ecoles.find(x=>x.id==(cl?cl.ecole_id:null));
-  const sanctions=getExtra('sanctions',classeId);
-  document.getElementById('pr-ecole').textContent=ec?ec.nom:'';
-  document.getElementById('pr-classe').textContent=`Classe : ${cl?cl.nom:''} — Année 2026-2027`;
-  document.getElementById('pr-date').textContent=`Imprimé le ${new Date().toLocaleDateString('fr-FR')}`;
-  const byEleve={};
-  sanctions.forEach(s=>{if(!byEleve[s.nom])byEleve[s.nom]=[];byEleve[s.nom].push(s);});
-  let html=`<table style="width:100%;border-collapse:collapse;font-size:12px">
-    <thead><tr style="background:#f0f0f0">
-      <th style="border:1px solid #ccc;padding:6px">N°</th>
-      <th style="border:1px solid #ccc;padding:6px">Élève</th>
-      <th style="border:1px solid #ccc;padding:6px">Motif(s)</th>
-      <th style="border:1px solid #ccc;padding:6px">Date</th>
-      <th style="border:1px solid #ccc;padding:6px">Nb</th>
-    </tr></thead><tbody>`;
-  let n=1;
-  Object.entries(byEleve).forEach(([nom,ss])=>{
-    html+=`<tr><td style="border:1px solid #ccc;padding:5px">${n++}</td>
-      <td style="border:1px solid #ccc;padding:5px;font-weight:600">${nom}</td>
-      <td style="border:1px solid #ccc;padding:5px">${ss.map(s=>s.motif+(s.detail?' ('+s.detail+')':'')).join('<br>')}</td>
-      <td style="border:1px solid #ccc;padding:5px">${ss.map(s=>s.date).join('<br>')}</td>
-      <td style="border:1px solid #ccc;padding:5px;text-align:center;font-weight:700;color:#c0392b">${ss.length}</td></tr>`;
-  });
-  html+='</tbody></table>';
-  document.getElementById('pr-content').innerHTML=html;
-  document.getElementById('print-zone').style.display='block';
-  window.print();
-  document.getElementById('print-zone').style.display='none';
-}
-
 // ===== BONUS =====
 function bonusMoisOff(cid,mi){return getExtra('bonus',cid).some(b=>b.off&&parseInt(b.moisIdx)===mi);}
 function getBonus(cid){
@@ -5608,6 +5619,7 @@ function absencesAlertes(classeId){
 function fmtDateFr(iso){return new Date(iso+'T12:00:00').toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});}
 function ouvrirPresences(){ouvrirCahier();showCahierTab('cj-presences');}
 function ouvrirSanctions(){ouvrirCahier();showCahierTab('cj-sanctions');}
+function ouvrirSanctionsClasse(classeId){const cl=cache.classes.find(c=>c.id===classeId);if(!cl)return;const ec=cache.ecoles.find(e=>e.id===cl.ecole_id);goTo('eleves',ec,cl);ouvrirSanctions();}
 async function ouvrirPresencesClasse(classeId){
   const cl=cache.classes.find(c=>c.id===classeId);if(!cl)return;
   const ec=cache.ecoles.find(e=>e.id===cl.ecole_id);
@@ -5617,6 +5629,7 @@ async function ouvrirPresencesClasse(classeId){
 function prInit(){
   document.getElementById('pr-date').value=aujIso();
   prCharger();
+  fgpInit();
 }
 function prCharger(){
   const date=document.getElementById('pr-date').value||aujIso();
@@ -5654,7 +5667,7 @@ async function prEnregistrer(){
   liste.sort((a,b)=>a.date<b.date?-1:1);
   await saveExtra('presences',cid,liste);
   toast('✓ Présences enregistrées dans le cahier journal',3500);
-  prCharger();renderElevesClasse(cid);
+  prCharger();renderElevesClasse(cid);fgpRender();
   const abs=Object.keys(prEtat).filter(k=>prEtat[k]==='A');
   const al=absencesAlertes(cid).filter(a=>abs.includes(a.eleve.id));
   if(al.length){
@@ -5682,7 +5695,7 @@ function prVoirDate(d){document.getElementById('pr-date').value=d;prCharger();do
 async function prSupprimer(date){
   if(!confirm('Supprimer le contrôle de présence du '+fmtDateFr(date)+' ?'))return;
   await saveExtra('presences',currentCahierClasseId,prListe().filter(r=>r.date!==date));
-  prCharger();renderElevesClasse(currentCahierClasseId);
+  prCharger();renderElevesClasse(currentCahierClasseId);fgpRender();
 }
 function prJour(delta){
   const i=document.getElementById('pr-date');const d=new Date((i.value||aujIso())+'T12:00:00');d.setDate(d.getDate()+delta);
@@ -5691,6 +5704,7 @@ function prJour(delta){
 
 // ===== SANCTIONS : liste filtrable =====
 function renderSanctions(){
+  sancRenderAlertes();
   const el=document.getElementById('liste-sanctions');
   const toutes=getExtra('sanctions',currentCahierClasseId).map((s,i)=>({...s,idx:i}));
   const fm=document.getElementById('sf-motif').value,fe=document.getElementById('sf-eleve').value,
@@ -5711,12 +5725,175 @@ function renderDashAbsences(){
   const tout=[];
   cache.classes.forEach(c=>absencesAlertes(c.id).forEach(a=>tout.push({...a,classe:c})));
   card.style.display=tout.length?'block':'none';
-  const bb=document.getElementById('bell-badge');if(bb){bb.textContent=tout.length;bb.style.display=tout.length?'inline-block':'none';}
+  const sTout=[];
+  cache.classes.forEach(c=>sanctionsAlertes(c.id).forEach(a=>sTout.push({...a,classe:c})));
+  const sc=document.getElementById('dash-sanctions-card'),sl=document.getElementById('dash-sanctions');
+  if(sc&&sl){
+    sc.style.display=sTout.length?'block':'none';
+    sl.innerHTML=sTout.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #f5d5d5;padding:6px 0;font-size:12px;flex-wrap:wrap"><div><strong>${resEsc(a.eleve.nom)}</strong> <span style="color:#888">· ${resEsc(a.classe.nom)}</span><br><span style="color:#791F1F">${a.n} sanctions en 2 mois${a.nRappel?' (dont '+a.nRappel+' leçon non rappelée)':''}</span></div><button class="btn btn-sm" onclick="ouvrirSanctionsClasse('${a.classe.id}')">Voir</button></div>`).join('');
+  }
+  const nb=tout.length+sTout.length;
+  const bb=document.getElementById('bell-badge');if(bb){bb.textContent=nb;bb.style.display=nb?'inline-block':'none';}
   el.innerHTML=tout.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #f5d5d5;padding:6px 0;font-size:12px;flex-wrap:wrap"><div><strong>${resEsc(a.eleve.nom)}</strong> <span style="color:#888">· ${resEsc(a.classe.nom)}</span><br><span style="color:#791F1F">${a.n} absences en 2 mois : ${a.dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})).join(', ')}</span></div><button class="btn btn-sm" onclick="ouvrirPresencesClasse('${a.classe.id}')">Voir</button></div>`).join('');
-  if(tout.length&&!absToastFait){absToastFait=true;setTimeout(()=>toast('⚠️ '+tout.length+' élève(s) avec 3 absences ou plus en 2 mois',6000),800);}
+  if((tout.length||sTout.length)&&!absToastFait){absToastFait=true;setTimeout(()=>toast((tout.length?'⚠️ '+tout.length+' élève(s) avec 3 absences ou plus en 2 mois':'')+(tout.length&&sTout.length?' · ':'')+(sTout.length?'🚨 '+sTout.length+' élève(s) avec 3 sanctions ou plus en 2 mois':''),7000),800);}
 }
 
 function resetFiltreSanctionsSilencieux(){['sf-motif','sf-du','sf-au'].forEach(i=>document.getElementById(i).value='');}
+
+// ===== IMPRESSION (fenêtre cachée, marche aussi sur téléphone) =====
+function imprimerDoc(titre,corps,paysage){
+  const doc='<!doctype html><html><head><meta charset="utf-8"><title>'+titre+'</title><style>@page{size:'+(paysage?'landscape':'portrait')+';margin:10mm}body{font-family:Arial,sans-serif;font-size:12px;color:#111;margin:0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #777;padding:4px 5px;text-align:left;vertical-align:top}th{background:#eef2fb}.c{text-align:center}h1,h2,h3{margin:0}.ent{text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}.sig{display:flex;justify-content:space-between;margin-top:26px;font-size:11px}.sig div{width:44%}.sig i{display:block;margin-top:30px;border-top:1px solid #000}</style></head><body>'+corps+'</body></html>';
+  try{
+    const f=document.createElement('iframe');
+    f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
+    document.body.appendChild(f);
+    f.contentDocument.open();f.contentDocument.write(doc);f.contentDocument.close();
+    setTimeout(()=>{try{f.contentWindow.focus();f.contentWindow.print();}catch(e){}setTimeout(()=>f.remove(),60000);},450);
+  }catch(e){
+    const w=window.open('','_blank');
+    if(!w)return toast('Autorise les fenêtres pop-up pour imprimer',4500);
+    w.document.write(doc);w.document.close();w.focus();setTimeout(()=>{try{w.print();}catch(e2){}},450);
+  }
+}
+function fmtIsoFr(iso){return iso?iso.split('-').reverse().join('/'):'';}
+function enteteFiche(titre,sous){
+  const cl=cache.classes.find(x=>x.id===currentCahierClasseId);
+  const ec=cl?cache.ecoles.find(x=>x.id==cl.ecole_id):null;
+  return '<div class="ent"><h2>'+resEsc(ec?ec.nom:'')+'</h2><div style="margin-top:3px;font-size:13px">Classe : <b>'+resEsc(cl?cl.nom:'')+'</b> · Année scolaire 2026-2027</div><h3 style="margin-top:8px;font-size:15px">'+titre+'</h3>'+(sous?'<div style="margin-top:3px;color:#444">'+sous+'</div>':'')+'</div>';
+}
+const SIG='<div class="sig"><div>Signature du professeur :<i></i></div><div>Visa du Directeur :<i></i></div></div>';
+
+// ===== SANCTIONS : alerte (3 fois ou plus en 2 mois) =====
+function sanctionsAlertes(classeId){
+  const d=new Date();d.setDate(d.getDate()-60);
+  const deb=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().split('T')[0];
+  const par={};
+  getExtra('sanctions',classeId).forEach(s=>{
+    if(!s.date||s.date<deb||!s.eleveId)return;
+    (par[s.eleveId]=par[s.eleveId]||[]).push(s);
+  });
+  const out=[];
+  Object.entries(par).forEach(([id,l])=>{
+    if(l.length<3)return;
+    const e=cache.eleves.find(x=>x.id===id&&x.classe_id===classeId);if(!e)return;
+    out.push({eleve:e,n:l.length,nRappel:l.filter(x=>x.motif==='Rappel de cours non effectué').length,dates:l.map(x=>x.date).sort()});
+  });
+  return out.sort((a,b)=>b.n-a.n);
+}
+function sancRenderAlertes(){
+  const el=document.getElementById('sanc-alertes');if(!el)return;
+  const al=sanctionsAlertes(currentCahierClasseId);
+  el.innerHTML=al.length?`<div style="background:#FCEBEB;border:1px solid #f5b8b8;border-left:4px solid #c0392b;border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:12px"><strong style="color:#791F1F">🚨 Attention : 3 sanctions ou plus en 2 mois</strong>${al.map(a=>`<div style="margin-top:5px"><strong>${resEsc(a.eleve.nom)}</strong> — ${a.n} sanctions${a.nRappel?` (dont ${a.nRappel} pour leçon non rappelée)`:''}<br><span style="color:#791F1F;font-size:11px">${a.dates.map(fmtIsoFr).join(' · ')}</span></div>`).join('')}</div>`:'';
+}
+function sancAlerteToast(eleveIds){
+  const al=sanctionsAlertes(currentCahierClasseId).filter(a=>eleveIds.includes(a.eleve.id));
+  if(!al.length)return;
+  const txt=al.map(a=>a.eleve.nom+' ('+a.n+' sanctions)').join(', ');
+  setTimeout(()=>toast('🚨 Attention : '+txt+' en 2 mois',7500),3800);
+  try{if('Notification' in window&&Notification.permission==='granted')new Notification('🚨 Sanctions répétées',{body:txt,icon:'icon-192.png'});}catch(e){}
+}
+
+// ===== SANCTIONS : fiche imprimable (jour ou période) =====
+function sancPeriodeRapide(t){
+  const auj=aujIso();let du=auj;
+  if(t==='7'){const d=new Date();d.setDate(d.getDate()-6);du=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().split('T')[0];}
+  if(t==='mois')du=auj.slice(0,8)+'01';
+  if(t==='60'){const d=new Date();d.setDate(d.getDate()-60);du=new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().split('T')[0];}
+  document.getElementById('sp-du').value=du;document.getElementById('sp-au').value=auj;
+}
+function sancFiche(du,au,motif){
+  const cid=currentCahierClasseId;
+  const l=getExtra('sanctions',cid).filter(s=>s.date&&s.date>=du&&s.date<=au&&(!motif||s.motif===motif));
+  if(!l.length){toast('Aucune sanction pour cette période',4000);return false;}
+  const par={};
+  l.forEach(s=>{(par[s.eleveId||s.nom]=par[s.eleveId||s.nom]||{nom:s.nom,id:s.eleveId,l:[]}).l.push(s);});
+  const lignes=Object.values(par).sort((a,b)=>cmpFr(a.nom,b.nom));
+  const alertes=new Map(sanctionsAlertes(cid).map(a=>[a.eleve.id,a.n]));
+  const jour=du===au;
+  const titre=motif==='Rappel de cours non effectué'?"FICHE DES ÉLÈVES N'AYANT PAS RAPPELÉ LA LEÇON":'FICHE DES ÉLÈVES SANCTIONNÉS';
+  const sous=jour?'Journée du '+fmtIsoFr(du):'Période du '+fmtIsoFr(du)+' au '+fmtIsoFr(au);
+  const lig=lignes.map((x,i)=>{
+    const e=cache.eleves.find(y=>y.id===x.id);
+    const tri=x.l.slice().sort((a,b)=>a.date<b.date?-1:1);
+    const pts=tri.reduce((t,s)=>t+(parseFloat(s.points)||0),0);
+    return '<tr><td class="c">'+(i+1)+'</td><td><b>'+resEsc(x.nom)+'</b>'+(alertes.has(x.id)?'<br><span style="color:#c0392b;font-size:10px">⚠ '+alertes.get(x.id)+' sanctions en 2 mois</span>':'')+'</td><td class="c">'+resEsc(e&&e.matricule||'')+'</td><td>'+tri.map(s=>fmtIsoFr(s.date)).join('<br>')+'</td><td>'+tri.map(s=>resEsc((motif?'':s.motif+' ')+(s.detail||''))||'—').join('<br>')+'</td><td class="c">'+(pts?'-'+Math.round(pts*100)/100:'')+'</td><td class="c"><b>'+tri.length+'</b></td></tr>';
+  }).join('');
+  const corps=enteteFiche(titre,sous)+'<table><thead><tr><th class="c" style="width:26px">N°</th><th>Prénom &amp; Nom</th><th class="c">Matricule</th><th>Date</th><th>'+(motif?'Leçon / précisions':'Motif et précisions')+'</th><th class="c">Points retirés</th><th class="c">Nb</th></tr></thead><tbody>'+lig+'</tbody></table><div style="margin-top:8px;font-size:11px">Total : <b>'+lignes.length+'</b> élève(s), <b>'+l.length+'</b> sanction(s).</div>'+SIG;
+  imprimerDoc('Fiche de sanctions',corps,false);
+  return true;
+}
+function sancImprimerJour(){const a=aujIso();sancFiche(a,a,document.getElementById('sp-motif').value);}
+function sancImprimerPeriode(){
+  const du=document.getElementById('sp-du').value,au=document.getElementById('sp-au').value;
+  if(!du||!au)return toast('Choisis la date de début et la date de fin',4000);
+  if(du>au)return toast('La date de début doit être avant la date de fin',4000);
+  sancFiche(du,au,document.getElementById('sp-motif').value);
+}
+function imprimerSanctions(){
+  const l=getExtra('sanctions',currentCahierClasseId).filter(s=>s.date).map(s=>s.date).sort();
+  if(!l.length)return toast('Aucune sanction à imprimer',4000);
+  sancFiche(l[0],aujIso()>l[l.length-1]?aujIso():l[l.length-1],'');
+}
+
+// ===== PRÉSENCES : fiche générale par jour et par mois =====
+function fgpInit(){
+  const sel=document.getElementById('fgp-mois');if(!sel)return;
+  sel.innerHTML='<option value="">— Période libre (choisir les dates) —</option>'+MOIS.map((m,i)=>`<option value="${i}">${m}</option>`).join('');
+  const a=aujIso(),idx=(+a.slice(0,4)-2026)*12+(+a.slice(5,7)-1)-9;
+  sel.value=(idx>=0&&idx<9)?String(idx):'';
+  if(sel.value==='')fgpDates(a.slice(0,8)+'01',a);else fgpMoisChange(true);
+  fgpRender();
+}
+function fgpDates(du,au){document.getElementById('fgp-du').value=du;document.getElementById('fgp-au').value=au;}
+function fgpMoisChange(silencieux){
+  const v=document.getElementById('fgp-mois').value;if(v==='')return;
+  const d=new Date(2026,9+(+v),1),f=new Date(2026,9+(+v)+1,0);
+  const iso=x=>new Date(x.getTime()-x.getTimezoneOffset()*60000).toISOString().split('T')[0];
+  fgpDates(iso(d),iso(f));
+  if(!silencieux)fgpRender();
+}
+function fgpDonnees(){
+  const du=document.getElementById('fgp-du').value,au=document.getElementById('fgp-au').value;
+  const eleves=cache.eleves.filter(e=>e.classe_id===currentCahierClasseId);
+  const recs=prListe().filter(r=>r.date>=du&&r.date<=au).sort((a,b)=>a.date<b.date?-1:1);
+  return{du,au,eleves,recs};
+}
+function fgpHtml(imp){
+  const{du,au,eleves,recs}=fgpDonnees();
+  if(!du||!au)return '<div class="empty">Choisis une période</div>';
+  if(!eleves.length)return '<div class="empty">Aucun élève dans cette classe</div>';
+  if(!recs.length)return '<div class="empty">Aucun contrôle de présence enregistré du '+fmtIsoFr(du)+' au '+fmtIsoFr(au)+'</div>';
+  const stk=imp?'':'position:sticky;left:0;background:#fff;';
+  const jr=['D','L','M','M','J','V','S'];
+  let h='<table style="font-size:'+(imp?'10':'11')+'px"><thead><tr><th class="c" style="width:24px">N°</th><th style="'+stk+'min-width:130px">Prénom &amp; Nom</th>'+recs.map(r=>{const d=new Date(r.date+'T12:00:00');return '<th class="c" style="padding:3px 2px;min-width:30px;line-height:1.15">'+jr[d.getDay()]+'<br>'+r.date.slice(8)+'/'+r.date.slice(5,7)+'</th>';}).join('')+'<th class="c" style="color:#c0392b">Abs.</th><th class="c" style="color:#b86e00">Ret.</th></tr></thead><tbody>';
+  const totJ=recs.map(()=>({A:0,R:0}));
+  eleves.forEach((e,i)=>{
+    let a=0,rt=0;
+    const cells=recs.map((r,k)=>{
+      const v=(r.p&&r.p[e.id])||'P';
+      if(v==='A'){a++;totJ[k].A++;return '<td class="c" style="background:#FCEBEB;color:#c0392b;font-weight:700">A</td>';}
+      if(v==='R'){rt++;totJ[k].R++;return '<td class="c" style="background:#FFF1D6;color:#b86e00;font-weight:700">R</td>';}
+      return '<td class="c"></td>';
+    }).join('');
+    h+='<tr><td class="c">'+(i+1)+'</td><td style="'+stk+'white-space:nowrap">'+resEsc(e.nom)+'</td>'+cells+'<td class="c"><b style="color:#c0392b">'+(a||'')+'</b></td><td class="c"><b style="color:#b86e00">'+(rt||'')+'</b></td></tr>';
+  });
+  h+='<tr style="background:#f4f4f0"><td></td><td style="'+(imp?'':'position:sticky;left:0;background:#f4f4f0;')+'"><b>Absents du jour</b></td>'+totJ.map(t=>'<td class="c"><b>'+(t.A||'')+'</b></td>').join('')+'<td class="c"><b>'+totJ.reduce((s,t)=>s+t.A,0)+'</b></td><td class="c"><b>'+totJ.reduce((s,t)=>s+t.R,0)+'</b></td></tr></tbody></table>';
+  h+='<div style="font-size:10px;margin:5px 0 10px;color:#555">A = absent · R = retard · case vide = présent</div>';
+  h+='<div style="font-weight:700;margin:8px 0 4px">Détail des absents jour par jour</div>';
+  h+=recs.slice().reverse().map(r=>{
+    const abs=eleves.filter(e=>r.p&&r.p[e.id]==='A').map(e=>resEsc(e.nom)),ret=eleves.filter(e=>r.p&&r.p[e.id]==='R').map(e=>resEsc(e.nom));
+    return '<div style="border-bottom:1px solid '+(imp?'#bbb':'#f0f0eb')+';padding:5px 0;font-size:'+(imp?'11':'12')+'px"><b>'+fmtDateFr(r.date)+'</b> — '+(abs.length?'<span style="color:#c0392b"><b>Absents ('+abs.length+') :</b> '+abs.join(', ')+'</span>':'<span style="color:#085041">aucun absent</span>')+(ret.length?'<br><span style="color:#b86e00"><b>Retards ('+ret.length+') :</b> '+ret.join(', ')+'</span>':'')+'</div>';
+  }).join('');
+  return imp?h:'<div style="overflow-x:auto">'+h.split('<div style="font-size:10px')[0]+'</div><div style="font-size:10px'+h.split('<div style="font-size:10px')[1];
+}
+function fgpRender(){const el=document.getElementById('fgp-contenu');if(el)el.innerHTML=fgpHtml(false);}
+function fgpImprimer(){
+  const{du,au,recs}=fgpDonnees();
+  if(!du||!au)return toast('Choisis une période',4000);
+  if(!recs.length)return toast('Aucun contrôle de présence enregistré sur cette période',4500);
+  imprimerDoc('Fiche de présence',enteteFiche('FICHE GÉNÉRALE DE CONTRÔLE DE PRÉSENCE','Du '+fmtIsoFr(du)+' au '+fmtIsoFr(au))+fgpHtml(true)+SIG,true);
+}
+
 // ===== SYNCHRONISATION AUTOMATIQUE (téléphone <-> ordinateur) =====
 let syncEnCours=false;
 async function synchroniser(){
