@@ -1179,7 +1179,7 @@ body.dark .dc-d{color:#cfe0ff}
             <select id="sl-jour"><option>Lundi</option><option>Mardi</option><option>Mercredi</option><option>Jeudi</option><option>Vendredi</option><option>Samedi</option></select>
           </div>
           <div class="form-group"><label>Période</label>
-            <select id="sl-periode"><option value="0">8H-10H</option><option value="1">10H15-12H15</option><option value="2">12H15-14H15</option><option value="3">15H-17H</option></select>
+            <select id="sl-periode"><option value="0">08H00 - 10H00</option><option value="1">10H15 - 12H00</option><option value="2">12H15 - 14H00</option><option value="3">14H15 - 16H00</option><option value="4">15H00 - 17H00</option></select>
           </div>
         </div>
         <div class="two-eq">
@@ -2254,11 +2254,11 @@ function planifierTri(){clearTimeout(trierT);trierT=setTimeout(trierEleves,350);
 
 
 // ===== EMPLOI DU TEMPS PAR PÉRIODES =====
-const PERIODES=[{lib:'8H-10H',d:'08h00',f:'10h00'},{lib:'10H15-12H15',d:'10h15',f:'12h15'},{lib:'12H15-14H15',d:'12h15',f:'14h15'},{lib:'15H-17H',d:'15h00',f:'17h00'}];
+const PERIODES=[{lib:'08H00 - 10H00',d:'08h00',f:'10h00'},{lib:'10H15 - 12H00',d:'10h15',f:'12h00'},{lib:'12H15 - 14H00',d:'12h15',f:'14h00'},{lib:'14H15 - 16H00',d:'14h15',f:'16h00'},{lib:'15H00 - 17H00',d:'15h00',f:'17h00'}];
 function minutes(h){const m=/(\d+)\s*[hH:]\s*(\d*)/.exec(h||'');return m?(+m[1])*60+(+m[2]||0):0;}
 function periodeDe(sl){
   const m=minutes(sl.hdeb);let best=0,bd=1e9;
-  PERIODES.forEach((p,i)=>{const a=minutes(p.d),b=minutes(p.f);const dist=(m>=a&&m<b)?0:Math.min(Math.abs(m-a),Math.abs(m-b));if(dist<bd){bd=dist;best=i;}});
+  PERIODES.forEach((p,i)=>{const dist=Math.abs(m-minutes(p.d));if(dist<bd){bd=dist;best=i;}});
   return best;
 }
 function ouvrirEdtClasse(){
