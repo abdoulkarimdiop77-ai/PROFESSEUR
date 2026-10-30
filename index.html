@@ -467,6 +467,8 @@ body:not(.dark) .main>.section>div:first-child:not(.card):not(.alert-box)>span[s
  .notes-mois .moy-cell{padding:3px 4px!important;font-size:10.5px}
  .notes-mois th,.notes-mois td{min-width:0!important}
 }
+.matricule-badge{white-space:nowrap}
+.mat-petit,.notes-table .matricule-badge{font-size:9px!important;padding:1px 7px!important;letter-spacing:.2px!important;font-weight:700}
 body:not(.dark) .section table.notes-table,body:not(.dark) .section table.notes-table tbody tr{background:#fff}
 body:not(.dark) .section .alert-box,body:not(.dark) .section .alert-box *{color:inherit}
 body:not(.dark) .section .empty,body:not(.dark) .main>.section>.empty{color:rgba(255,255,255,.7)}
@@ -920,7 +922,7 @@ body.dark .dc-d{color:#cfe0ff}
         <div class="card-title">⭐ Ajouter des points bonus</div>
         <div class="three-col">
           <div class="form-group"><label>Élève</label><select id="bon-eleve"><option value="">--</option></select></div>
-          <div class="form-group"><label>Points (+)</label><select id="bon-points"><option value="1">+1</option><option value="2">+2</option><option value="3">+3</option></select></div>
+          <div class="form-group"><label>Points (+) — de 0,25 à 20</label><input id="bon-points" type="number" step="0.25" min="0.25" max="20" value="1" inputmode="decimal"></div>
           <div class="form-group"><label>Mois concerné</label>
             <select id="bon-mois">
               <option value="0">Octobre 2026</option><option value="1">Novembre 2026</option>
@@ -934,6 +936,7 @@ body.dark .dc-d{color:#cfe0ff}
         <div class="form-group"><label>Motif</label><input id="bon-motif" placeholder="Excellent rappel de cours..."></div>
         <button class="btn btn-primary btn-sm" onclick="ajouterBonus()">+ Ajouter</button>
       </div>
+      <div class="card"><div class="card-title">🗓️ Utiliser les bonus, mois par mois</div><div style="font-size:11px;color:#667;margin-bottom:7px">Touche un mois pour <b>désactiver</b> les bonus de ce mois (ils ne comptent plus dans la note orale, mais restent enregistrés). Touche-le encore pour les réactiver.</div><div id="bonus-mois-liste" style="display:flex;flex-wrap:wrap;gap:6px"></div></div>
       <div class="card"><div class="card-title">⭐ Classement des bonus</div><div id="liste-bonus"><div class="empty">Aucun bonus</div></div></div>
     </div>
   </div>
@@ -1503,6 +1506,19 @@ body.dark .dc-d{color:#cfe0ff}
 </div>
 
 <!-- MODAL AJOUTER CLASSE -->
+<div class="modal-overlay" id="modal-edit-bonus">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><h2>✏️ Modifier le bonus</h2><button class="modal-close" onclick="closeModal('modal-edit-bonus')">✕</button></div>
+    <div class="form-group"><label>Élève</label><input id="eb-eleve" disabled></div>
+    <div class="two-eq">
+      <div class="form-group"><label>Points (+)</label><input id="eb-points" type="number" step="0.25" min="0.25" max="20" inputmode="decimal"></div>
+      <div class="form-group"><label>Mois concerné</label><select id="eb-mois"></select></div>
+    </div>
+    <div class="form-group"><label>Motif</label><input id="eb-motif"></div>
+    <input type="hidden" id="eb-index">
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" onclick="validerEditBonus()">💾 Enregistrer</button><button class="btn btn-danger" onclick="supprimerBonus(+document.getElementById('eb-index').value,true)">🗑️ Annuler ce bonus</button></div>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-add-classe">
   <div class="modal" style="max-width:420px">
     <div class="modal-header"><h2>📚 Nouvelle classe</h2><button class="modal-close" onclick="closeModal('modal-add-classe')">✕</button></div>
@@ -2697,8 +2713,8 @@ function renderElevesClasse(classeId){
     <div class="eleve-row" onclick="ouvrirFicheEleve('${e.id}')">
       <div class="eleve-avatar">${e.photo?`<img src="${e.photo}">`:'👤'}</div>
       <div style="flex:1">
-        <div style="font-weight:600;font-size:13px">${e.nom}</div>
-        <div style="font-size:10px;color:#888;margin-top:2px"><span class="matricule-badge">${e.matricule||'—'}</span>${absAl.has(e.id)?` <span class="sanction-chip">⚠️ ${absAl.get(e.id)} absences / 2 mois</span>`:''}</div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:600;font-size:13px">${e.nom}</span><span class="matricule-badge mat-petit">${e.matricule||'—'}</span></div>
+        ${absAl.has(e.id)?`<div style="margin-top:3px"><span class="sanction-chip">⚠️ ${absAl.get(e.id)} absences / 2 mois</span></div>`:''}
       </div>
       <div style="font-size:11px;color:#aaa">#${i+1}</div>
       <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delEleve('${e.id}')">✕</button>
@@ -2912,7 +2928,7 @@ function renderNotesGenerale(){
   if(!eleves.length){el.innerHTML='<div class="empty">Aucun élève dans cette classe</div>';return;}
   const mat=document.getElementById('notes-mat-filter').value;
   // Récupérer les extras (bonus/sanctions par mois)
-  const bonusData=getExtra('bonus',currentClasse.id);
+  const bonusData=getBonus(currentClasse.id);
   const sanctData=getExtra('sanctions',currentClasse.id);
 
   let html=`<table class="notes-table">
@@ -3049,7 +3065,7 @@ async function sauvegarderNotesClasse(){
 async function exporterNotesExcel(){
   await sauvegarderNotesClasse();
   const eleves=cache.eleves.filter(e=>e.classe_id===currentClasse.id);
-  const bonusData=getExtra('bonus',currentClasse.id);
+  const bonusData=getBonus(currentClasse.id);
   const sanctData=getExtra('sanctions',currentClasse.id);
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
 
@@ -3087,7 +3103,7 @@ function notesValeurs(e,mat){
       else if(n.type_note==='ecrit')ecrit[n.mois_idx]=n.note;
     }
   });
-  getExtra('bonus',currentClasse.id).filter(b=>b.eleveId===e.id).forEach(b=>{
+  getBonus(currentClasse.id).filter(b=>b.eleveId===e.id).forEach(b=>{
     const i=parseInt(b.moisIdx||0);
     if(i>=0&&i<9){oral[i]=Math.min(20,(parseFloat(oral[i])||0)+b.points);}
   });
@@ -3740,38 +3756,97 @@ function imprimerSanctions(){
 }
 
 // ===== BONUS =====
+function bonusMoisOff(cid,mi){return getExtra('bonus',cid).some(b=>b.off&&parseInt(b.moisIdx)===mi);}
+function getBonus(cid){
+  const all=getExtra('bonus',cid);
+  const off=new Set(all.filter(b=>b.off).map(b=>parseInt(b.moisIdx)));
+  return all.filter(b=>!b.off&&!off.has(parseInt(b.moisIdx||0)));
+}
+function rafraichirNotesSiOuvert(){
+  const v=document.getElementById('vue-notes');
+  if(v&&v.classList.contains('show')&&currentClasse)renderNotesClasse();
+}
 async function ajouterBonus(){
   const eleveId=document.getElementById('bon-eleve').value;
   if(!eleveId)return toast('Choisir un élève');
   const eleve=cache.eleves.find(e=>e.id===eleveId);
-  const points=parseFloat(document.getElementById('bon-points').value)||0;
+  const points=Math.round((parseFloat(document.getElementById('bon-points').value)||0)*100)/100;
+  if(!(points>=0.25&&points<=20))return toast('Les points doivent être entre 0,25 et 20');
   const moisIdx=parseInt(document.getElementById('bon-mois').value);
-  const bonus=getExtra('bonus',currentCahierClasseId);
+  const bonus=getExtra('bonus',currentCahierClasseId).slice();
   bonus.push({eleveId,nom:eleve?eleve.nom:'—',points,moisIdx,motif:document.getElementById('bon-motif').value.trim()||'Participation',date:new Date().toLocaleDateString('fr-FR')});
   document.getElementById('bon-motif').value='';
   await saveExtra('bonus',currentCahierClasseId,bonus);
-  renderBonus();
-  if(document.getElementById('vue-notes').classList.contains('show'))renderNotesClasse();
-  toast(`+${points} point(s) ajouté(s) ✓ — Note orale ${MOIS[moisIdx]} mise à jour`);
+  renderBonus();rafraichirNotesSiOuvert();
+  toast(bonusMoisOff(currentCahierClasseId,moisIdx)?`+${points} enregistré, mais les bonus de ${MOIS[moisIdx]} sont désactivés`:`+${points} point(s) ajouté(s) ✓ — Note orale ${MOIS[moisIdx]} mise à jour`);
+}
+async function basculerBonusMois(mi){
+  const cid=currentCahierClasseId;
+  const all=getExtra('bonus',cid);
+  const off=bonusMoisOff(cid,mi);
+  const nv=off?all.filter(b=>!(b.off&&parseInt(b.moisIdx)===mi)):all.concat([{off:true,moisIdx:mi}]);
+  await saveExtra('bonus',cid,nv);
+  renderBonus();rafraichirNotesSiOuvert();
+  toast(off?`Bonus de ${MOIS[mi]} réactivés ✓`:`Bonus de ${MOIS[mi]} désactivés — ils ne comptent plus dans la note orale`);
+}
+async function supprimerBonus(i,depuisModal){
+  const all=getExtra('bonus',currentCahierClasseId);
+  const b=all[i];if(!b||b.off)return;
+  if(!confirm('Annuler ce bonus (+'+b.points+' pour '+b.nom+') ?'))return;
+  await saveExtra('bonus',currentCahierClasseId,all.filter((_,k)=>k!==i));
+  if(depuisModal)closeModal('modal-edit-bonus');
+  renderBonus();rafraichirNotesSiOuvert();
+  toast('Bonus annulé ✓ — note orale mise à jour');
+}
+function ouvrirEditBonus(i){
+  const b=getExtra('bonus',currentCahierClasseId)[i];if(!b||b.off)return;
+  document.getElementById('eb-eleve').value=b.nom||'';
+  document.getElementById('eb-points').value=b.points;
+  document.getElementById('eb-mois').innerHTML=MOIS.map((m,k)=>`<option value="${k}">${m}</option>`).join('');
+  document.getElementById('eb-mois').value=String(parseInt(b.moisIdx||0));
+  document.getElementById('eb-motif').value=b.motif||'';
+  document.getElementById('eb-index').value=i;
+  openModal('modal-edit-bonus');
+}
+async function validerEditBonus(){
+  const i=+document.getElementById('eb-index').value;
+  const all=getExtra('bonus',currentCahierClasseId).slice();
+  const b=all[i];if(!b||b.off)return;
+  const points=Math.round((parseFloat(document.getElementById('eb-points').value)||0)*100)/100;
+  if(!(points>=0.25&&points<=20))return toast('Les points doivent être entre 0,25 et 20');
+  all[i]=Object.assign({},b,{points,moisIdx:parseInt(document.getElementById('eb-mois').value),motif:document.getElementById('eb-motif').value.trim()||'Participation'});
+  await saveExtra('bonus',currentCahierClasseId,all);
+  closeModal('modal-edit-bonus');
+  renderBonus();rafraichirNotesSiOuvert();
+  toast('Bonus modifié ✓ — note orale mise à jour');
 }
 function renderBonus(){
+  const cid=currentCahierClasseId;
+  const mm=document.getElementById('bonus-mois-liste');
+  if(mm)mm.innerHTML=MOIS.map((m,k)=>{const off=bonusMoisOff(cid,k);return `<button class="btn btn-sm" style="${off?'background:#eee;color:#888;text-decoration:line-through':'background:#E1F5EE;color:#085041;border-color:#9FE1CB'}" onclick="basculerBonusMois(${k})">${off?'✕':'✓'} ${resEsc(m)}</button>`;}).join('');
   const el=document.getElementById('liste-bonus');
-  const bonus=getExtra('bonus',currentCahierClasseId);
-  if(!bonus.length){el.innerHTML='<div class="empty">Aucun bonus</div>';return;}
+  const bonus=getExtra('bonus',cid);
+  if(!bonus.some(b=>!b.off)){el.innerHTML='<div class="empty">Aucun bonus</div>';return;}
   const totaux={};
-  bonus.forEach(b=>{if(!totaux[b.nom])totaux[b.nom]={nom:b.nom,total:0,details:[]};totaux[b.nom].total+=b.points;totaux[b.nom].details.push(b);});
+  bonus.forEach((b,idx)=>{
+    if(b.off)return;
+    if(!totaux[b.nom])totaux[b.nom]={nom:b.nom,total:0,details:[]};
+    const actif=!bonusMoisOff(cid,parseInt(b.moisIdx||0));
+    if(actif)totaux[b.nom].total+=b.points;
+    totaux[b.nom].details.push({...b,_i:idx,_actif:actif});
+  });
   const sorted=Object.values(totaux).sort((a,b)=>b.total-a.total);
   el.innerHTML=sorted.map((t,i)=>`
-    <div style="border:1px solid #e5e5e0;border-radius:7px;padding:8px 11px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start">
-      <div>
+    <div style="border:1px solid #e5e5e0;border-radius:7px;padding:8px 11px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div style="min-width:0">
         <span style="color:#888;font-weight:700;margin-right:6px">#${i+1}</span>
-        <strong>${t.nom}</strong>
-        <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:3px">
-          ${t.details.map(d=>`<span style="font-size:10px;background:#E1F5EE;color:#085041;padding:1px 6px;border-radius:20px">+${d.points} ${d.motif} · ${MOIS[d.moisIdx]||''} <span style="color:#aaa">${d.date}</span></span>`).join('')}
+        <strong>${resEsc(t.nom)}</strong>
+        <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px">
+          ${t.details.map(d=>`<span style="font-size:10px;background:${d._actif?'#E1F5EE':'#f0f0eb'};color:${d._actif?'#085041':'#999'};${d._actif?'':'text-decoration:line-through;'}padding:2px 4px 2px 7px;border-radius:20px;display:inline-flex;align-items:center;gap:4px">+${d.points} ${resEsc(d.motif||'')} · ${MOIS[d.moisIdx]||''} <span style="color:#aaa">${resEsc(d.date||'')}</span>${d._actif?'':' (non utilisé)'}<button title="Modifier" style="border:none;background:rgba(0,0,0,.07);border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:10px;padding:0" onclick="ouvrirEditBonus(${d._i})">✏️</button><button title="Annuler ce bonus" style="border:none;background:rgba(192,57,43,.15);color:#c0392b;border-radius:50%;width:18px;height:18px;cursor:pointer;font-size:10px;padding:0" onclick="supprimerBonus(${d._i})">✕</button></span>`).join('')}
         </div>
       </div>
       <div style="text-align:center;background:#0B4FBF;color:#fff;border-radius:8px;padding:5px 10px;flex-shrink:0">
-        <div style="font-size:20px;font-weight:700">+${t.total}</div>
+        <div style="font-size:20px;font-weight:700">+${Math.round(t.total*100)/100}</div>
         <div style="font-size:9px;opacity:.8">pts</div>
       </div>
     </div>`).join('');
