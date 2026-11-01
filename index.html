@@ -605,6 +605,13 @@ body.dark .nav button{color:#fff}
 body.dark ::placeholder{color:#8d97b5}
 body.dark .toast{background:#2a3358;color:#fff}
 :root{--on-primary:#fff;--primary-text:#0B4FBF}
+
+/* mode sombre : toutes les écritures des surfaces en blanc clair et gras */
+body.dark :is(.card,.modal,.ecole-card,.classe-card,.dossier-card,.ressource-card,.eleve-row,.seance-card,.msg-item,.corbeille-item,.eleve-rappel,.kpi,.shortcut,.breadcrumb,#bottom-nav,.auth-card,.alert-box,.notes-table-wrap,.k2-ic){color:#000!important}
+body.dark :is(.card,.modal,.ecole-card,.classe-card,.dossier-card,.ressource-card,.eleve-row,.seance-card,.msg-item,.corbeille-item,.eleve-rappel,.kpi,.shortcut,.breadcrumb,#bottom-nav,.auth-card,.alert-box,.notes-table-wrap,.k2-ic) *:not(:is(.btn-primary,.btn-warn,.btn-info,.btn-success,.btn-danger, svg, svg *, img, option)):not(:is(.btn-primary,.btn-warn,.btn-info,.btn-success,.btn-danger) *){color:#000!important;font-weight:700!important}
+body.dark :is(.card,.modal,.ecole-card,.classe-card,.dossier-card,.ressource-card,.eleve-row,.seance-card,.msg-item,.corbeille-item,.eleve-rappel,.kpi,.shortcut,.breadcrumb,#bottom-nav,.auth-card,.alert-box,.notes-table-wrap,.k2-ic) ::placeholder{color:#000!important;opacity:.55}
+body.dark :is(input,select,textarea):not(:is(.card,.modal,.ecole-card,.classe-card,.dossier-card,.ressource-card,.eleve-row,.seance-card,.msg-item,.corbeille-item,.eleve-rappel,.kpi,.shortcut,.breadcrumb,#bottom-nav,.auth-card,.alert-box,.notes-table-wrap,.k2-ic) *),body.dark .section :is(label,p,li,td,th){font-weight:700}
+body.dark .main a,body.dark .breadcrumb a{font-weight:700}
 </style>
 </head>
 <body>
