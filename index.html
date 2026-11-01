@@ -1852,7 +1852,13 @@ let cache={ecoles:[],classes:[],eleves:[],notes:[],devoirs:[],copies:[],ressourc
 
 // ===== UTILS =====
 function toast(msg,dur=3000){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),dur);}
-function openModal(id){document.getElementById(id).classList.add('show');}
+function openModal(id){
+  try{
+    if(id==='modal-add-classe')cyclesClasse();
+    if(id==='modal-add-eleve'){const b=document.getElementById('add-mat-box');if(b)b.style.display=estSupClasse()?'block':'none';}
+  }catch(e){}
+  document.getElementById(id).classList.add('show');
+}
 function closeModal(id){document.getElementById(id).classList.remove('show');}
 function setSyncStatus(s){const d=document.getElementById('sync-dot');if(!d)return;d.className='sync-dot'+(s==='syncing'?' syncing':s==='error'?' error':'');}
 function hIdx(h){return HEURES.indexOf(h);}
@@ -2216,20 +2222,13 @@ function appliquerCycle(){
   document.body.classList.toggle('cycle-primaire',monCycle==='primaire');
   {const o=document.getElementById('rp-opt-note');if(o)o.textContent='Note orale du mois /'+NB()+' (donnée à partir du rappel)';}
   document.body.classList.toggle('cycle-superieur',monCycle==='superieur');
-  {const c=document.getElementById('cl-cycle');if(c){
-    const ok=monCycle==='primaire'?['Primaire']:monCycle==='superieur'?['Supérieur']:['Collège','Lycée'];
-    [...c.options].forEach(o=>{const v=ok.includes(o.value);o.hidden=!v;o.disabled=!v;});
-    if(!ok.includes(c.value)){c.value=ok[0];updateNiveaux();}
-  }}
-  {const mb=document.getElementById('cl-module-box');if(mb)mb.style.display=monCycle==='superieur'?'block':'none';}
-  {const b=document.getElementById('add-mat-box'),i=document.getElementById('add-mat');if(b)b.style.display=monCycle==='superieur'?'block':'none';if(i&&monCycle!=='superieur')i.value='';}
   try{appliquerLibelles();}catch(e){}
-  if(monCycle==='superieur'){const c=document.getElementById('cl-cycle');if(c){c.value='Supérieur';updateNiveaux();const g=c.closest('.form-group');if(g)g.style.display='none';}}
+  
   const bAjEc=document.querySelector('#ecoles [onclick*="modal-add-ecole"]');
   if(bAjEc)bAjEc.style.display=(monCycle==='primaire'&&cache.ecoles.length>=1)?'none':'';
   const bAjCl=document.querySelector('#vue-classes [onclick*="modal-add-classe"]');
   if(bAjCl)bAjCl.style.display=(monCycle==='primaire'&&cache.classes.length>=1)?'none':'';
-  if(monCycle==='primaire'){const c=document.getElementById('cl-cycle');if(c&&c.value!=='Primaire'){c.value='Primaire';updateNiveaux();}}
+  try{cyclesClasse();}catch(e){}
 }
 async function chargerCycle(){
   const cle='koto_cycle_'+currentUser.id;
@@ -2741,6 +2740,27 @@ function renderEcoles(){
 }
 
 // ===== CLASSES =====
+// la classe (ou le compte) est-elle du supérieur ?
+function estSupClasse(){return monCycle==='superieur'||!!(currentClasse&&currentClasse.cycle==='Supérieur');}
+// cycles proposés à la création d'une classe : selon le type de l'école choisie (et le cycle du compte)
+function cyclesPermis(){
+  if(monCycle==='primaire')return['Primaire'];
+  if(monCycle==='superieur')return['Supérieur'];
+  const t=(currentEcole&&currentEcole.type)||'';
+  if(/sup|univ|profession/i.test(t))return['Supérieur'];
+  if(/coll/i.test(t)&&/lyc/i.test(t))return['Collège','Lycée'];
+  if(/coll/i.test(t))return['Collège'];
+  if(/lyc/i.test(t))return['Lycée'];
+  return['Collège','Lycée'];
+}
+function cyclesClasse(){
+  const c=document.getElementById('cl-cycle');if(!c)return;
+  const ok=cyclesPermis();
+  [...c.options].forEach(o=>{const v=ok.includes(o.value);o.hidden=!v;o.disabled=!v;});
+  if(!ok.includes(c.value))c.value=ok[0];
+  updateNiveaux();
+  const g=c.closest('.form-group');if(g)g.style.display=ok.length===1?'none':'';
+}
 function updateNiveaux(){
   const cycle=document.getElementById('cl-cycle').value;
   let opts='';
@@ -2750,6 +2770,7 @@ function updateNiveaux(){
   else opts='<option>Licence 1</option><option>Licence 2</option><option>Licence 3</option><option>Licence 4</option><option>Master 1</option><option>Master 2</option>';
   document.getElementById('cl-niveau').innerHTML=opts;
   majSeries();
+  {const mb=document.getElementById('cl-module-box');if(mb)mb.style.display=document.getElementById('cl-cycle').value==='Supérieur'?'block':'none';}
 }
 function majSeries(){
   const cy=document.getElementById('cl-cycle').value,nv=document.getElementById('cl-niveau').value;
@@ -2765,7 +2786,7 @@ async function addClasse(){
   const lettre=document.getElementById('cl-lettre').value;
   const cycle=document.getElementById('cl-cycle').value;
   const serie=(document.getElementById('cl-serie-box').style.display!=='none'&&document.getElementById('cl-serie').value)||'';
-  const modSup=monCycle==='superieur'?(document.getElementById('cl-module').value||'0'):null;
+  const modSup=cycle==='Supérieur'?(document.getElementById('cl-module').value||'0'):null;
   const nom=niveau+(serie?' '+serie:'')+(lettre?' '+lettre:'')+(modSup&&modSup!=='0'?' — Module '+modSup:'');
   const obj={nom,niveau,cycle,ecole_id:currentEcole.id,effectif:document.getElementById('cl-eff').value||'?',annee:'2026-2027'};
   const data=await sbInsert('classes',obj);
@@ -2820,7 +2841,7 @@ async function saveNewEleve(){
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
   const nomComplet=prenom+' '+nom;
   let mat;
-  if(estSup()){
+  if(estSupClasse()){
     mat=document.getElementById('add-mat').value.trim();
     if(!mat)return toast('Écris le matricule de l\'étudiant (donné par l\'établissement)',4500);
     if(cache.eleves.some(x=>(x.matricule||'').toLowerCase()===mat.toLowerCase()))return toast('Ce matricule est déjà utilisé',4500);
@@ -2922,7 +2943,7 @@ function importExcelEleves(input){
         const nomComplet=prenom+(nom?' '+nom:'');
         let mat=txt(r[3]);
         if(mat&&matUtilises.has(mat.toLowerCase())){ignores++;continue;}
-        if(!mat&&estSup()){ignores++;continue;}
+        if(!mat&&estSupClasse()){ignores++;continue;}
         if(!mat){do{mat=genMatricule(ec?ec.abr:'',currentClasse.nom)+Math.floor(Math.random()*10);}while(matUtilises.has(mat.toLowerCase()));}
         matUtilises.add(mat.toLowerCase());
         const pwd=genPwd();
@@ -3055,7 +3076,7 @@ async function delObsEleve(id,idx){
 // ===== FICHE DE NOTES PAR CLASSE =====
 function ouvrirNotesClasse(){
   if(!currentClasse)return;
-  if(estSup())return ouvrirNotesSup();
+  if(estSupClasse())return ouvrirNotesSup();
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
   document.getElementById('notes-titre').textContent=`📊 Notes — ${currentClasse.nom}${ec?' ('+ec.abr+')':''}`;
   // Matières disponibles
