@@ -721,6 +721,7 @@ body.dark .dc-d{color:#cfe0ff}
       <div class="form-group"><label>Prénom(s)</label><input id="add-prenom" placeholder="Fatoumata"></div>
       <div class="form-group"><label>Nom de famille</label><input id="add-nom" placeholder="Diallo"></div>
     </div>
+    <div class="form-group" id="add-mat-box" style="display:none"><label>Matricule (donné par l'établissement) *</label><input id="add-mat" placeholder="Ex. : ISS-2026-0142" maxlength="40"></div>
     <button class="btn btn-primary" style="width:100%;margin-top:6px" onclick="saveNewEleve()">💾 Enregistrer</button>
   </div>
 </div>
@@ -1165,7 +1166,7 @@ body.dark .dc-d{color:#cfe0ff}
     <!-- Import Excel -->
     <div class="card" style="margin-bottom:10px">
       <div class="card-title">📥 Import liste élèves (Excel)</div>
-      <div class="alert-info alert-box" style="margin-bottom:7px">Format du fichier : <code>N° | Prénom | Nom | Matricule (facultatif)</code> (1ère ligne = en-tête). Si le matricule est vide, il est créé automatiquement. <a onclick="telechargerModeleEleves()" style="color:#0B4FBF;cursor:pointer;text-decoration:underline">⬇️ Télécharger le modèle</a></div>
+      <div class="alert-info alert-box" style="margin-bottom:7px">Format du fichier : <code>N° | Prénom | Nom | Matricule (facultatif)</code> (1ère ligne = en-tête). Si le matricule est vide, il est créé automatiquement (cycle supérieur : le matricule est obligatoire, les lignes sans matricule sont ignorées). <a onclick="telechargerModeleEleves()" style="color:#0B4FBF;cursor:pointer;text-decoration:underline">⬇️ Télécharger le modèle</a></div>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="file" id="import-eleves-file" accept=".xlsx,.xls,.csv" onchange="importExcelEleves(this)" style="flex:1">
       </div>
@@ -2214,6 +2215,12 @@ function appliquerCycle(){
   document.body.classList.toggle('cycle-primaire',monCycle==='primaire');
   {const o=document.getElementById('rp-opt-note');if(o)o.textContent='Note orale du mois /'+NB()+' (donnée à partir du rappel)';}
   document.body.classList.toggle('cycle-superieur',monCycle==='superieur');
+  {const c=document.getElementById('cl-cycle');if(c){
+    const ok=monCycle==='primaire'?['Primaire']:monCycle==='superieur'?['Supérieur']:['Collège','Lycée'];
+    [...c.options].forEach(o=>{const v=ok.includes(o.value);o.hidden=!v;o.disabled=!v;});
+    if(!ok.includes(c.value)){c.value=ok[0];updateNiveaux();}
+  }}
+  {const b=document.getElementById('add-mat-box'),i=document.getElementById('add-mat');if(b)b.style.display=monCycle==='superieur'?'block':'none';if(i&&monCycle!=='superieur')i.value='';}
   try{appliquerLibelles();}catch(e){}
   if(monCycle==='superieur'){const c=document.getElementById('cl-cycle');if(c){c.value='Supérieur';updateNiveaux();const g=c.closest('.form-group');if(g)g.style.display='none';}}
   const bAjEc=document.querySelector('#ecoles [onclick*="modal-add-ecole"]');
@@ -2808,14 +2815,19 @@ async function saveNewEleve(){
   if(!currentClasse)return toast('Aucune classe sélectionnée');
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
   const nomComplet=prenom+' '+nom;
-  const mat=genMatricule(ec?ec.abr:'',currentClasse.nom);
+  let mat;
+  if(estSup()){
+    mat=document.getElementById('add-mat').value.trim();
+    if(!mat)return toast('Écris le matricule de l\'étudiant (donné par l\'établissement)',4500);
+    if(cache.eleves.some(x=>(x.matricule||'').toLowerCase()===mat.toLowerCase()))return toast('Ce matricule est déjà utilisé',4500);
+  }else mat=genMatricule(ec?ec.abr:'',currentClasse.nom);
   const pwd=genPwd();
   const obj={nom:nomComplet,prenom,nom_famille:nom,classe_id:currentClasse.id,ecole_id:currentClasse.ecole_id,matricule:mat,pwd,photo:addPhotoData||'',observations:[]};
   const data=await sbInsert('eleves',obj);
   if(!data)return;
   cache.eleves.unshift(data);
   addPhotoData='';
-  document.getElementById('add-prenom').value='';
+  document.getElementById('add-prenom').value='';document.getElementById('add-mat').value='';
   document.getElementById('add-nom').value='';
   document.getElementById('add-photo-data').value='';
   document.getElementById('add-photo-preview').innerHTML='👤';
@@ -2906,6 +2918,7 @@ function importExcelEleves(input){
         const nomComplet=prenom+(nom?' '+nom:'');
         let mat=txt(r[3]);
         if(mat&&matUtilises.has(mat.toLowerCase())){ignores++;continue;}
+        if(!mat&&estSup()){ignores++;continue;}
         if(!mat){do{mat=genMatricule(ec?ec.abr:'',currentClasse.nom)+Math.floor(Math.random()*10);}while(matUtilises.has(mat.toLowerCase()));}
         matUtilises.add(mat.toLowerCase());
         const pwd=genPwd();
