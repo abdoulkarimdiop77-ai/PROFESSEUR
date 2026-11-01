@@ -1645,6 +1645,7 @@ body.dark .dc-d{color:#cfe0ff}
       </div>
     </div>
     <div class="form-group" id="cl-serie-box" style="display:none"><label>Série / option</label><select id="cl-serie"></select></div>
+    <div class="form-group" id="cl-module-box" style="display:none"><label>Module de cette classe *</label><select id="cl-module"><option value="1">Module 1 (octobre → février)</option><option value="2">Module 2 (mars → juin)</option><option value="0">Les deux modules (cours différents dans chaque module)</option></select><div style="font-size:11px;color:#667;margin-top:3px">Si tu donnes le même cours aux deux modules, crée deux classes (une par module).</div></div>
     <div class="two-eq">
       <div class="form-group"><label>Lettre/Groupe</label>
         <select id="cl-lettre"><option value="">— Aucune</option><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select>
@@ -2220,6 +2221,7 @@ function appliquerCycle(){
     [...c.options].forEach(o=>{const v=ok.includes(o.value);o.hidden=!v;o.disabled=!v;});
     if(!ok.includes(c.value)){c.value=ok[0];updateNiveaux();}
   }}
+  {const mb=document.getElementById('cl-module-box');if(mb)mb.style.display=monCycle==='superieur'?'block':'none';}
   {const b=document.getElementById('add-mat-box'),i=document.getElementById('add-mat');if(b)b.style.display=monCycle==='superieur'?'block':'none';if(i&&monCycle!=='superieur')i.value='';}
   try{appliquerLibelles();}catch(e){}
   if(monCycle==='superieur'){const c=document.getElementById('cl-cycle');if(c){c.value='Supérieur';updateNiveaux();const g=c.closest('.form-group');if(g)g.style.display='none';}}
@@ -2763,11 +2765,13 @@ async function addClasse(){
   const lettre=document.getElementById('cl-lettre').value;
   const cycle=document.getElementById('cl-cycle').value;
   const serie=(document.getElementById('cl-serie-box').style.display!=='none'&&document.getElementById('cl-serie').value)||'';
-  const nom=niveau+(serie?' '+serie:'')+(lettre?' '+lettre:'');
+  const modSup=monCycle==='superieur'?(document.getElementById('cl-module').value||'0'):null;
+  const nom=niveau+(serie?' '+serie:'')+(lettre?' '+lettre:'')+(modSup&&modSup!=='0'?' — Module '+modSup:'');
   const obj={nom,niveau,cycle,ecole_id:currentEcole.id,effectif:document.getElementById('cl-eff').value||'?',annee:'2026-2027'};
   const data=await sbInsert('classes',obj);
   if(!data)return;
   cache.classes.unshift(data);
+  if(modSup!==null)await saveExtra('sup_cfg',data.id,[{module:+modSup}]);
   closeModal('modal-add-classe');
   document.getElementById('cl-lettre').value='';document.getElementById('cl-eff').value='';
   renderClassesEcole(currentEcole.id);refreshAllSelects();toast('Classe ajoutée ✓');
@@ -6247,16 +6251,17 @@ function ouvrirNotesSup(){
 function renderNotesSup(){
   if(supSel&&supFiches(currentClasse.id).some(f=>f.id===supSel))renderFicheSup();else{supSel=null;renderListeFichesSup();}
 }
-function supModuleCourant(){const m=new Date().getMonth()+1;return(m>=3&&m<=6)?'2':'1';}
+function supModuleClasse(){const c=getExtra('sup_cfg',currentClasse.id)[0];return c&&(c.module===1||c.module===2)?c.module:0;}
+function supModuleCourant(){const mc=supModuleClasse();if(mc)return String(mc);const m=new Date().getMonth()+1;return(m>=3&&m<=6)?'2':'1';}
 function renderListeFichesSup(){
   const el=document.getElementById('ns-contenu');
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
-  const fl=(document.getElementById('ns-filtre')||{}).value||'';
+  const fl=supModuleClasse()?'':((document.getElementById('ns-filtre')||{}).value||'');
   const liste=supFiches(currentClasse.id);
   const eleves=cache.eleves.filter(e=>e.classe_id===currentClasse.id);
   const vus=liste.filter(f=>!fl||String(f.module)===fl);
-  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px"><strong style="font-size:15px">📊 Notes — ${resEsc(currentClasse.nom)}${ec?' ('+resEsc(ec.abr)+')':''}</strong><div style="display:flex;gap:7px;flex-wrap:wrap"><select id="ns-filtre" onchange="renderListeFichesSup()" style="width:auto"><option value="">Tous les modules</option><option value="1"${fl==='1'?' selected':''}>Module 1</option><option value="2"${fl==='2'?' selected':''}>Module 2</option></select><button class="btn btn-primary btn-sm" onclick="supOuvrirModale()">+ Nouveau cours</button></div></div>`;
-  h+=`<div class="alert-info alert-box" style="font-size:11px;margin-bottom:10px">🎓 <strong>Module 1</strong> : octobre → février · <strong>Module 2</strong> : mars → juin. Chaque cours a ses crédits, ses notes (évaluation écrite, exposé, devoir de groupe…) et leurs poids dans la moyenne.</div>`;
+  let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px"><strong style="font-size:15px">📊 Notes — ${resEsc(currentClasse.nom)}${ec?' ('+resEsc(ec.abr)+')':''}</strong><div style="display:flex;gap:7px;flex-wrap:wrap">${supModuleClasse()?'':`<select id="ns-filtre" onchange="renderListeFichesSup()" style="width:auto"><option value="">Tous les modules</option><option value="1"${fl==='1'?' selected':''}>Module 1</option><option value="2"${fl==='2'?' selected':''}>Module 2</option></select>`}<button class="btn btn-primary btn-sm" onclick="supOuvrirModale()">+ Nouveau cours</button></div></div>`;
+  h+=`<div class="alert-info alert-box" style="font-size:11px;margin-bottom:10px">🎓 ${supModuleClasse()?'Classe du <strong>'+SUP_MOD[supModuleClasse()]+'</strong>. ':'<strong>Module 1</strong> : octobre → février · <strong>Module 2</strong> : mars → juin. '}Chaque cours a ses crédits, ses notes (évaluation écrite, exposé, devoir de groupe…) et leurs poids dans la moyenne.</div>`;
   if(!liste.length)h+='<div class="empty">Aucun cours pour cette classe.<br>Clique sur « + Nouveau cours » pour créer ta première fiche de notes.</div>';
   else if(!vus.length)h+='<div class="empty">Aucun cours dans ce module</div>';
   else h+=[1,2].map(m=>{
@@ -6278,7 +6283,9 @@ function supOuvrirModale(id){
   document.getElementById('sc-titre').textContent=f?'✏️ Modifier le cours':'📘 Nouveau cours';
   document.getElementById('sc-nom').value=f?f.cours:'';
   document.getElementById('sc-credits').value=f?f.credits:9;
-  document.getElementById('sc-module').value=f?String(f.module):supModuleCourant();
+  {const mc=supModuleClasse(),sm=document.getElementById('sc-module');
+   [...sm.options].forEach(o=>{const ok=!mc||+o.value===mc||(f&&+o.value===+f.module);o.hidden=!ok;o.disabled=!ok;});
+   sm.value=f?String(f.module):supModuleCourant();}
   document.getElementById('sc-bareme').value=f?String(f.bareme):'10';
   document.getElementById('sc-mode').value=f?f.mode:'pct';
   document.getElementById('sc-rappel').checked=!!(f&&f.rappel);
