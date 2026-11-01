@@ -659,6 +659,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="eleveSubmit()">📤 Envoyer</button>
     </div>
     <div id="ep-done" style="display:none" class="card"><div style="text-align:center;padding:20px"><div style="font-size:36px">✅</div><div style="font-size:15px;font-weight:600;margin-top:6px" data-etat>Devoir envoyé !</div></div></div>
+    <div id="ep-corr" style="display:none"></div>
     <div id="ep-bloque" style="display:none;border:2px solid #c0392b;background:#fff5f5" class="card"><div style="text-align:center;padding:20px"><div style="font-size:42px">🚫</div><div style="font-size:16px;font-weight:700;color:#c0392b;margin-top:6px">Devoir bloqué</div><div style="font-size:12px;margin-top:8px;color:#444">Tu as quitté l'application pendant le devoir : cela est considéré comme une <b>fraude suspectée</b>.</div><div style="font-size:11px;color:#791F1F;margin-top:6px">Motif : <span id="ep-bloque-motif"></span></div><div style="font-size:11px;color:#555;margin-top:8px" id="ep-bloque-etat"></div></div></div>
   </div>
 </div>
@@ -1628,6 +1629,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       </div>
     </div>
     <div id="sc-sugg" style="font-size:11px;color:#0B4FBF;margin:-4px 0 4px"></div>
+    <div id="sc-pro-info" style="display:none;font-size:11px;color:#0A3A9E;background:#E6EEFB;border-radius:7px;padding:6px 8px;margin:0 0 6px">🏭 École professionnelle : choisis le nombre de notes du cours ci-dessus ; une <b>composition de fin de module</b> s'ajoute automatiquement comme dernière note. La moyenne suit les proportions que tu fixes.</div>
     <div style="font-size:11px;color:#556;margin:0 0 8px">💡 Entre 2 et 4 notes en général. Si l'université organise une composition de fin de module que tu corriges seulement, choisis <b>1 note</b> nommée « Composition de l'université » (100 %).</div>
     <div class="form-group"><label>Poids des notes dans la moyenne</label>
       <select id="sc-mode" onchange="supReconstruireLignes(true)"><option value="pct">En pourcentage (%)</option><option value="coef">En coefficients (×1, ×2…)</option></select>
@@ -1647,7 +1649,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
     <div class="modal-header"><h2>📚 Nouvelle classe</h2><button class="modal-close" onclick="closeModal('modal-add-classe')">✕</button></div>
     <div class="two-eq">
       <div class="form-group"><label>Cycle</label>
-        <select id="cl-cycle" onchange="updateNiveaux()"><option value="Primaire">Primaire</option><option value="Collège">Collège</option><option value="Lycée">Lycée</option><option value="Supérieur">Supérieur</option></select>
+        <select id="cl-cycle" onchange="updateNiveaux()"><option value="Primaire">Primaire</option><option value="Collège">Collège</option><option value="Lycée">Lycée</option><option value="Supérieur">Supérieur</option><option value="Professionnel">École professionnelle</option></select>
       </div>
       <div class="form-group"><label>Niveau</label>
         <select id="cl-niveau" onchange="majSeries()"><option>7ème</option><option>8ème</option><option>9ème</option><option>10ème</option></select>
@@ -1701,7 +1703,20 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       </div>
       <div id="questions-builder"></div>
     </div>
-    <button class="btn btn-primary" style="width:100%" onclick="saveDevoir()">💾 Créer le devoir</button>
+    <button class="btn btn-primary" style="width:100%" onclick="dvOuvrirPond()">➡️ Suivant : pondérer le sujet</button>
+    <div style="font-size:10.5px;color:#667;margin-top:5px;text-align:center">Tu fixes les points de chaque question, puis tu crées le devoir et son lien.</div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-pond">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header"><h2>⚖️ Pondération du sujet</h2><button class="modal-close" onclick="closeModal('modal-pond')">✕</button></div>
+    <div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:8px">
+      <div class="form-group" style="margin:0"><label>Le devoir est noté sur</label><input id="pd-bareme" type="number" min="1" step="1" style="width:90px" oninput="dvPondBareme()"></div>
+      <button class="btn btn-sm" onclick="dvRepartir()">⚖️ Répartir également</button>
+    </div>
+    <div id="pd-liste"></div>
+    <div id="pd-total" style="font-size:13px;font-weight:700;margin:8px 0"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" onclick="closeModal('modal-pond')">← Retour au sujet</button><button class="btn btn-primary" style="flex:1" onclick="saveDevoir()">💾 Créer le devoir et générer le lien</button></div>
   </div>
 </div>
 
@@ -2751,13 +2766,16 @@ function renderEcoles(){
 
 // ===== CLASSES =====
 // la classe (ou le compte) est-elle du supérieur ?
-function estSupClasse(){return monCycle==='superieur'||!!(currentClasse&&currentClasse.cycle==='Supérieur');}
+function estSupClasse(){return monCycle==='superieur'||!!(currentClasse&&(currentClasse.cycle==='Supérieur'||currentClasse.cycle==='Professionnel'));}
+// classe d'école professionnelle : notes de cours + composition finale
+function estProClasse(){return!!(currentClasse&&currentClasse.cycle==='Professionnel');}
 // cycles proposés à la création d'une classe : selon le type de l'école choisie (et le cycle du compte)
 function cyclesPermis(){
   if(monCycle==='primaire')return['Primaire'];
-  if(monCycle==='superieur')return['Supérieur'];
   const t=(currentEcole&&currentEcole.type)||'';
-  if(/sup|univ|profession/i.test(t))return['Supérieur'];
+  if(/profession/i.test(t))return['Professionnel'];
+  if(monCycle==='superieur')return['Supérieur'];
+  if(/sup|univ/i.test(t))return['Supérieur'];
   if(/coll/i.test(t)&&/lyc/i.test(t))return['Collège','Lycée'];
   if(/coll/i.test(t))return['Collège'];
   if(/lyc/i.test(t))return['Lycée'];
@@ -2777,10 +2795,11 @@ function updateNiveaux(){
   if(cycle==='Primaire')opts='<option>1ère année</option><option>2ème année</option><option>3ème année</option><option>4ème année</option><option>5ème année</option><option>6ème année</option>';
   else if(cycle==='Collège')opts='<option>7ème</option><option>8ème</option><option>9ème</option><option>10ème</option>';
   else if(cycle==='Lycée')opts='<option>11ème</option><option>12ème</option><option>Terminale</option>';
+  else if(cycle==='Professionnel')opts='<option>1ère année</option><option>2ème année</option><option>3ème année</option><option>4ème année</option>';
   else opts='<option>Licence 1</option><option>Licence 2</option><option>Licence 3</option><option>Licence 4</option><option>Master 1</option><option>Master 2</option>';
   document.getElementById('cl-niveau').innerHTML=opts;
   majSeries();
-  {const mb=document.getElementById('cl-module-box');if(mb)mb.style.display=document.getElementById('cl-cycle').value==='Supérieur'?'block':'none';}
+  {const mb=document.getElementById('cl-module-box');if(mb)mb.style.display=['Supérieur','Professionnel'].includes(document.getElementById('cl-cycle').value)?'block':'none';}
 }
 function majSeries(){
   const cy=document.getElementById('cl-cycle').value,nv=document.getElementById('cl-niveau').value;
@@ -2796,7 +2815,7 @@ async function addClasse(){
   const lettre=document.getElementById('cl-lettre').value;
   const cycle=document.getElementById('cl-cycle').value;
   const serie=(document.getElementById('cl-serie-box').style.display!=='none'&&document.getElementById('cl-serie').value)||'';
-  const modSup=cycle==='Supérieur'?(document.getElementById('cl-module').value||'0'):null;
+  const modSup=['Supérieur','Professionnel'].includes(cycle)?(document.getElementById('cl-module').value||'0'):null;
   const nom=niveau+(serie?' '+serie:'')+(lettre?' '+lettre:'')+(modSup&&modSup!=='0'?' — Module '+modSup:'');
   const obj={nom,niveau,cycle,ecole_id:currentEcole.id,effectif:document.getElementById('cl-eff').value||'?',annee:'2026-2027'};
   const data=await sbInsert('classes',obj);
@@ -2822,7 +2841,7 @@ function renderClassesEcole(ecoleId){
   const ec=cache.ecoles.find(e=>e.id===ecoleId);
   el.innerHTML=arr.map(c=>{
     const nb=cache.eleves.filter(e=>e.classe_id===c.id).length;
-    const badgeCls=c.cycle==='Lycée'?'badge-lycee':c.cycle==='Supérieur'?'badge-sup':'badge-college';
+    const badgeCls=c.cycle==='Lycée'?'badge-lycee':(c.cycle==='Supérieur'||c.cycle==='Professionnel')?'badge-sup':'badge-college';
     return `<div class="classe-card" onclick="goTo('eleves',null,${JSON.stringify(c).replace(/"/g,'&quot;')})">
       <button class="cl-del btn btn-danger btn-xs" onclick="delClasse('${c.id}',event)">✕</button>
       <div class="cl-nom" style="color:${ec?ec.couleur:'#0B4FBF'}">${c.nom}</div>
@@ -4278,21 +4297,64 @@ function filterClassesDevoir(){
   const arr=eid?cache.classes.filter(c=>c.ecole_id==eid):cache.classes;
   document.getElementById('dv-classe').innerHTML='<option value="">--</option>'+arr.map(c=>`<option value="${c.id}">${c.nom}</option>`).join('');
 }
+// ----- Pondération du sujet (points par question) -----
+function dvPtsDef(n,bareme){
+  if(!n)return[];
+  const base=Math.floor(bareme/n*4)/4,r=[];let reste=bareme;
+  for(let i=0;i<n;i++){const v=i<n-1?base:Math.round(reste*100)/100;r.push(v);reste-=v;}
+  return r;
+}
+function dvPtsQ(dv,i){const q=(dv.questions||[])[i]||{};if(q.pts!==undefined&&q.pts!==null&&q.pts!=='')return+q.pts;const n=(dv.questions||[]).length||1;return Math.round((dv.bareme||20)/n*100)/100;}
+function dvOuvrirPond(){
+  if(monCycle==='primaire')return toast('Les devoirs ne sont pas disponibles pour le cycle primaire.',4500);
+  const titre=document.getElementById('dv-titre').value.trim();
+  if(!titre||!document.getElementById('dv-classe').value||!document.getElementById('dv-ecole').value)return toast('Remplis les champs obligatoires');
+  if(!dvQArr.length)return saveDevoir();
+  if(dvQArr.some(q=>q.type==='qcm'&&q.reponse===''))return toast('Coche la bonne réponse de chaque QCM avant de continuer',4500);
+  const bar=parseFloat(document.getElementById('dv-bareme').value)||20;
+  document.getElementById('pd-bareme').value=bar;
+  if(dvQArr.some(q=>q.pts===undefined||q.pts===''))dvRepartir(true);
+  dvPondRender();openModal('modal-pond');
+}
+function dvRepartir(silencieux){
+  const bar=parseFloat(document.getElementById('pd-bareme').value)||20;
+  dvPtsDef(dvQArr.length,bar).forEach((v,i)=>{dvQArr[i].pts=v;});
+  if(!silencieux)dvPondRender();
+}
+function dvPondBareme(){dvPondTotal();}
+function dvPondRender(){
+  document.getElementById('pd-liste').innerHTML=dvQArr.map((q,i)=>`<div style="display:flex;gap:8px;align-items:center;border-bottom:1px solid #eee;padding:6px 0"><span style="font-size:11px;font-weight:700;width:34px;color:${q.type==='qcm'?'#1565C0':'#0B4FBF'}">Q${i+1}</span><span style="flex:1;font-size:12px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${resEsc((q.enonce||'(sans énoncé)').slice(0,90))}</span><input type="number" min="0" step="0.25" inputmode="decimal" value="${q.pts}" oninput="dvQArr[${i}].pts=parseFloat(this.value)||0;dvPondTotal()" style="width:80px"><span style="font-size:11px">pt(s)</span></div>`).join('');
+  dvPondTotal();
+}
+function dvPondTotal(){
+  const bar=parseFloat(document.getElementById('pd-bareme').value)||0;
+  const t=Math.round(dvQArr.reduce((a,q)=>a+(parseFloat(q.pts)||0),0)*100)/100;
+  const ok=Math.abs(t-bar)<0.01;
+  document.getElementById('pd-total').innerHTML=`Total : <span style="color:${ok?'#085041':'#c0392b'}">${t} / ${bar}</span> ${ok?'✓':'— le total doit être égal à '+bar}`;
+}
 async function saveDevoir(){
   if(monCycle==='primaire')return toast('Les devoirs ne sont pas disponibles pour le cycle primaire.',4500);
   const titre=document.getElementById('dv-titre').value.trim();
   const classeId=document.getElementById('dv-classe').value;
   const ecoleId=document.getElementById('dv-ecole').value;
   if(!titre||!classeId||!ecoleId)return toast('Remplis les champs obligatoires');
+  let barFinal=parseFloat(document.getElementById('dv-bareme').value)||20;
+  if(dvQArr.length){
+    if(!document.getElementById('modal-pond').classList.contains('show'))return dvOuvrirPond();
+    barFinal=parseFloat(document.getElementById('pd-bareme').value)||0;
+    const t=dvQArr.reduce((a,q)=>a+(parseFloat(q.pts)||0),0);
+    if(!(barFinal>0)||Math.abs(t-barFinal)>=0.01)return toast('Le total des points doit être égal à '+barFinal,4500);
+    document.getElementById('dv-bareme').value=barFinal;
+  }
   const code=genCode();
-  const obj={titre,type:document.getElementById('dv-type').value,ecole_id:ecoleId,classe_id:classeId,mat:document.getElementById('dv-mat').value,deadline:document.getElementById('dv-deadline').value,duree:document.getElementById('dv-duree').value,bareme:parseFloat(document.getElementById('dv-bareme').value)||20,consignes:document.getElementById('dv-consignes').value,drive_link:document.getElementById('dv-drive-link').value,questions:JSON.parse(JSON.stringify(dvQArr)),code,statut:'ouvert'};
+  const obj={titre,type:document.getElementById('dv-type').value,ecole_id:ecoleId,classe_id:classeId,mat:document.getElementById('dv-mat').value,deadline:document.getElementById('dv-deadline').value,duree:document.getElementById('dv-duree').value,bareme:barFinal,consignes:document.getElementById('dv-consignes').value,drive_link:document.getElementById('dv-drive-link').value,questions:JSON.parse(JSON.stringify(dvQArr)),code,statut:'ouvert'};
   const data=await sbInsert('devoirs',obj);
   if(!data)return;
   cache.devoirs.unshift(data);
   dvQArr=[];['dv-titre','dv-consignes','dv-mat','dv-drive-link'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('questions-builder').innerHTML='';
   document.getElementById('dv-import-info').innerHTML='';
-  closeModal('modal-add-devoir');renderDevoirs();toast('Devoir créé ✓ — Partage le lien !',4000);
+  closeModal('modal-pond');closeModal('modal-add-devoir');renderDevoirs();toast('Devoir créé ✓ — Partage le lien !',4000);
 }
 function getLien(code){return window.location.href.split('?')[0]+'?devoir='+code;}
 function partagerWA(code,titre){window.open('https://wa.me/?text='+encodeURIComponent(`📚 *${titre}*\n\n${getLien(code)}`),'_blank');}
@@ -4302,39 +4364,106 @@ async function cloturerDevoir(id){
   const d=cache.devoirs.find(x=>x.id===id);if(d)d.statut='cloture';
   renderDevoirs();
 }
+let corrEtat={};
 async function voirResultats(id){
   const dv=cache.devoirs.find(x=>x.id===id);if(!dv)return;
   const{data:copies}=await sb.from('copies').select('*').eq('devoir_id',id);
   document.getElementById('res-titre').textContent='Résultats — '+dv.titre;
+  const bareme=dv.bareme||20,nq=(dv.questions||[]).length;
   const nbF=(copies||[]).filter(c=>c.fraude).length;
-  let html=`<div style="font-size:12px;color:#666;margin-bottom:9px">${(copies||[]).length} copie(s)${nbF?` · <b style="color:#c0392b">🚨 ${nbF} devoir(s) bloqué(s)</b>`:''}</div>`;
+  const nbC=(copies||[]).filter(c=>c.corrige).length;
+  let html=`<div style="font-size:12px;color:#666;margin-bottom:9px">${(copies||[]).length} copie(s)${nbC?` · ✅ ${nbC} corrigée(s)`:''}${nbF?` · <b style="color:#c0392b">🚨 ${nbF} devoir(s) bloqué(s)</b>`:''} · noté sur <b>${bareme}</b></div>`;
   if(!copies||!copies.length)html+='<div class="empty">Aucune copie</div>';
   else(copies||[]).forEach(cp=>{
     const el=cache.eleves.find(e=>e.id==cp.eleve_id);
-    const qcms=(dv.questions||[]).filter(q=>q.type==='qcm');
-    let bon=0;(dv.questions||[]).forEach((q,i)=>{if(q.type==='qcm'&&q.reponse!==''&&q.reponse==(cp.reponses||[])[i])bon++;});
     const dsec=cp.duree_sec;
-    html+=`<div style="border:1px solid ${cp.fraude?'#e8a5a5':'#e5e5e0'};border-radius:7px;padding:9px 12px;margin-bottom:7px;${cp.fraude?'background:#fff5f5':''}">
+    corrEtat[cp.id]={manuel:!!cp.note_manuelle};
+    html+=`<div style="border:1px solid ${cp.fraude?'#e8a5a5':'#e5e5e0'};border-radius:7px;padding:9px 12px;margin-bottom:9px;${cp.fraude?'background:#fff5f5':''}">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">
-        <div style="font-weight:600">${el?resEsc(el.nom):'Élève'}</div>
-        <div style="font-size:11px;color:#555">${qcms.length?`QCM : <b>${bon}/${qcms.length}</b>`:''}${dsec!=null?` · ⏱ ${Math.floor(dsec/60)} min ${dsec%60} s`:''}</div>
+        <div style="font-weight:700">${el?resEsc(el.nom):'Élève'}</div>
+        <div style="font-size:11px;color:#555">${cp.corrige?`<b style="color:#085041">✅ Note : ${fmtNote(cp.note_finale)}/${bareme}</b>`:'<b style="color:#8a5a00">À corriger</b>'}${dsec!=null?` · ⏱ ${Math.floor(dsec/60)} min ${dsec%60} s`:''}</div>
       </div>
-      ${cp.fraude?`<div style="background:#FCEBEB;color:#791F1F;border-radius:6px;padding:6px 8px;font-size:11px;margin-bottom:5px">🚨 <b>Devoir bloqué — fraude suspectée</b><br>${resEsc(cp.motif||'')}<br><button class="btn btn-sm" style="margin-top:5px" onclick="devoirDebloquer('${cp.id}','${id}')">🔓 Autoriser l'élève à recommencer</button></div>`
+      ${cp.fraude?`<div style="background:#FCEBEB;color:#791F1F;border-radius:6px;padding:6px 8px;font-size:11px;margin-bottom:5px">🚨 <b>Devoir bloqué — fraude suspectée</b><br>${resEsc(cp.motif||'')}<br><button class="btn btn-sm" style="margin-top:5px" onclick="devoirDebloquer('${cp.id}','${id}')">🔓 Débloquer cet élève</button></div>`
         :(cp.motif?`<div style="background:#FFF3DC;color:#8a5a00;border-radius:6px;padding:5px 8px;font-size:11px;margin-bottom:5px">⏰ ${resEsc(cp.motif)}</div>`:'')}`;
-    (dv.questions||[]).forEach((q,i)=>{
-      const rep=(cp.reponses||[])[i]||'—';
-      const ok=q.type==='qcm'?q.reponse==rep:null;
-      html+=`<div style="background:#f9f9f7;border-radius:5px;padding:5px 8px;margin-bottom:4px;font-size:11px">
-        <div style="font-weight:600">Q${i+1} : ${resEsc(q.enonce)}${q.image?' 🖼️':''}</div>
-        <div>→ ${q.type==='qcm'?`<span style="color:${ok?'#085041':'#c0392b'}">${resEsc((q.options||[])[parseInt(rep)]||rep)} ${ok?'✓':'✗'}</span>`:resEsc(rep)}</div>
-        ${q.type==='qcm'&&!ok?`<div style="color:#085041;font-size:10px">✓ ${resEsc((q.options||[])[parseInt(q.reponse)]||'(non définie)')}</div>`:''}
-        ${q.type==='open'&&q.reponse?`<div style="color:#085041;font-size:10px">Attendu : ${resEsc(q.reponse)}</div>`:''}
+    if(!cp.fraude){
+      (dv.questions||[]).forEach((q,i)=>{
+        const rep=(cp.reponses||[])[i]||'';
+        const pts=dvPtsQ(dv,i);
+        const ok=q.type==='qcm'?(q.reponse!==''&&q.reponse==rep):null;
+        let init='';
+        if(cp.notes_q&&cp.notes_q[i]!==null&&cp.notes_q[i]!==undefined)init=cp.notes_q[i];
+        else if(q.type==='qcm'&&q.reponse!=='')init=ok?pts:0;
+        html+=`<div style="background:#f9f9f7;border-radius:5px;padding:6px 8px;margin-bottom:5px;font-size:11px">
+          <div style="font-weight:600">Q${i+1} : ${resEsc(q.enonce)}${q.image?' 🖼️':''}</div>
+          <div>→ ${q.type==='qcm'?(rep===''?'<i>pas de réponse</i>':`<span style="color:${ok?'#085041':'#c0392b'}">${resEsc((q.options||[])[parseInt(rep)]||rep)} ${ok?'✓':'✗'}</span>`):(rep?resEsc(rep):'<i>pas de réponse</i>')}</div>
+          ${q.type==='qcm'&&!ok?`<div style="color:#085041;font-size:10px">✓ ${resEsc((q.options||[])[parseInt(q.reponse)]||'(non définie)')}</div>`:''}
+          ${q.type==='open'&&q.reponse?`<div style="color:#085041;font-size:10px">Attendu : ${resEsc(q.reponse)}</div>`:''}
+          <div style="display:flex;align-items:center;gap:6px;margin-top:5px"><span>Points :</span><input type="number" class="cq-${cp.id}" data-max="${pts}" min="0" max="${pts}" step="0.25" inputmode="decimal" value="${init}" placeholder="—" oninput="corrTotal('${cp.id}')" style="width:76px"><span>/ ${pts}</span></div>
+        </div>`;
+      });
+      html+=`<div style="background:#E6EEFB;border-radius:7px;padding:8px 10px;margin-top:6px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div style="font-size:12px">Total des questions : <b id="ct-${cp.id}"></b> / ${bareme}</div>
+        <div style="font-size:13px;font-weight:700">Note du devoir : <span id="cf-${cp.id}"></span> / ${bareme} <button class="btn btn-xs" onclick="corrManuel('${cp.id}')" title="Modifier la note à la main">✏️ Modifier la note</button></div></div>
+        <div id="cmw-${cp.id}" style="display:${cp.note_manuelle?'flex':'none'};gap:6px;align-items:center;margin-top:6px;font-size:11px"><span>Note imposée :</span><input type="number" id="cm-${cp.id}" min="0" max="${bareme}" step="0.25" inputmode="decimal" value="${cp.note_manuelle&&cp.note_finale!=null?cp.note_finale:''}" oninput="corrTotal('${cp.id}')" style="width:80px"><span>/ ${bareme}</span><button class="btn btn-xs" onclick="corrManuel('${cp.id}',false)">↩ Revenir au total automatique</button></div>
+        <textarea id="cc-${cp.id}" rows="2" maxlength="500" placeholder="Appréciation pour l'élève (facultatif)" style="margin-top:6px;width:100%">${resEsc(cp.commentaire||'')}</textarea>
+        <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="corrSauver('${cp.id}','${id}')">💾 Enregistrer la correction</button>
+        <span id="cs-${cp.id}" style="font-size:11px;color:#085041;margin-left:6px"></span>
       </div>`;
-    });
+      (cp.reclamations||[]).forEach((r,k)=>{
+        html+=`<div style="border:1px solid ${r.statut==='ouverte'?'#F5C27A':'#cde'};background:${r.statut==='ouverte'?'#FFF7E6':'#f4f8fd'};border-radius:7px;padding:7px 9px;margin-top:6px;font-size:11px">
+          <b>${r.statut==='ouverte'?'🔔 Réclamation':'✔ Réclamation traitée'}</b> — Q${(r.q||0)+1} · ${resEsc(r.date||'')}<div style="margin-top:3px;white-space:pre-wrap">${resEsc(r.texte)}</div>
+          ${r.statut==='ouverte'?`<textarea id="cr-${cp.id}-${k}" rows="2" maxlength="500" placeholder="Ta réponse à l'élève" style="width:100%;margin-top:5px"></textarea><div style="font-size:10px;color:#667;margin:3px 0">Si besoin, corrige d'abord les points de la question ci-dessus et enregistre la correction.</div><button class="btn btn-sm btn-primary" onclick="reclRepondre('${cp.id}',${k},'${id}')">Répondre et clore</button>`:`<div style="margin-top:4px;color:#0A3A9E"><b>Ta réponse :</b> ${resEsc(r.reponse||'—')}</div>`}
+        </div>`;
+      });
+    }
     html+='</div>';
   });
   document.getElementById('res-content').innerHTML=html;
   openModal('modal-resultats');
+  (copies||[]).filter(c=>!c.fraude).forEach(c=>corrTotal(c.id));
+}
+function corrManuel(cid,on){
+  if(on===undefined)on=true;
+  corrEtat[cid]={manuel:on};
+  const w=document.getElementById('cmw-'+cid);if(w)w.style.display=on?'flex':'none';
+  if(on){const i=document.getElementById('cm-'+cid);if(i&&i.value==='')i.value=corrSomme(cid);}
+  corrTotal(cid);
+}
+function corrSomme(cid){
+  return Math.round([...document.querySelectorAll('.cq-'+cid)].reduce((a,i)=>a+(parseFloat(i.value)||0),0)*100)/100;
+}
+function corrTotal(cid){
+  [...document.querySelectorAll('.cq-'+cid)].forEach(i=>{const m=parseFloat(i.dataset.max),v=parseFloat(i.value);if(!isNaN(v)&&v>m){i.value=m;}if(!isNaN(v)&&v<0)i.value=0;});
+  const t=corrSomme(cid);
+  const e1=document.getElementById('ct-'+cid),e2=document.getElementById('cf-'+cid);
+  if(e1)e1.textContent=fmtNote(t);
+  let fin=t;
+  if((corrEtat[cid]||{}).manuel){const m=parseFloat((document.getElementById('cm-'+cid)||{}).value);if(!isNaN(m))fin=m;}
+  if(e2)e2.textContent=fmtNote(fin);
+}
+async function corrSauver(cid,devoirId){
+  const dv=cache.devoirs.find(x=>x.id===devoirId),bareme=dv.bareme||20;
+  const notes=[...document.querySelectorAll('.cq-'+cid)].map(i=>i.value===''?null:Math.max(0,Math.min(parseFloat(i.dataset.max),parseFloat(i.value))));
+  let note=corrSomme(cid),manuel=!!(corrEtat[cid]||{}).manuel;
+  if(manuel){const m=parseFloat(document.getElementById('cm-'+cid).value);if(isNaN(m)||m<0||m>bareme)return toast('La note imposée doit être entre 0 et '+bareme,4500);note=m;}
+  const commentaire=(document.getElementById('cc-'+cid).value||'').trim().slice(0,500);
+  const{error}=await sb.from('copies').update({notes_q:notes,note_finale:Math.round(note*100)/100,note_manuelle:manuel,commentaire,corrige:true}).eq('id',cid);
+  if(error)return toast('Enregistrement impossible : '+error.message+' (as-tu lancé devoirs_correction.sql ?)',7000);
+  const c=cache.copies.find(x=>String(x.id)===String(cid));if(c)Object.assign(c,{notes_q:notes,note_finale:note,note_manuelle:manuel,commentaire,corrige:true});
+  const s=document.getElementById('cs-'+cid);if(s)s.textContent='✓ Enregistré — l\'élève verra sa copie corrigée avec le même lien';
+  toast('Correction enregistrée ✓');
+}
+async function reclRepondre(cid,k,devoirId){
+  const t=(document.getElementById('cr-'+cid+'-'+k).value||'').trim();
+  if(t.length<2)return toast('Écris ta réponse à l\'élève');
+  const{data:c,error}=await sb.from('copies').select('reclamations').eq('id',cid).single();
+  if(error)return toast('Erreur : '+error.message);
+  const rs=c.reclamations||[];if(!rs[k])return;
+  rs[k]={...rs[k],reponse:t.slice(0,500),statut:'traitée'};
+  const u=await sb.from('copies').update({reclamations:rs}).eq('id',cid);
+  if(u.error)return toast('Erreur : '+u.error.message);
+  const cc=cache.copies.find(x=>String(x.id)===String(cid));if(cc)cc.reclamations=rs;
+  toast('Réponse envoyée ✓');voirResultats(devoirId);renderDevoirs();
 }
 async function devoirDebloquer(copieId,devoirId){
   if(!confirm('Autoriser cet élève à refaire le devoir ? Sa copie bloquée sera supprimée.'))return;
@@ -4370,7 +4499,7 @@ function renderDevoirs(){
           <span class="badge-stat" style="margin-left:3px;background:${dv.statut==='ouvert'?'#E1F5EE':'#f0f0eb'};color:${dv.statut==='ouvert'?'#085041':'#555'}">${dv.statut==='ouvert'?'✓ Ouvert':'Clôturé'}</span>
           <div style="font-size:13px;font-weight:600;margin-top:3px">${dv.titre}</div>
           <div style="font-size:10px;color:#888">${getClasseNomGlobal(dv.classe_id)} · ${(dv.questions||[]).length} question(s)${dv.deadline?' · Limite : '+dv.deadline:''}</div>
-          <div style="font-size:11px;color:#0B4FBF;font-weight:600">📥 ${nbCopies}/${nbEl} copie(s)</div>
+          <div style="font-size:11px;color:#0B4FBF;font-weight:600">📥 ${nbCopies}/${nbEl} copie(s)${(()=>{const cs=cache.copies.filter(c=>c.devoir_id===dv.id);const a=cs.filter(c=>c.corrige).length,r=cs.reduce((t,c)=>t+(c.reclamations||[]).filter(x=>x.statut==='ouverte').length,0);return (a?' · ✅ '+a+' corrigée(s)':'')+(r?' · <span style="color:#c0392b">🔔 '+r+' réclamation(s)</span>':'');})()}</div>
           ${dv.drive_link?`<div style="margin-top:4px"><span class="file-chip">📎 <a href="${dv.drive_link}" target="_blank">Fichier sujet</a></span></div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
@@ -4523,6 +4652,7 @@ async function eleveLogin(){
   if(error||!r){err.textContent='Erreur de connexion. Réessaie.';return;}
   if(!r.ok){err.textContent=r.message||'Nom ou mot de passe incorrect.';return;}
   currentEleveDevoir={id:r.eleve_id,nom:r.nom,pwd};
+  if(r.mode==='correction'){document.getElementById('ep-login').style.display='none';return eleveCorrection();}
   document.getElementById('ep-login').style.display='none';
   const dureeSec=(parseInt(r.duree)||0)*60;
   let html=`<div class="card" style="margin-bottom:9px">${dv.consignes?`<div style="font-size:12px;color:#555;background:#f9f9f7;border-radius:6px;padding:7px;margin-bottom:7px;white-space:pre-wrap">${resEsc(dv.consignes)}</div>`:''}${dv.drive_link&&/^https?:\/\//i.test(dv.drive_link)?`<div style="font-size:11px;color:#8a5a00">📎 Un fichier sujet existe, mais l'ouvrir te ferait sortir de l'application : le devoir serait bloqué. Utilise seulement les questions ci-dessous.</div>`:''}</div>`;
@@ -4532,6 +4662,46 @@ async function eleveLogin(){
   document.getElementById('ep-envoi-msg').textContent='';
   window.scrollTo(0,0);
   examDemarrer(dureeSec);
+}
+// ----- Copie corrigée de l'élève + réclamations -----
+let corrDonnees=null;
+async function eleveCorrection(){
+  const box=document.getElementById('ep-corr');box.style.display='block';
+  box.innerHTML='<div class="card"><div class="empty">Chargement de ta copie corrigée…</div></div>';
+  const{data,error}=await sb.rpc('devoir_correction',{p_code:currentDevoirCode,p_eleve_id:currentEleveDevoir.id,p_pwd:currentEleveDevoir.pwd});
+  if(error||!data||data.ok===false){box.innerHTML='<div class="card"><div class="empty">'+resEsc((data&&data.message)||'Copie indisponible. Réessaie.')+'</div></div>';return;}
+  corrDonnees=data;renderCorrectionEleve();
+}
+function renderCorrectionEleve(){
+  const d=corrDonnees,bar=+d.bareme||20,qs=d.questions||[];
+  const ptsQ=i=>{const q=qs[i]||{};return(q.pts!==undefined&&q.pts!==null&&q.pts!=='')?+q.pts:Math.round(bar/(qs.length||1)*100)/100;};
+  const n=d.note_finale,sur20=n==null?null:n/bar*20;
+  let h=`<div class="card" style="text-align:center;margin-bottom:9px"><div style="font-size:12px;color:#667">Ton devoir corrigé</div><div style="font-size:34px;font-weight:800;color:${sur20!==null&&sur20>=10?'#085041':'#c0392b'}">${n==null?'—':fmtNote(+n)} <span style="font-size:16px;color:#667">/ ${bar}</span></div>${d.commentaire?`<div style="margin-top:6px;font-size:12px;background:#f4f8fd;border-radius:7px;padding:7px;white-space:pre-wrap"><b>Appréciation :</b> ${resEsc(d.commentaire)}</div>`:''}</div>`;
+  qs.forEach((q,i)=>{
+    const rep=(d.reponses||[])[i]||'';
+    const got=(d.notes_q||[])[i];
+    const ok=q.type==='qcm'?(q.reponse!==''&&q.reponse==rep):null;
+    const rec=(d.reclamations||[]).filter(r=>r.q===i);
+    const ouverte=rec.some(r=>r.statut==='ouverte');
+    h+=`<div class="card" style="margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;gap:8px;font-size:11px;font-weight:700;margin-bottom:5px"><span style="color:#0B4FBF">Q${i+1} — ${q.type==='qcm'?'QCM':'Question ouverte'}</span><span style="color:#085041">${got==null?'—':fmtNote(+got)} / ${ptsQ(i)} pt(s)</span></div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:6px;white-space:pre-wrap">${resEsc(q.enonce)}</div>
+      ${(q.image&&/^data:image\//i.test(q.image))?`<img src="${q.image}" style="max-width:100%;border:1px solid #ddd;border-radius:7px;margin-bottom:6px;display:block">`:''}
+      <div style="font-size:12px;background:#f9f9f7;border-radius:6px;padding:6px 8px;margin-bottom:4px"><b>Ta réponse :</b> ${rep===''?'<i>aucune</i>':resEsc(q.type==='qcm'?((q.options||[])[parseInt(rep)]||rep):rep)} ${ok===null?'':(ok?'<span style="color:#085041">✓</span>':'<span style="color:#c0392b">✗</span>')}</div>
+      ${q.reponse!==''&&q.reponse!==undefined?`<div style="font-size:12px;background:#E1F5EE;color:#085041;border-radius:6px;padding:6px 8px;margin-bottom:4px"><b>Réponse attendue :</b> ${resEsc(q.type==='qcm'?((q.options||[])[parseInt(q.reponse)]||q.reponse):q.reponse)}</div>`:''}
+      ${rec.map(r=>`<div style="font-size:11px;background:${r.statut==='ouverte'?'#FFF7E6':'#f4f8fd'};border-radius:6px;padding:6px 8px;margin-top:4px"><b>${r.statut==='ouverte'?'🔔 Ta réclamation (en attente)':'✔ Réclamation traitée'}</b> · ${resEsc(r.date||'')}<div style="white-space:pre-wrap">${resEsc(r.texte)}</div>${r.reponse?`<div style="margin-top:3px;color:#0A3A9E"><b>Réponse du professeur :</b> ${resEsc(r.reponse)}</div>`:''}</div>`).join('')}
+      ${ouverte?'':`<button class="btn btn-sm" style="margin-top:5px" onclick="reclamerOuvrir(${i})">✋ Réclamer sur cette question</button><div id="rc-${i}" style="display:none;margin-top:5px"><textarea id="rct-${i}" rows="2" maxlength="500" placeholder="Explique pourquoi tu penses que ta réponse mérite plus de points" style="width:100%"></textarea><button class="btn btn-primary btn-sm" style="margin-top:4px" onclick="reclamerEnvoyer(${i})">Envoyer la réclamation</button><span id="rce-${i}" style="font-size:11px;color:#c0392b;margin-left:6px"></span></div>`}
+    </div>`;
+  });
+  document.getElementById('ep-corr').innerHTML=h;
+}
+function reclamerOuvrir(i){const b=document.getElementById('rc-'+i);b.style.display=b.style.display==='none'?'block':'none';}
+async function reclamerEnvoyer(i){
+  const t=(document.getElementById('rct-'+i).value||'').trim(),e=document.getElementById('rce-'+i);
+  if(t.length<3){e.textContent='Explique ta réclamation.';return;}
+  const{data,error}=await sb.rpc('devoir_reclamer',{p_code:currentDevoirCode,p_eleve_id:currentEleveDevoir.id,p_pwd:currentEleveDevoir.pwd,p_q:i,p_texte:t});
+  if(error||!data||data.ok===false){e.textContent=(data&&data.message)||'Envoi impossible. Réessaie.';return;}
+  corrDonnees.reclamations=data.reclamations;renderCorrectionEleve();
 }
 let examConfirme=false;
 async function eleveSubmit(){
@@ -6340,10 +6510,11 @@ function supOuvrirModale(id){
   document.getElementById('sc-bonus').checked=!!(f&&f.bonus);
   const nb=document.getElementById('sc-nb');
   nb.innerHTML=[1,2,3,4,5,6,7,8].map(n=>`<option value="${n}">${n}</option>`).join('');
-  nb.value=f?f.notes.filter(n=>!n.auto).length:supNbSuggere(9);
+  nb.value=f?f.notes.filter(n=>!n.auto&&!n.final).length:supNbSuggere(9);
   window._scExistantes=f?f.notes.map(n=>({...n})):null;
   supReconstruireLignes(!f,true);
   supSuggestion();
+  {const pi=document.getElementById('sc-pro-info');if(pi)pi.style.display=estProClasse()?'block':'none';}
   openModal('modal-sup-cours');
 }
 function supSuggestion(){
@@ -6360,10 +6531,13 @@ function supLignesActuelles(){
 }
 function supReconstruireLignes(reinitPoids,premier){
   const n=+document.getElementById('sc-nb').value,mode=document.getElementById('sc-mode').value;
-  const r=document.getElementById('sc-rappel').checked?1:0,N=n+r;
-  const toutes=premier&&window._scExistantes?window._scExistantes.map(x=>({id:x.id,auto:x.auto||'',nom:x.nom,poids:x.poids})):supLignesActuelles();
-  const act=toutes.filter(x=>!x.auto),aa=toutes.find(x=>x.auto==='rappel')||{};
-  const pDef=i=>mode==='pct'?(i<N-1?Math.round(10000/N)/100:Math.round((100-Math.round(10000/N)/100*(N-1))*100)/100):1;
+  const r=document.getElementById('sc-rappel').checked?1:0,c=estProClasse()?1:0,N=n+r+c;
+  const toutes=premier&&window._scExistantes?window._scExistantes.map(x=>({id:x.id,auto:x.auto||x.final||'',nom:x.nom,poids:x.poids})):supLignesActuelles();
+  const act=toutes.filter(x=>!x.auto),aa=toutes.find(x=>x.auto==='rappel')||{},ac=toutes.find(x=>x.auto==='compo')||{};
+  const pDef=i=>{
+    if(mode!=='pct')return(c&&i===N-1)?2:1;
+    if(c){const nc=N-1,cc=50;if(i===N-1)return cc;const b=Math.round((100-cc)/nc*100)/100;return i<nc-1?b:Math.round((100-cc-b*(nc-1))*100)/100;}
+    return i<N-1?Math.round(10000/N)/100:Math.round((100-Math.round(10000/N)/100*(N-1))*100)/100;};
   const lignes=[];
   for(let i=0;i<n;i++){
     const a=act[i]||{};
@@ -6371,7 +6545,8 @@ function supReconstruireLignes(reinitPoids,premier){
     lignes.push({id:a.id||'',auto:'',nom:a.nom!==undefined&&a.nom!==''?a.nom:SUP_PRESETS[i]||'Autre note',poids});
   }
   if(r)lignes.push({id:aa.id||'',auto:'rappel',nom:'Rappels de cours (automatique)',poids:(reinitPoids||aa.poids===undefined||aa.poids==='')?pDef(n):aa.poids});
-  document.getElementById('sc-lignes').innerHTML=lignes.map((l,i)=>`<div class="sc-ligne" data-id="${l.id}" data-auto="${l.auto}" style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><span style="width:18px;color:#888;font-size:12px">${i+1}.</span><input class="sc-nom" ${l.auto?'readonly style="flex:1;min-width:0;background:#FFF3D6"':'list="sc-presets" style="flex:1;min-width:0"'} value="${resEsc(l.nom)}" placeholder="Nom de la note"><input class="sc-poids" type="number" min="0" step="any" inputmode="decimal" value="${l.poids}" oninput="supMajTotal()" style="width:76px"><span style="font-size:12px;color:#666;width:18px">${mode==='pct'?'%':'×'}</span></div>`).join('');
+  if(c)lignes.push({id:ac.id||'',auto:'compo',nom:'Composition de fin de module',poids:(reinitPoids||ac.poids===undefined||ac.poids==='')?pDef(N-1):ac.poids});
+  document.getElementById('sc-lignes').innerHTML=lignes.map((l,i)=>`<div class="sc-ligne" data-id="${l.id}" data-auto="${l.auto}" style="display:flex;gap:6px;align-items:center;margin-bottom:6px"><span style="width:18px;color:#888;font-size:12px">${i+1}.</span><input class="sc-nom" ${l.auto?`readonly style="flex:1;min-width:0;background:${l.auto==='compo'?'#E6EEFB':'#FFF3D6'}"`:'list="sc-presets" style="flex:1;min-width:0"'} value="${resEsc(l.nom)}" placeholder="Nom de la note"><input class="sc-poids" type="number" min="0" step="any" inputmode="decimal" value="${l.poids}" oninput="supMajTotal()" style="width:76px"><span style="font-size:12px;color:#666;width:18px">${mode==='pct'?'%':'×'}</span></div>`).join('');
   supMajTotal();
 }
 function supMajTotal(){
@@ -6401,7 +6576,7 @@ async function supEnregistrerCours(){
   const poids=lignes.map(l=>parseFloat(l.poids));
   if(poids.some(p=>!(p>0)))return toast('Chaque note doit avoir un poids supérieur à 0',4500);
   if(mode==='pct'&&Math.abs(poids.reduce((a,b)=>a+b,0)-100)>=0.05)return toast('Le total des pourcentages doit faire 100 %',4500);
-  const notes=lignes.map((l,i)=>{const o={id:l.id||supUid('n'),nom:l.nom.trim(),poids:Math.round(poids[i]*100)/100};if(l.auto)o.auto=l.auto;return o;});
+  const notes=lignes.map((l,i)=>{const o={id:l.id||supUid('n'),nom:l.nom.trim(),poids:Math.round(poids[i]*100)/100};if(l.auto==='compo')o.final='compo';else if(l.auto)o.auto=l.auto;return o;});
   let liste=supFiches(currentClasse.id).slice();
   if(id){
     const f=liste.find(x=>x.id===id);if(!f)return;
