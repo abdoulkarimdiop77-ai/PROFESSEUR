@@ -644,14 +644,23 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       <div class="form-group"><label>Mot de passe</label><input id="ep-pwd" type="password"></div>
       <div style="background:#FFF3DC;border:1px solid #F5D08A;border-radius:8px;padding:9px 11px;margin-bottom:9px;font-size:11.5px;color:#5c3d00;line-height:1.5">
         <b>⚠️ Règles du devoir surveillé</b><br>
-        • Le <b>chrono démarre dès que tu te connectes</b>.<br>
+        • Si ton professeur a fixé une <b>heure de lancement</b>, tu attends dans une salle d'attente : le sujet apparaît pour <b>toute la classe en même temps</b> et le devoir se termine <b>en même temps pour tous</b>. Sinon, le chrono démarre dès que tu te connectes.<br>
         • Ne quitte <b>jamais</b> cette page : changer d'application, ouvrir une notification, verrouiller l'écran, recharger la page ou ouvrir une fenêtre par-dessus <b>bloque immédiatement ton devoir</b> (fraude suspectée, ton professeur est prévenu).<br>
         • Avant de commencer, active le mode <b>« Ne pas déranger »</b> de ton téléphone et ferme les autres applications.<br>
         • Garde ta connexion internet active jusqu'à l'envoi.
       </div>
       <div id="ep-err" style="font-size:11px;color:#c0392b;margin-bottom:7px"></div>
+      <button class="btn" id="ep-retry" style="display:none;margin-bottom:8px;width:100%" onclick="eleveLogin()">🔄 Réessayer</button>
       <button class="btn btn-primary" onclick="eleveLogin()">Commencer le devoir →</button>
     </div>
+    <div id="ep-attente" style="display:none" class="card"><div style="text-align:center;padding:22px 10px">
+      <div style="font-size:38px">⏳</div>
+      <div style="font-size:15px;font-weight:700;margin-top:6px">Salle d'attente</div>
+      <div style="font-size:12px;color:#555;margin:6px 0 12px">Tu es bien connecté(e). Le sujet apparaîtra automatiquement pour toute la classe à l'heure prévue. <b>Ne quitte pas cette page</b> et ne touche à aucune notification.</div>
+      <div style="font-size:12px;color:#667">Début dans</div>
+      <div id="ep-att-compte" style="font-size:40px;font-weight:800;color:#0B4FBF;font-variant-numeric:tabular-nums">--:--</div>
+      <div id="ep-att-heure" style="font-size:12px;color:#667;margin-top:4px"></div>
+    </div></div>
     <div id="ep-form" style="display:none">
       <div style="position:sticky;top:0;z-index:5;margin:-2px 0 8px"><div id="ep-chrono" style="background:#0B4FBF;color:#fff;text-align:center;font-weight:700;font-size:18px;padding:8px;border-radius:9px;box-shadow:0 2px 8px rgba(0,0,0,.2)">⏱ 00:00</div></div>
       <div id="ep-questions"></div>
@@ -1448,6 +1457,14 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
               </div>
             </div>
             <div id="profil-status" style="font-size:12px;color:#0B4FBF;margin-top:4px"></div>
+            <div style="margin-top:18px;padding-top:14px;border-top:1px solid #e5e5e0">
+              <div style="font-size:12px;margin-bottom:10px"><a href="confidentialite.html" target="_blank" style="color:#0B4FBF">Politique de confidentialité</a> · <a href="conditions.html" target="_blank" style="color:#0B4FBF">Conditions d'utilisation</a></div>
+              <div style="border:1px solid #e0b4b4;background:#fdf3f3;border-radius:10px;padding:12px">
+                <div style="font-weight:700;color:#c0392b;margin-bottom:4px">⚠️ Supprimer mon compte</div>
+                <div style="font-size:12px;color:#555;margin-bottom:8px">Supprime définitivement ton compte et toutes tes données (écoles, classes, élèves, notes, devoirs, présences…). Cette action est irréversible. Pense à exporter ou imprimer ce dont tu as besoin avant.</div>
+                <button class="btn btn-sm" style="color:#c0392b;border-color:#c0392b" onclick="supprimerMonCompte()">🗑️ Supprimer définitivement mon compte</button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1683,6 +1700,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
     <div class="three-col">
       <div class="form-group"><label>Date limite</label><input id="dv-deadline" type="date"></div>
       <div class="form-group"><label>Durée (min)</label><input id="dv-duree" type="number" placeholder="60"></div>
+      <div class="form-group"><label>🕒 Lancement commun (facultatif)</label><input id="dv-lancement" type="datetime-local"><div style="font-size:10.5px;color:#667;margin-top:3px">Si tu fixes une heure, les élèves qui ouvrent le lien avant attendent dans une salle d'attente ; le sujet apparaît pour tous en même temps et tout s'arrête en même temps (la durée est alors obligatoire).</div></div>
       <div class="form-group"><label>Barème</label><input id="dv-bareme" type="number" value="20"></div>
     </div>
     <div class="form-group"><label>Consignes</label><textarea id="dv-consignes"></textarea></div>
@@ -1705,6 +1723,14 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
     </div>
     <button class="btn btn-primary" style="width:100%" onclick="dvOuvrirPond()">➡️ Suivant : pondérer le sujet</button>
     <div style="font-size:10.5px;color:#667;margin-top:5px;text-align:center">Tu fixes les points de chaque question, puis tu crées le devoir et son lien.</div>
+  </div>
+</div>
+<div class="modal-overlay" id="modal-salle">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-header"><h2>🚪 Salle d'attente</h2><button class="modal-close" onclick="dvSalleFermer()">✕</button></div>
+    <div id="salle-titre" style="font-size:13px;font-weight:600;margin-bottom:4px"></div>
+    <div id="salle-etat" style="font-size:22px;font-weight:800;color:#0B4FBF;margin-bottom:8px"></div>
+    <div id="salle-corps"></div>
   </div>
 </div>
 <div class="modal-overlay" id="modal-pond">
@@ -1822,6 +1848,7 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
       <input class="auth-input" id="login-pwd" type="password" placeholder="Mot de passe">
       <button class="auth-btn" onclick="login()">Se connecter</button>
       <a onclick="motDePasseOublie()" style="display:block;text-align:center;font-size:12px;color:#0B4FBF;cursor:pointer;margin-top:10px;text-decoration:underline">Mot de passe oublié ?</a>
+      <div style="text-align:center;font-size:11px;margin-top:12px"><a href="confidentialite.html" target="_blank" style="color:#0B4FBF">Confidentialité</a> · <a href="conditions.html" target="_blank" style="color:#0B4FBF">Conditions d'utilisation</a></div>
     </div>
     <div class="auth-form" id="auth-register">
       <div class="auth-err" id="register-err"></div>
@@ -1844,6 +1871,7 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
       <div style="background:#E6EEFB;border-radius:9px;padding:10px 12px;font-size:12px;color:#222;margin:4px 0 10px;line-height:1.5">
         <strong>🎁 2 mois gratuits</strong>, puis <strong>20 000 GNF par mois</strong>, payables par <strong>Orange Money</strong> directement dans l'application (code de paiement marchand).
       </div>
+      <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;margin:0 0 10px;line-height:1.4"><input type="checkbox" id="reg-cgu" style="margin-top:2px"><span>J'ai lu et j'accepte les <a href="conditions.html" target="_blank" style="color:#0B4FBF">conditions d'utilisation</a> et la <a href="confidentialite.html" target="_blank" style="color:#0B4FBF">politique de confidentialité</a>.</span></label>
       <button class="auth-btn" onclick="register()">Créer mon compte</button>
     </div>
   </div>
@@ -1929,6 +1957,7 @@ async function register(){
   const err=document.getElementById('register-err');
   err.style.color='#c0392b';
   if(v('reg-site'))return;// piège à robots
+  if(!document.getElementById('reg-cgu').checked){err.textContent='Accepte les conditions d\'utilisation et la politique de confidentialité pour continuer.';return;}
   if(!cycleEns){err.textContent='Choisis le cycle que tu enseignes.';return;}
   if(!prenom||!nom||!profession||!matiere||!email||!contact||!adresse||!pwd){err.textContent='Tous les champs sont requis.';return;}
   if(!/^\S+@\S+\.\S+$/.test(email)){err.textContent='Adresse email invalide.';return;}
@@ -2023,6 +2052,18 @@ async function login(){
   }
   err.textContent='';
   await initApp(data.user);
+}
+async function supprimerMonCompte(){
+  if(!currentUser)return;
+  if(!navigator.onLine){alert('Connecte-toi à internet pour supprimer ton compte.');return;}
+  if(!confirm('Supprimer définitivement ton compte KOTO et TOUTES tes données ? Cette action est irréversible.'))return;
+  var rep=prompt('Pour confirmer, écris SUPPRIMER en majuscules :');
+  if(rep!=='SUPPRIMER'){toast('Suppression annulée');return;}
+  var r=await sb.rpc('supprimer_mon_compte');
+  if(r.error){alert('Suppression impossible : '+(r.error.message||'erreur')+'. Vérifie que le script supprimer_compte.sql a été exécuté, ou contacte le support.');return;}
+  outbox=[];
+  await logout();
+  alert('Ton compte et tes données ont été supprimés.');
 }
 async function logout(){
   if(outbox.length){
@@ -4346,15 +4387,69 @@ async function saveDevoir(){
     if(!(barFinal>0)||Math.abs(t-barFinal)>=0.01)return toast('Le total des points doit être égal à '+barFinal,4500);
     document.getElementById('dv-bareme').value=barFinal;
   }
+  const lancV=document.getElementById('dv-lancement').value;
+  let lancISO=null;
+  if(lancV){
+    const lt=new Date(lancV);
+    if(isNaN(lt))return toast('Heure de lancement invalide');
+    if(!(parseInt(document.getElementById('dv-duree').value)>0))return toast('Indique la durée du devoir pour un lancement commun',4500);
+    if(lt.getTime()<Date.now()-60000)return toast('L\'heure de lancement est déjà passée',4500);
+    lancISO=lt.toISOString();
+  }
   const code=genCode();
   const obj={titre,type:document.getElementById('dv-type').value,ecole_id:ecoleId,classe_id:classeId,mat:document.getElementById('dv-mat').value,deadline:document.getElementById('dv-deadline').value,duree:document.getElementById('dv-duree').value,bareme:barFinal,consignes:document.getElementById('dv-consignes').value,drive_link:document.getElementById('dv-drive-link').value,questions:JSON.parse(JSON.stringify(dvQArr)),code,statut:'ouvert'};
+  if(lancISO)obj.lancement=lancISO;
   const data=await sbInsert('devoirs',obj);
   if(!data)return;
   cache.devoirs.unshift(data);
-  dvQArr=[];['dv-titre','dv-consignes','dv-mat','dv-drive-link'].forEach(id=>document.getElementById(id).value='');
+  dvQArr=[];['dv-titre','dv-consignes','dv-mat','dv-drive-link','dv-lancement'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('questions-builder').innerHTML='';
   document.getElementById('dv-import-info').innerHTML='';
   closeModal('modal-pond');closeModal('modal-add-devoir');renderDevoirs();toast('Devoir créé ✓ — Partage le lien !',4000);
+}
+let salleId=null,salleTimer=null,salleOff=0;
+function dvSalleOuvrir(id){
+  salleId=id;
+  document.getElementById('salle-corps').innerHTML='<div class="empty">Chargement…</div>';
+  openModal('modal-salle');
+  dvSalleCharger();
+  clearInterval(salleTimer);
+  salleTimer=setInterval(()=>{if(!document.getElementById('modal-salle').classList.contains('show')){dvSalleFermer();return;}dvSalleCharger();},4000);
+}
+function dvSalleFermer(){clearInterval(salleTimer);salleTimer=null;salleId=null;closeModal('modal-salle');}
+async function dvSalleCharger(){
+  const dv=cache.devoirs.find(x=>x.id==salleId);if(!dv)return;
+  const{data,error}=await sb.rpc('devoir_salle',{p_devoir:String(dv.id)});
+  const box=document.getElementById('salle-corps');
+  if(error||!data||data.ok===false){box.innerHTML='<div class="empty">Impossible de charger (connexion ou script devoirs_lancement.sql non exécuté).</div>';return;}
+  salleOff=Date.parse(data.maintenant)-Date.now();
+  const t0=Date.parse(dv.lancement),dureeMin=parseInt(dv.duree)||0;
+  const nowS=Date.now()+salleOff;
+  document.getElementById('salle-titre').textContent=dv.titre+' · '+getClasseNomGlobal(dv.classe_id);
+  const et=document.getElementById('salle-etat');
+  if(nowS<t0){et.textContent='Début dans '+examFmt(Math.ceil((t0-nowS)/1000));et.style.color='#0B4FBF';}
+  else if(nowS<t0+dureeMin*60000){et.textContent='▶ En cours · reste '+examFmt(Math.ceil((t0+dureeMin*60000-nowS)/1000));et.style.color='#085041';}
+  else{et.textContent='⏹ Terminé';et.style.color='#667';}
+  const nbEl=cache.eleves.filter(e=>e.classe_id==dv.classe_id).length;
+  const pres=data.presents||[],ret=data.retards||[];
+  let h=`<div style="font-size:12px;font-weight:700;margin-bottom:4px">✅ Connectés dans la salle : ${pres.length}/${nbEl}</div>`;
+  h+=pres.length?`<div style="font-size:12px;display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">${pres.map(p=>`<span class="badge-stat" style="background:#E1F5EE;color:#085041">${resEsc(p.nom)}</span>`).join('')}</div>`:'<div style="font-size:12px;color:#888;margin-bottom:10px">Personne pour l\'instant.</div>';
+  const absents=cache.eleves.filter(e=>e.classe_id==dv.classe_id&&!pres.some(p=>p.eleve_id==e.id)&&!ret.some(r=>r.eleve_id==e.id));
+  if(nowS<t0&&absents.length)h+=`<div style="font-size:11px;color:#8a5a00;margin-bottom:10px">⏳ Pas encore connectés : ${absents.map(e=>resEsc(e.nom)).join(', ')}</div>`;
+  h+=`<div style="font-size:12px;font-weight:700;margin-bottom:4px">🐢 Retardataires (connectés après le début)</div>`;
+  h+=ret.length?ret.map(r=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid #e5e5e0;border-radius:8px;padding:7px 9px;margin-bottom:5px;font-size:12px"><b>${resEsc(r.nom)}</b>${r.autorise?`<span style="color:#085041;font-weight:600">✓ Autorisé${r.extra?' (+'+r.extra+' min)':''}</span>`:`<button class="btn btn-primary btn-sm" onclick="dvAutoriser('${r.eleve_id}')">Autoriser à continuer</button>`}</div>`).join(''):'<div style="font-size:12px;color:#888">Aucun retardataire.</div>';
+  h+='<div style="font-size:10.5px;color:#667;margin-top:8px">Un élève autorisé travaille jusqu\'à la fin commune (plus le temps supplémentaire que tu lui accordes). Tout le monde est arrêté en même temps à la fin.</div>';
+  box.innerHTML=h;
+}
+async function dvAutoriser(eleveId){
+  const dv=cache.devoirs.find(x=>x.id==salleId);if(!dv)return;
+  const v=prompt('Minutes supplémentaires accordées à cet élève, en plus de la fin commune (0 = il termine avec les autres) :','0');
+  if(v===null)return;
+  const extra=Math.max(0,Math.min(240,parseInt(v)||0));
+  const{data,error}=await sb.rpc('devoir_autoriser',{p_devoir:String(dv.id),p_eleve:String(eleveId),p_extra:extra});
+  if(error||!data||data.ok===false)return toast('Autorisation impossible',3500);
+  toast('✓ Élève autorisé — il peut toucher « Réessayer »',3500);
+  dvSalleCharger();
 }
 function getLien(code){return window.location.href.split('?')[0]+'?devoir='+code;}
 function partagerWA(code,titre){window.open('https://wa.me/?text='+encodeURIComponent(`📚 *${titre}*\n\n${getLien(code)}`),'_blank');}
@@ -4499,11 +4594,13 @@ function renderDevoirs(){
           <span class="badge-stat" style="margin-left:3px;background:${dv.statut==='ouvert'?'#E1F5EE':'#f0f0eb'};color:${dv.statut==='ouvert'?'#085041':'#555'}">${dv.statut==='ouvert'?'✓ Ouvert':'Clôturé'}</span>
           <div style="font-size:13px;font-weight:600;margin-top:3px">${dv.titre}</div>
           <div style="font-size:10px;color:#888">${getClasseNomGlobal(dv.classe_id)} · ${(dv.questions||[]).length} question(s)${dv.deadline?' · Limite : '+dv.deadline:''}</div>
+          ${dv.lancement?`<div style="font-size:11px;color:#8a5a00;font-weight:600">🕒 Lancement commun : ${new Date(dv.lancement).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}${dv.duree?' · '+dv.duree+' min':''}</div>`:''}
           <div style="font-size:11px;color:#0B4FBF;font-weight:600">📥 ${nbCopies}/${nbEl} copie(s)${(()=>{const cs=cache.copies.filter(c=>c.devoir_id===dv.id);const a=cs.filter(c=>c.corrige).length,r=cs.reduce((t,c)=>t+(c.reclamations||[]).filter(x=>x.statut==='ouverte').length,0);return (a?' · ✅ '+a+' corrigée(s)':'')+(r?' · <span style="color:#c0392b">🔔 '+r+' réclamation(s)</span>':'');})()}</div>
           ${dv.drive_link?`<div style="margin-top:4px"><span class="file-chip">📎 <a href="${dv.drive_link}" target="_blank">Fichier sujet</a></span></div>`:''}
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
           <button class="btn btn-primary btn-sm" onclick="voirResultats('${dv.id}')">📊 Résultats</button>
+          ${dv.lancement&&dv.statut==='ouvert'?`<button class="btn btn-sm" onclick="dvSalleOuvrir('${dv.id}')">🚪 Salle d'attente</button>`:''}
           ${dv.statut==='ouvert'?`<button class="btn btn-warn btn-sm" onclick="cloturerDevoir('${dv.id}')">🔒 Clôturer</button>`:''}
           <button class="btn btn-danger btn-sm" onclick="delDevoir('${dv.id}')">✕</button>
         </div>
@@ -4534,7 +4631,8 @@ async function refreshDevoir(){
   document.getElementById('eleve-page').classList.add('show');
 }
 let currentDevoirCode='';
-let exam={actif:false,bloque:false,fs:false,tick:null,debut:0,dureeSec:0,wl:null,pret:false,pasEnvoye:null};
+let attTimer=null;
+let exam={off:0,actif:false,bloque:false,fs:false,tick:null,debut:0,dureeSec:0,wl:null,pret:false,pasEnvoye:null};
 function examHtmlQuestions(dv){
   let html='';
   (dv.questions||[]).forEach((q,i)=>{
@@ -4559,7 +4657,7 @@ function examBloquerEvt(e){
 function examFmt(s){s=Math.max(0,Math.round(s));const m=Math.floor(s/60),r=s%60;return String(m).padStart(2,'0')+':'+String(r).padStart(2,'0');}
 function examTick(){
   if(!exam.actif)return;
-  const ecoule=(Date.now()-exam.debut)/1000;
+  const ecoule=(Date.now()-exam.debut)/1000;// exam.debut est exprimé sur l'horloge de l'appareil (corrigée du décalage serveur)
   const c=document.getElementById('ep-chrono');
   if(exam.dureeSec>0){
     const reste=exam.dureeSec-ecoule;
@@ -4592,8 +4690,8 @@ async function examNettoyer(){
   exam.fs=false;
   document.body.classList.remove('examen');
 }
-function examDemarrer(dureeSec){
-  exam.actif=true;exam.bloque=false;exam.debut=Date.now();exam.dureeSec=dureeSec||0;exam.pret=false;
+function examDemarrer(dureeSec,debutMs){
+  exam.actif=true;exam.bloque=false;exam.debut=debutMs||Date.now();exam.dureeSec=dureeSec||0;exam.pret=false;
   document.body.classList.add('examen');
   examListeners(true);
   const el=document.documentElement;
@@ -4650,18 +4748,65 @@ async function eleveLogin(){
   if(!nom||!pwd){err.textContent='Écris ton nom complet et ton mot de passe.';return;}
   const{data:r,error}=await sb.rpc('devoir_login',{p_code:currentDevoirCode,p_nom:nom,p_pwd:pwd});
   if(error||!r){err.textContent='Erreur de connexion. Réessaie.';return;}
+  document.getElementById('ep-retry').style.display=r.retard?'block':'none';
   if(!r.ok){err.textContent=r.message||'Nom ou mot de passe incorrect.';return;}
+  err.textContent='';
   currentEleveDevoir={id:r.eleve_id,nom:r.nom,pwd};
   if(r.mode==='correction'){document.getElementById('ep-login').style.display='none';return eleveCorrection();}
+  return eleveSuite(r);
+}
+function srvMaj(r){if(r&&r.maintenant){const t=Date.parse(r.maintenant);if(!isNaN(t))exam.off=t-Date.now();}}
+function eleveAttente(r){
+  srvMaj(r);
   document.getElementById('ep-login').style.display='none';
-  const dureeSec=(parseInt(r.duree)||0)*60;
+  document.getElementById('ep-attente').style.display='block';
+  const t0=Date.parse(r.lancement);
+  document.getElementById('ep-att-heure').textContent='Lancement à '+new Date(t0).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  try{const el=document.documentElement,rf=el.requestFullscreen||el.webkitRequestFullscreen;if(rf&&!document.fullscreenElement){const q=rf.call(el);if(q&&q.catch)q.catch(()=>{});}}catch(e){}
+  clearInterval(attTimer);
+  const c=document.getElementById('ep-att-compte');
+  const maj=()=>{
+    const reste=(t0-(Date.now()+exam.off))/1000;
+    c.textContent=reste>0?examFmt(Math.ceil(reste)):'GO !';
+    if(reste<=0){clearInterval(attTimer);attTimer=null;eleveLancer();}
+  };
+  maj();if(!attTimer&&(t0-(Date.now()+exam.off))>0)attTimer=setInterval(maj,250);
+}
+async function eleveLancer(){
+  let r2=null;
+  try{
+    const{data,error}=await sb.rpc('devoir_login',{p_code:currentDevoirCode,p_nom:currentEleveDevoir.nom,p_pwd:currentEleveDevoir.pwd});
+    if(error)throw error;r2=data;
+  }catch(e){setTimeout(eleveLancer,800);return;}
+  if(!r2){setTimeout(eleveLancer,800);return;}
+  if(r2.ok&&r2.attente)return eleveAttente(r2);// l'horloge locale était en avance : on patiente encore
+  document.getElementById('ep-attente').style.display='none';
+  if(!r2.ok){
+    document.getElementById('ep-login').style.display='block';
+    document.getElementById('ep-err').textContent=r2.message||'Connexion impossible.';
+    document.getElementById('ep-retry').style.display=r2.retard?'block':'none';
+    return;
+  }
+  return eleveSuite(r2);
+}
+async function eleveSuite(r){
+  srvMaj(r);
+  if(r.attente)return eleveAttente(r);
+  if(r.lancement){
+    // devoir à lancement commun : le sujet est disponible maintenant, on le recharge
+    try{const{data:d2}=await sb.rpc('devoir_public',{p_code:currentDevoirCode});if(d2)cache.devoirs=[d2];}catch(e){}
+  }
+  const dv=cache.devoirs[0];
+  document.getElementById('ep-login').style.display='none';
+  let dureeSec=(parseInt(r.duree)||0)*60,debutMs=null;
+  if(r.lancement&&r.fin){debutMs=Date.parse(r.lancement)-exam.off;dureeSec=(Date.parse(r.fin)-Date.parse(r.lancement))/1000;}
   let html=`<div class="card" style="margin-bottom:9px">${dv.consignes?`<div style="font-size:12px;color:#555;background:#f9f9f7;border-radius:6px;padding:7px;margin-bottom:7px;white-space:pre-wrap">${resEsc(dv.consignes)}</div>`:''}${dv.drive_link&&/^https?:\/\//i.test(dv.drive_link)?`<div style="font-size:11px;color:#8a5a00">📎 Un fichier sujet existe, mais l'ouvrir te ferait sortir de l'application : le devoir serait bloqué. Utilise seulement les questions ci-dessous.</div>`:''}</div>`;
   html+=examHtmlQuestions(dv);
   document.getElementById('ep-questions').innerHTML=html;
   document.getElementById('ep-form').style.display='block';
   document.getElementById('ep-envoi-msg').textContent='';
   window.scrollTo(0,0);
-  examDemarrer(dureeSec);
+  examDemarrer(dureeSec,debutMs);
 }
 // ----- Copie corrigée de l'élève + réclamations -----
 let corrDonnees=null;
