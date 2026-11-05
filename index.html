@@ -809,9 +809,11 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       <button class="sub-tab" onclick="showCahierTab('cj-rappel')">🎯 Rappel</button>
       <button class="sub-tab" onclick="showCahierTab('cj-sanctions')">⚠️ Sanctions</button>
       <button class="sub-tab" onclick="showCahierTab('cj-bonus')">⭐ Bonus</button>
+      <button class="sub-tab" onclick="showCahierTab('cj-progression')">📈 Progression</button>
     </div>
     <!-- SÉANCES -->
     <div id="cj-seances" class="sub-content active">
+      <div id="pg-seance-banner"></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <strong style="font-size:13px">Séances enregistrées</strong>
         <button class="btn btn-primary btn-sm" onclick="toggleFormSeance()">+ Nouvelle séance</button>
@@ -837,6 +839,8 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       </div>
       <div id="liste-seances"><div class="empty">Aucune séance enregistrée</div></div>
     </div>
+    <!-- PROGRESSION -->
+    <div id="cj-progression" class="sub-content"><div id="pg-corps"></div></div>
     <!-- PRÉSENCES -->
     <div id="cj-presences" class="sub-content">
       <div id="pr-alertes"></div>
@@ -1113,6 +1117,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       </svg>
     </div>
     <div class="dash-kpis" id="dash-stats"></div>
+    <div class="card" id="dash-prog-card" style="display:none;border-left:4px solid #F08A00"><div class="card-title">📈 Progression : cours à confirmer / retard</div><div id="dash-prog"></div></div>
     <div class="card" id="dash-sanctions-card" style="display:none;border-left:4px solid #c0392b"><div class="card-title" style="color:#791F1F">🚨 Sanctions répétées (3 ou plus en 2 mois)</div><div id="dash-sanctions"></div></div>
     <div class="card" id="dash-absences-card" style="display:none;border-left:4px solid #c0392b"><div class="card-title" style="color:#791F1F">⚠️ Absences répétées (3 ou plus en 2 mois)</div><div id="dash-absences"></div></div>
     <div class="dash-grid">
@@ -1171,6 +1176,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
         <button class="btn btn-info btn-sm" onclick="ouvrirPresences()">✅ Contrôle de présence</button>
         <button class="btn btn-warn btn-sm" onclick="ouvrirSanctions()">⚠️ Sanctions</button>
         <button class="btn btn-info btn-sm" onclick="ouvrirCahier()">📔 Cahier journal</button>
+        <button class="btn btn-info btn-sm" onclick="ouvrirProgression()">📈 Progression</button>
         <button class="btn btn-sm" onclick="ouvrirNotesClasse()">📊 Fiche de notes</button>
         <button class="btn btn-sm" onclick="regenererCodesClasse()" title="Nouveaux mots de passe de devoir pour tous les élèves">🔑 Régénérer les codes</button>
         <button class="btn btn-sm" onclick="exporterCodesClasse()">⬇️ Exporter les codes</button>
@@ -1307,6 +1313,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       </div>
       <div id="notif-status" class="alert-warn alert-box">Non activées</div>
     </div>
+    <div class="card" id="alertes-prog-card" style="display:none;border-left:4px solid #F08A00"><div class="card-title">📈 Progression : cours à confirmer / retard</div><div id="alertes-prog"></div></div>
     <div class="card"><div class="card-title">🔔 Classes de demain</div><div id="demain-liste"><div class="empty">Aucune classe</div></div></div>
     <div class="card"><div class="card-title">🗓️ Mes classes par jour</div><div id="semaine-liste"></div></div>
   </div>
@@ -2718,7 +2725,7 @@ function showTab(t){
   if(t==='ressources'){renderRessources();}
   if(t==='bibliotheque')renderBibliotheque();
   if(t==='edt-global')renderEdtGlobal();
-  if(t==='alertes')renderDemain();
+  if(t==='alertes'){renderDemain();pgRafraichirAlertes();}
   if(t==='dashboard')renderDashboard();
   if(t==='admin-abo')renderAdminAbo();
   if(t==='admin-msg')renderAdminMsg();
@@ -3546,10 +3553,12 @@ function ouvrirCahier(){
   openModal('modal-cahier');
 }
 function showCahierTab(id){
-  ['cj-seances','cj-presences','cj-rappel','cj-sanctions','cj-bonus'].forEach((t,i)=>{
+  ['cj-seances','cj-presences','cj-rappel','cj-sanctions','cj-bonus','cj-progression'].forEach((t,i)=>{
     document.getElementById(t).classList.toggle('active',t===id);
     document.querySelectorAll('#modal-cahier .sub-tab')[i].classList.toggle('active',t===id);
   });
+  if(id==='cj-progression')renderProgression();
+  if(id==='cj-seances')pgMajSeanceBanner();
 }
 function toggleFormSeance(){
   const f=document.getElementById('form-seance');
@@ -6293,7 +6302,8 @@ function renderDashAbsences(){
     sc.style.display=sTout.length?'block':'none';
     sl.innerHTML=sTout.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #f5d5d5;padding:6px 0;font-size:12px;flex-wrap:wrap"><div><strong>${resEsc(a.eleve.nom)}</strong> <span style="color:#888">· ${resEsc(a.classe.nom)}</span><br><span style="color:#791F1F">${a.n} sanctions en 2 mois${a.nRappel?' (dont '+a.nRappel+' leçon non rappelée)':''}</span></div><button class="btn btn-sm" onclick="ouvrirSanctionsClasse('${a.classe.id}')">Voir</button></div>`).join('');
   }
-  const nb=tout.length+sTout.length;
+  pgRafraichirAlertes();
+  const nb=tout.length+sTout.length+pgNbAlertes();
   const bb=document.getElementById('bell-badge');if(bb){bb.textContent=nb;bb.style.display=nb?'inline-block':'none';}
   el.innerHTML=tout.map(a=>`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #f5d5d5;padding:6px 0;font-size:12px;flex-wrap:wrap"><div><strong>${resEsc(a.eleve.nom)}</strong> <span style="color:#888">· ${resEsc(a.classe.nom)}</span><br><span style="color:#791F1F">${a.n} absences en 2 mois : ${a.dates.map(d=>new Date(d+'T12:00:00').toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'})).join(', ')}</span></div><button class="btn btn-sm" onclick="ouvrirPresencesClasse('${a.classe.id}')">Voir</button></div>`).join('');
   if((tout.length||sTout.length)&&!absToastFait){absToastFait=true;setTimeout(()=>toast((tout.length?'⚠️ '+tout.length+' élève(s) avec 3 absences ou plus en 2 mois':'')+(tout.length&&sTout.length?' · ':'')+(sTout.length?'🚨 '+sTout.length+' élève(s) avec 3 sanctions ou plus en 2 mois':''),7000),800);}
@@ -6992,6 +7002,483 @@ async function copierTexte(t){
     w.appendChild(b);
   });
 })();
+
+// ===== PROGRESSION (plan de progression annuel) =====
+const PG_MOIS3={jan:0,fev:1,mar:2,avr:3,mai:4,aou:7,sep:8,oct:9,nov:10,dec:11};
+const PG_MOIS_LIB=['janv.','févr.','mars','avr.','mai','juin','juil.','août','sept.','oct.','nov.','déc.'];
+function pgPad(n){return String(n).padStart(2,'0');}
+function pgIso(d){return d.getFullYear()+'-'+pgPad(d.getMonth()+1)+'-'+pgPad(d.getDate());}
+function pgDate(iso){return new Date(iso+'T12:00:00');}
+function pgAuj(){return pgIso(new Date());}
+function pgAddJ(iso,n){const d=pgDate(iso);d.setDate(d.getDate()+n);return pgIso(d);}
+function pgMoisIdx(t){
+  t=String(t||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z]/g,'');
+  if(t.startsWith('juin'))return 5;if(t.startsWith('juil'))return 6;
+  const k=t.slice(0,3);return k in PG_MOIS3?PG_MOIS3[k]:-1;
+}
+function pgAnneeDebut(plan){const y=parseInt(String(plan&&plan.annee||'').slice(0,4));return y||new Date().getFullYear();}
+function pgAnneeMois(plan,m){const y0=pgAnneeDebut(plan);return m>=8?y0:y0+1;}
+function pgLundiApres(iso){// premier lundi strictement après la date
+  const d=pgDate(iso);let n=(8-d.getDay())%7;if(n===0)n=7;d.setDate(d.getDate()+n);return pgIso(d);
+}
+function pgPremierLundiOctobre(y){const d=new Date(y,9,1,12);while(d.getDay()!==1)d.setDate(d.getDate()+1);return pgIso(d);}
+function pgFmtCourt(iso){return iso?pgDate(iso).toLocaleDateString('fr-FR',{weekday:'short',day:'2-digit',month:'2-digit'}):'';}
+function pgFmtPeriode(d1,d2){
+  if(!d1)return '';if(!d2)d2=d1;
+  const a=pgDate(d1),b=pgDate(d2);
+  const ma=PG_MOIS_LIB[a.getMonth()],mb=PG_MOIS_LIB[b.getMonth()];
+  if(a.getMonth()===b.getMonth()&&a.getFullYear()===b.getFullYear())return pgPad(a.getDate())+' au '+pgPad(b.getDate())+' '+mb+' '+b.getFullYear();
+  if(a.getFullYear()===b.getFullYear())return pgPad(a.getDate())+' '+ma+' au '+pgPad(b.getDate())+' '+mb+' '+b.getFullYear();
+  return pgPad(a.getDate())+' '+ma+' '+a.getFullYear()+' au '+pgPad(b.getDate())+' '+mb+' '+b.getFullYear();
+}
+function pgFmtPct(v){if(v>=100)return '100';return v.toFixed(2).replace('.',',').padStart(5,'0');}
+function pgUid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+// lecture d'une date saisie / importée (jj/mm/aaaa, jj-mm-aaaa, aaaa-mm-jj, Date, numéro Excel)
+function pgLireDate(v){
+  if(v==null||v==='')return null;
+  if(v instanceof Date&&!isNaN(v))return pgIso(new Date(v.getFullYear(),v.getMonth(),v.getDate(),12));
+  if(typeof v==='number'&&v>20000&&v<80000){const d=new Date(Math.round((v-25569)*86400000));return pgIso(new Date(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate(),12));}
+  const t=String(v).trim();let m;
+  if((m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(t)))return m[1]+'-'+pgPad(m[2])+'-'+pgPad(m[3]);
+  if((m=/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2,4})$/.exec(t))){let y=+m[3];if(y<100)y+=2000;return y+'-'+pgPad(m[2])+'-'+pgPad(m[1]);}
+  return null;
+}
+// "06 au 11 oct. 2025", "27 oct. au 01 nov. 2025", "du 25 décembre 2026 au 02 janvier 2027"
+function pgParsePeriode(txt,plan){
+  const t=String(txt||'').replace(/\s+/g,' ').trim();if(!t)return null;
+  let m=/(\d{1,2})\s*(?:er)?\s*([a-zéèêûîôàç\.]*)\s*(\d{4})?\s*(?:au|à|-|–)\s*(\d{1,2})\s*(?:er)?\s*([a-zéèêûîôàç\.]*)\s*(\d{4})?/i.exec(t.replace(/^du\s+/i,''));
+  if(!m)return null;
+  let m2=pgMoisIdx(m[5]),m1=m[2]?pgMoisIdx(m[2]):m2;
+  if(m2<0)m2=m1;if(m1<0)m1=m2;if(m2<0)return null;
+  let y2=m[6]?+m[6]:pgAnneeMois(plan,m2);
+  let y1=m[3]?+m[3]:(m1>m2?y2-1:y2);
+  return{d1:y1+'-'+pgPad(m1+1)+'-'+pgPad(+m[1]),d2:y2+'-'+pgPad(m2+1)+'-'+pgPad(+m[4])};
+}
+function pgGetPlan(cid){return getExtra('progression',cid||currentCahierClasseId)[0]||null;}
+async function pgSavePlan(plan,cid){await saveExtra('progression',cid||currentCahierClasseId,[plan]);}
+function pgLecons(plan){return(plan.lignes||[]).filter(l=>l.t==='l');}
+function pgEnConge(plan,iso){return(plan.lignes||[]).some(l=>l.t==='c'&&l.d1&&l.d1<=iso&&iso<=(l.d2||l.d1));}
+function pgPointeur(plan){const L=pgLecons(plan);const i=L.findIndex(l=>!l.fait);return i<0?L.length:i;}
+function pgIdxCalendrier(plan,iso){
+  const L=pgLecons(plan);
+  const i=L.findIndex(l=>l.d1&&l.d1<=iso&&iso<=(l.d2||l.d1));
+  if(i>=0)return i;
+  return L.filter(l=>(l.d2||l.d1||'')<iso).length;// congé ou hors calendrier : prochaine leçon attendue
+}
+function pgRetard(plan,iso){const L=pgLecons(plan);if(!L.length)return 0;return Math.max(0,Math.min(pgIdxCalendrier(plan,iso),L.length)-pgPointeur(plan));}
+function pgSlotsClasse(cid){return cache.slots.filter(s=>s.classe_id==cid);}
+function pgJoursSemaine(cid,plan,d1,d2){
+  const out=[];const sl=pgSlotsClasse(cid);if(!sl.length||!d1)return out;
+  for(let d=d1;d<=(d2||d1);d=pgAddJ(d,1)){
+    if(pgEnConge(plan,d))continue;
+    sl.filter(s=>s.jour===JOURS_FR[pgDate(d).getDay()]).sort((a,b)=>minutes(a.hdeb)-minutes(b.hdeb)).forEach(s=>out.push({date:d,slot:s}));
+  }
+  return out;
+}
+// cours des emplois du temps passés, pas encore confirmés
+function pgAConfirmer(plan,cid){
+  const out=[];const sl=pgSlotsClasse(cid);if(!sl.length)return out;
+  const auj=pgAuj(),now=new Date(),mn=now.getHours()*60+now.getMinutes();
+  const dep=plan.suiviDepuis||auj;
+  for(let d=dep;d<=auj;d=pgAddJ(d,1)){
+    if(pgEnConge(plan,d))continue;
+    sl.filter(s=>s.jour===JOURS_FR[pgDate(d).getDay()]).forEach(s=>{
+      if(d===auj&&mn<minutes(s.hfin))return;
+      if((plan.journal||[]).some(j=>j.date===d&&String(j.slotId)===String(s.id)))return;
+      out.push({date:d,slot:s});
+    });
+  }
+  return out.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:minutes(a.slot.hdeb)-minutes(b.slot.hdeb));
+}
+// ---------- création / import / export ----------
+function pgMatiereDefaut(){const i=document.getElementById('profil-matiere');return i?i.value.trim():'';}
+function pgNouveauPlan(cid){
+  const cl=cache.classes.find(c=>c.id==cid);const ec=cl?cache.ecoles.find(e=>e.id==cl.ecole_id):null;
+  const m=new Date().getMonth(),y=new Date().getFullYear();const y0=m>=8?y:y-1;
+  return{v:1,annee:y0+'-'+(y0+1),ministere:'MEPUA / IGE',ire:'',dce:'',etab:ec?ec.nom:'',matiere:pgMatiereDefaut(),
+    debut:pgPremierLundiOctobre(y0),suiviDepuis:pgAuj(),lignes:[],journal:[]};
+}
+async function pgCreerManuel(){
+  const cid=currentCahierClasseId;if(pgGetPlan(cid))return;
+  await pgSavePlan(pgNouveauPlan(cid),cid);renderProgression();
+}
+function pgDatesAuto(plan){// complète les dates manquantes, semaine après semaine
+  let prev=null;
+  (plan.lignes||[]).forEach(l=>{
+    if(!l.d1){
+      if(l.t==='l'){l.d1=prev?pgLundiApres(prev):plan.debut;l.d2=pgAddJ(l.d1,5);}
+    }
+    if(l.d1&&!l.d2)l.d2=l.t==='l'?pgAddJ(l.d1,5):l.d1;
+    if(l.d2)prev=l.d2;
+  });
+}
+function pgTelechargerModele(){
+  const rows=[['Semaine','Du','Au','Contenu du programme (par semaine, par leçon et par séance)','Observations'],
+    [1,'05/10/2026','10/10/2026','Commentaire et prise du programme',''],
+    [2,'12/10/2026','17/10/2026','Introduction à la Géologie',''],
+    [3,'19/10/2026','24/10/2026','Les subdivisions de la Géologie',''],
+    ['','21/12/2026','02/01/2027','Congés de fin du premier trimestre',''],
+    ['','18/01/2027','30/01/2027','Composition semestrielle','']];
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:9},{wch:12},{wch:12},{wch:60},{wch:25}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Progression');
+  XLSX.writeFile(wb,'modele_plan_de_progression.xlsx');
+}
+function pgImporter(input){
+  const f=input.files&&input.files[0];if(!f)return;
+  const cid=currentCahierClasseId;
+  const r=new FileReader();
+  r.onload=async e=>{
+    try{
+      const wb=XLSX.read(e.target.result,{type:'binary',cellDates:true});
+      const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1,defval:''});
+      let plan=pgGetPlan(cid)||pgNouveauPlan(cid);
+      const lignes=pgLireLignes(rows,plan);
+      if(!lignes.length){toast('Aucune leçon trouvée dans ce fichier. Utilise le modèle Excel.',5000);input.value='';return;}
+      if((plan.lignes||[]).length&&!confirm('Remplacer le plan actuel ('+plan.lignes.length+' lignes) par les '+lignes.length+' lignes du fichier ?')){input.value='';return;}
+      plan.lignes=lignes;plan.journal=(plan.journal||[]).filter(j=>false);
+      pgDatesAuto(plan);
+      await pgSavePlan(plan,cid);renderProgression();
+      toast('✓ Plan importé : '+pgLecons(plan).length+' leçons',4000);
+    }catch(err){toast('Fichier illisible : '+(err.message||err),5000);}
+    input.value='';
+  };
+  r.readAsBinaryString(f);
+}
+function pgLireLignes(rows,plan){
+  const txt=v=>(v instanceof Date)?'':String(v==null?'':v).trim();
+  let hr=-1;
+  for(let i=0;i<Math.min(rows.length,20);i++){if((rows[i]||[]).some(c=>/contenu|le[cç]on|programme|titre/i.test(txt(c)))){hr=i;break;}}
+  let ci=-1,si=-1,pi=-1,ji=-1,oi=-1,di=-1,ai=-1;
+  if(hr>=0){
+    rows[hr].forEach((c,k)=>{const t=txt(c).toLowerCase();
+      if(/contenu|le[cç]on|programme|titre/.test(t)&&ci<0)ci=k;
+      else if(/^sem/.test(t))si=k;
+      else if(/^du$/.test(t))di=k;
+      else if(/^au$/.test(t))ai=k;
+      else if(/p[ée]riode|dates?/.test(t))pi=k;
+      else if(/jours?/.test(t))ji=k;
+      else if(/obs/.test(t))oi=k;});
+  }else{
+    let best=-1,len=0;const nc=Math.max(...rows.map(r=>(r||[]).length),1);
+    for(let k=0;k<nc;k++){const L=rows.reduce((t,r)=>t+txt((r||[])[k]).length,0);if(L>len){len=L;best=k;}}
+    ci=best;
+  }
+  if(ci<0)return[];
+  const out=[];
+  for(let i=hr+1;i<rows.length;i++){
+    const r=rows[i]||[];
+    const contenu=txt(r[ci]);
+    const tout=r.map(txt).filter(Boolean).join(' ');
+    if(!tout)continue;
+    if(/fait [àa]\s|censeur|chef du groupe|signature|^professeur/i.test(contenu||tout))continue;
+    if(/^(cong[ée]s?|composition|examens?|vacances|devoirs? de synth)/i.test(contenu||tout.replace(/^\d+\s*/,''))){
+      const lib=contenu||tout;
+      let p=pgParseDuAu(lib,plan);
+      if(!p&&pi>=0)p=pgParsePeriode(txt(r[pi]),plan);
+      if(!p&&di>=0)p={d1:pgLireDate(r[di]),d2:pgLireDate(r[ai>=0?ai:di])};
+      const k=/cong|vacances/i.test(lib)?'conge':/examen/i.test(lib)?'exam':'compo';
+      out.push({id:pgUid(),t:'c',k,lib:lib.replace(/\s+/g,' '),d1:p&&p.d1||null,d2:p&&p.d2||null});
+      continue;
+    }
+    if(!contenu)continue;
+    let p=null;
+    if(di>=0){const a=pgLireDate(r[di]),b=pgLireDate(r[ai>=0?ai:di]);if(a)p={d1:a,d2:b||pgAddJ(a,5)};}
+    if(!p&&pi>=0)p=pgParsePeriode(txt(r[pi]),plan);
+    out.push({id:pgUid(),t:'l',d1:p&&p.d1||null,d2:p&&p.d2||null,contenu:contenu.replace(/\s+/g,' '),jours:ji>=0?txt(r[ji]):'',obs:oi>=0?txt(r[oi]):'',fait:false,dateFait:''});
+  }
+  return out;
+}
+function pgParseDuAu(t,plan){
+  const m=/du\s+(\d{1,2})\s*(?:er)?\s+([a-zéèêûîôàç\.]+)\s*(\d{4})?\s+au\s+(\d{1,2})\s*(?:er)?\s+([a-zéèêûîôàç\.]+)\s*(\d{4})?/i.exec(String(t||''));
+  if(!m)return null;
+  const m1=pgMoisIdx(m[2]),m2=pgMoisIdx(m[5]);if(m1<0||m2<0)return null;
+  const y2=m[6]?+m[6]:pgAnneeMois(plan,m2),y1=m[3]?+m[3]:(m1>m2?y2-1:y2);
+  return{d1:y1+'-'+pgPad(m1+1)+'-'+pgPad(+m[1]),d2:y2+'-'+pgPad(m2+1)+'-'+pgPad(+m[4])};
+}
+function pgTrimLibelles(plan){// numéro de trimestre de chaque ligne : change après chaque congé
+  let t=1;const o={};
+  (plan.lignes||[]).forEach(l=>{o[l.id]=t;if(l.t==='c'&&l.k==='conge')t=Math.min(3,t+1);});
+  return o;
+}
+function pgExporterExcel(){
+  const plan=pgGetPlan();if(!plan)return;
+  const L=pgLecons(plan),N=L.length||1,tr=pgTrimLibelles(plan);
+  const rows=[['Trimestre','Semaine','Du','Au','Nbre jours de cours','Contenu du programme par semaine, par leçon et par séance','% Prévu','% Réalisé','Observations']];
+  let k=0,n=0;
+  plan.lignes.forEach(l=>{
+    if(l.t==='c'){rows.push(['','',fmtIsoFr(l.d1),fmtIsoFr(l.d2),'',l.lib,'','','']);return;}
+    k++;n++;
+    rows.push([tr[l.id],n,fmtIsoFr(l.d1),fmtIsoFr(l.d2),l.jours||'',l.contenu,pgFmtPct(k/N*100),l.fait?pgFmtPct(k/N*100):'',(l.obs||'')]);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:10},{wch:9},{wch:12},{wch:12},{wch:10},{wch:60},{wch:9},{wch:10},{wch:28}];
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Progression');
+  XLSX.writeFile(wb,'Progression_'+(currentClasse?currentClasse.nom:'classe').replace(/[^A-Za-z0-9_-]+/g,'_')+'.xlsx');
+}
+function pgImprimer(){
+  const plan=pgGetPlan();if(!plan)return;
+  const cl=cache.classes.find(c=>c.id==currentCahierClasseId);
+  const L=pgLecons(plan),N=L.length||1,tr=pgTrimLibelles(plan);
+  const TR={1:'Premier trimestre',2:'Deuxième trimestre',3:'Troisième trimestre'};
+  const bd='border:1px solid #000;padding:3px 5px;vertical-align:middle';
+  let k=0,n=0,rows='',last=0;
+  plan.lignes.forEach(l=>{
+    if(l.t==='c'){rows+=`<tr><td colspan="8" style="${bd};text-align:center;font-weight:700;background:#eee">${resEsc(l.lib)}${l.d1?' ('+resEsc(pgFmtPeriode(l.d1,l.d2))+')':''}</td></tr>`;return;}
+    k++;n++;
+    const t=tr[l.id];const tcell=t!==last?`<td rowspan="${plan.lignes.filter(x=>x.t==='l'&&tr[x.id]===t).length}" style="${bd};text-align:center;font-weight:700">${TR[t]||''}</td>`:'';last=t;
+    rows+=`<tr>${tcell}<td style="${bd};text-align:center">${n}</td><td style="${bd}">${resEsc(pgFmtPeriode(l.d1,l.d2))}</td><td style="${bd};text-align:center">${resEsc(l.jours||'')}</td><td style="${bd}">${resEsc(l.contenu)}</td><td style="${bd};text-align:center">${pgFmtPct(k/N*100)}</td><td style="${bd};text-align:center">${l.fait?pgFmtPct(k/N*100):''}</td><td style="${bd}">${resEsc(l.obs||'')}</td></tr>`;
+  });
+  // les lignes « congé » fusionnent toute la largeur : on ajoute une cellule de trimestre vide pour le tableau
+  const corps=`<div style="display:flex;justify-content:space-between;font-size:12px"><div><b>${resEsc(plan.ministere||'')}</b><br>IRE : ${resEsc(plan.ire||'………………')}<br>DCE/DPE : ${resEsc(plan.dce||'………………')}<br>Établissement : ${resEsc(plan.etab||'………………')}</div><div style="text-align:center"><b>RÉPUBLIQUE DE GUINÉE</b><br>Travail - Justice - Solidarité</div></div>
+  <h2 style="text-align:center;margin:12px 0 4px">PLAN DE PROGRESSION ANNUELLE</h2>
+  <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px"><span>Matière : <b>${resEsc(plan.matiere||'')}</b></span><span>Classe : <b>${resEsc(cl?cl.nom:'')}</b></span><span>Année scolaire : <b>${resEsc(plan.annee||'')}</b></span></div>
+  <table style="width:100%;border-collapse:collapse;font-size:11px"><thead><tr style="background:#ddd"><th style="${bd}">Trimestre</th><th style="${bd}">Semaine</th><th style="${bd}">Périodes</th><th style="${bd}">Nbre de jours</th><th style="${bd}">Contenu du programme par semaine, par leçon et par séance</th><th style="${bd}">% Prévu</th><th style="${bd}">% Réalisé</th><th style="${bd}">Obs.</th></tr></thead><tbody>${rows}</tbody></table>
+  <div style="display:flex;justify-content:space-between;margin-top:24px;font-size:12px"><div>Censeur<br><br>Mr/Mme ……………………</div><div>Chef du Groupe Technique<br><br>Mr/Mme ……………………</div><div>Professeur<br><br>${resEsc('')}Mr/Mme ……………………</div></div>`;
+  imprimerDoc('Plan de progression',corps,true);
+}
+// ---------- affichage ----------
+function ouvrirProgression(){ouvrirCahier();showCahierTab('cj-progression');}
+function pgLibLecon(l){return l?l.contenu:'—';}
+function renderProgression(){
+  const box=document.getElementById('pg-corps');if(!box)return;
+  const cid=currentCahierClasseId;const plan=pgGetPlan(cid);
+  const cl=cache.classes.find(c=>c.id==cid);
+  if(!plan){
+    box.innerHTML=`<div class="card"><div class="card-title">📈 Plan de progression — ${resEsc(cl?cl.nom:'')}</div>
+      <div class="alert-info alert-box" style="margin-bottom:8px">Le plan suit le format officiel (semaines, périodes, contenu, % prévu et réalisé, observations). Importe ton plan en Excel ou ajoute les leçons à la main : elles se synchronisent avec ton emploi du temps et tes séances.</div>
+      <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+        <label class="btn btn-primary" style="cursor:pointer">📥 Importer un fichier Excel<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="pgImporter(this)"></label>
+        <button class="btn btn-sm" onclick="pgTelechargerModele()">⬇️ Modèle Excel</button>
+        <button class="btn btn-sm" onclick="pgCreerManuel()">✍️ Créer à la main</button>
+      </div>
+      ${pgSlotsClasse(cid).length?'':'<div style="font-size:11px;color:#8a5a00;margin-top:8px">⚠️ Cette classe n\'a pas encore de cours dans l\'emploi du temps (bouton « 🗓️ Mes cours »). Le suivi des séances en a besoin.</div>'}
+    </div>`;
+    return;
+  }
+  const L=pgLecons(plan),N=L.length,auj=pgAuj();
+  const fait=L.filter(l=>l.fait).length,ptr=pgPointeur(plan),cal=Math.min(pgIdxCalendrier(plan,auj),N),ret=pgRetard(plan,auj);
+  const pend=pgAConfirmer(plan,cid);
+  let h='';
+  // --- bandeau d'état ---
+  h+=`<div class="card" style="border-left:4px solid ${ret>0?'#c0392b':'#2E9E3E'}">
+    <div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;align-items:center"><strong style="font-size:13px">📈 ${resEsc(plan.matiere||'Plan de progression')} — ${resEsc(cl?cl.nom:'')}</strong><span class="badge-stat">${fait}/${N} leçons · ${N?pgFmtPct(fait/N*100).replace(/^0/,''):'0'} %</span></div>
+    ${N?`<div style="font-size:12px;margin-top:5px">${ret>0?`<b style="color:#c0392b">⏰ Retard de ${ret} leçon(s)</b> : d'après le calendrier tu devrais être à « ${resEsc(pgLibLecon(L[cal]||L[N-1]))} », tu en es à « ${resEsc(ptr<N?pgLibLecon(L[ptr]):'fin du programme')} ». Les prochains cours reprennent la leçon en retard jusqu'au rattrapage.`:(ptr>cal?`<b style="color:#085041">✅ En avance de ${ptr-cal} leçon(s)</b>`:'<b style="color:#085041">✅ Tu es à jour.</b>')}</div>`:''}
+  </div>`;
+  // --- cours à confirmer ---
+  if(pend.length){
+    h+=`<div class="card" style="border-left:4px solid #F08A00"><div class="card-title">🔔 Cours à confirmer (${pend.length})</div>`;
+    pend.slice(0,25).forEach(o=>{
+      const lc=ptr<N?L[ptr]:null;
+      h+=`<div style="border:1px solid #f0d9a8;background:#fffaf0;border-radius:9px;padding:8px 10px;margin-bottom:6px">
+        <div style="font-size:12px;font-weight:700">${resEsc(pgFmtCourt(o.date))} · ${resEsc(o.slot.hdeb)}–${resEsc(o.slot.hfin)}</div>
+        <div style="font-size:12px;margin:3px 0 6px">Leçon prévue : <b>${resEsc(lc?lc.contenu:'(plus de leçon dans le plan)')}</b></div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          ${lc?`<button class="btn btn-primary btn-sm" onclick="pgConfirmer('${o.date}','${o.slot.id}','fin')">✅ Cours fait · leçon terminée</button><button class="btn btn-sm" onclick="pgConfirmer('${o.date}','${o.slot.id}','cont')">↪ Fait · à continuer</button>`:''}
+          <button class="btn btn-sm" onclick="pgConfirmer('${o.date}','${o.slot.id}','autre')">📝 Autre activité</button>
+          <button class="btn btn-warn btn-sm" onclick="pgConfirmer('${o.date}','${o.slot.id}','non')">❌ Cours non tenu</button>
+        </div></div>`;
+    });
+    if(pend.length>25)h+=`<div style="font-size:11px;color:#667">… et ${pend.length-25} plus anciens (confirme-les en commençant par les plus anciens).</div>`;
+    h+='</div>';
+  }
+  // --- tableau ---
+  const tr=pgTrimLibelles(plan);const TRL={1:'1er trim.',2:'2e trim.',3:'3e trim.'};
+  let k=0,n=0;
+  const rows=plan.lignes.map((l,idx)=>{
+    if(l.t==='c')return `<tr style="background:#eef1f6"><td colspan="6" style="padding:5px 8px;font-size:11.5px;font-weight:700;text-align:center">${resEsc(l.lib)}${l.d1?' · '+resEsc(pgFmtPeriode(l.d1,l.d2)):''}</td><td style="white-space:nowrap"><button class="btn btn-sm" onclick="pgEditerLigne('${l.id}')">✏️</button><button class="btn btn-sm btn-danger" onclick="pgSupprimerLigne('${l.id}')">✕</button></td></tr>`;
+    k++;n++;
+    const enRetard=!l.fait&&(l.d2||'')<auj,courant=l.d1&&l.d1<=auj&&auj<=(l.d2||l.d1);
+    const bg=l.fait?'#E1F5EE':enRetard?'#FFF1E0':courant?'#E6EEFB':'';
+    const edt=pgJoursSemaine(cid,plan,l.d1,l.d2).map(o=>pgFmtCourt(o.date).replace(/\./g,'')+' '+o.slot.hdeb).join(' · ');
+    return `<tr style="background:${bg};border-bottom:1px solid #e5e5e0;vertical-align:top">
+      <td style="padding:5px 4px;text-align:center;font-size:11px">${n}<div style="font-size:9px;color:#889">${TRL[tr[l.id]]||''}</div></td>
+      <td style="padding:5px 4px;font-size:11px;white-space:nowrap">${resEsc(pgFmtPeriode(l.d1,l.d2))}${edt?`<div style="font-size:9.5px;color:#0B4FBF;white-space:normal">🗓️ ${resEsc(edt)}</div>`:''}</td>
+      <td style="padding:5px 4px;font-size:12px">${resEsc(l.contenu)}${l.fait?`<div style="font-size:10px;color:#085041">✅ fait le ${resEsc(fmtIsoFr(l.dateFait))}</div>`:(enRetard?'<div style="font-size:10px;color:#c0392b">⏰ en retard</div>':(courant?'<div style="font-size:10px;color:#0B4FBF">▶ cette semaine</div>':''))}</td>
+      <td style="padding:5px 4px;font-size:11px;text-align:center">${pgFmtPct(k/N*100)}</td>
+      <td style="padding:5px 4px;font-size:11px;text-align:center">${l.fait?pgFmtPct(k/N*100):''}</td>
+      <td style="padding:5px 4px;font-size:11px">${resEsc(l.obs||'')}</td>
+      <td style="white-space:nowrap;padding:4px 2px"><button class="btn btn-sm" onclick="pgEditerLigne('${l.id}')">✏️</button>${l.fait?'':`<button class="btn btn-sm" onclick="pgDeplacer('${l.id}',-1)">↑</button><button class="btn btn-sm" onclick="pgDeplacer('${l.id}',1)">↓</button>`}<button class="btn btn-sm btn-danger" onclick="pgSupprimerLigne('${l.id}')">✕</button></td></tr>`;
+  }).join('');
+  h+=`<div class="card"><div class="card-title">📋 Plan de progression annuelle · ${resEsc(plan.annee)}</div>
+    <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:#f4f4f0;font-size:10.5px;text-align:left"><th style="padding:5px 4px">Sem.</th><th style="padding:5px 4px">Périodes</th><th style="padding:5px 4px">Contenu du programme par semaine, leçon et séance</th><th style="padding:5px 4px">% prévu</th><th style="padding:5px 4px">% réalisé</th><th style="padding:5px 4px">Obs.</th><th></th></tr></thead><tbody>${rows||'<tr><td colspan="7"><div class="empty">Aucune leçon : ajoute-en ci-dessous ou importe un fichier Excel.</div></td></tr>'}</tbody></table></div></div>`;
+  // --- ajouter une ligne ---
+  h+=`<div class="card"><div class="card-title">➕ Ajouter</div>
+    <div class="two-eq"><div class="form-group"><label>Type</label><select id="pg-type"><option value="l">Leçon (une semaine)</option><option value="conge">Congés</option><option value="compo">Composition / évaluation</option><option value="exam">Examens</option></select></div>
+    <div class="form-group"><label>Contenu / libellé</label><input id="pg-lib" placeholder="Ex : La respiration pulmonaire"></div></div>
+    <div class="two-eq"><div class="form-group"><label>Du (facultatif)</label><input type="date" id="pg-d1"></div><div class="form-group"><label>Au (facultatif)</label><input type="date" id="pg-d2"></div></div>
+    <div style="font-size:10.5px;color:#667;margin-bottom:6px">Pour une leçon sans dates, la semaine suivante est prise automatiquement (lundi au samedi).</div>
+    <button class="btn btn-primary btn-sm" onclick="pgAjouterLigne()">➕ Ajouter à la fin du plan</button></div>`;
+  // --- historique ---
+  const J=(plan.journal||[]).slice().reverse().slice(0,10);
+  if(J.length)h+=`<div class="card"><div class="card-title">🕘 Derniers cours confirmés</div>${J.map(j=>`<div style="display:flex;justify-content:space-between;gap:6px;align-items:center;border-bottom:1px solid #eee;padding:5px 0;font-size:12px"><span>${resEsc(fmtIsoFr(j.date))} · ${j.statut==='annule'?'<b style="color:#c0392b">❌ non tenu</b> — '+resEsc(j.motif||''):(j.extra?'🔁 rattrapage · ':'✅ ')+resEsc(j.titre||'')+(j.fin?' (terminée)':'')}</span><button class="btn btn-sm" onclick="pgAnnulerEntree('${j.id}')">↩</button></div>`).join('')}</div>`;
+  // --- paramètres et outils ---
+  h+=`<div class="card"><div class="card-title">⚙️ Informations du plan</div>
+    <div class="two-eq"><div class="form-group"><label>Matière</label><input id="pg-mat" value="${resEsc(plan.matiere||'')}" onchange="pgMajEntete()"></div><div class="form-group"><label>Année scolaire</label><input id="pg-annee" value="${resEsc(plan.annee||'')}" onchange="pgMajEntete()"></div></div>
+    <div class="two-eq"><div class="form-group"><label>Ministère / service</label><input id="pg-min" value="${resEsc(plan.ministere||'')}" onchange="pgMajEntete()"></div><div class="form-group"><label>Établissement</label><input id="pg-etab" value="${resEsc(plan.etab||'')}" onchange="pgMajEntete()"></div></div>
+    <div class="two-eq"><div class="form-group"><label>IRE</label><input id="pg-ire" value="${resEsc(plan.ire||'')}" onchange="pgMajEntete()"></div><div class="form-group"><label>DCE / DPE</label><input id="pg-dce" value="${resEsc(plan.dce||'')}" onchange="pgMajEntete()"></div></div>
+    <div class="form-group"><label>Suivre les cours à confirmer à partir du</label><input type="date" id="pg-suivi" value="${resEsc(plan.suiviDepuis||'')}" onchange="pgMajEntete()"></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="pgImprimer()">🖨️ Imprimer (format officiel)</button>
+      <button class="btn btn-sm" onclick="pgExporterExcel()">⬇️ Exporter Excel</button>
+      <label class="btn btn-sm" style="cursor:pointer">📥 Importer Excel<input type="file" accept=".xlsx,.xls,.csv" style="display:none" onchange="pgImporter(this)"></label>
+      <button class="btn btn-sm" onclick="pgTelechargerModele()">⬇️ Modèle</button>
+      <button class="btn btn-danger btn-sm" onclick="pgSupprimerPlan()">🗑️ Supprimer le plan</button>
+    </div></div>`;
+  box.innerHTML=h;
+}
+async function pgMajEntete(){
+  const plan=pgGetPlan();if(!plan)return;
+  const v=id=>document.getElementById(id).value.trim();
+  plan.matiere=v('pg-mat');plan.annee=v('pg-annee')||plan.annee;plan.ministere=v('pg-min');plan.etab=v('pg-etab');plan.ire=v('pg-ire');plan.dce=v('pg-dce');
+  const sv=document.getElementById('pg-suivi').value;if(sv)plan.suiviDepuis=sv;
+  await pgSavePlan(plan);renderProgression();toast('Enregistré ✓');
+}
+async function pgAjouterLigne(){
+  const plan=pgGetPlan();if(!plan)return;
+  const type=document.getElementById('pg-type').value,lib=document.getElementById('pg-lib').value.trim();
+  let d1=document.getElementById('pg-d1').value,d2=document.getElementById('pg-d2').value;
+  if(!lib)return toast('Écris le contenu ou le libellé');
+  const dernier=plan.lignes.filter(l=>l.d2||l.d1).slice(-1)[0];
+  if(type==='l'){
+    if(!d1)d1=dernier?pgLundiApres(dernier.d2||dernier.d1):plan.debut;
+    if(!d2)d2=pgAddJ(d1,5);
+    plan.lignes.push({id:pgUid(),t:'l',d1,d2,contenu:lib,jours:'',obs:'',fait:false,dateFait:''});
+  }else{
+    if(!d1)return toast('Indique les dates (du … au …) pour une période de congé ou de composition',4500);
+    plan.lignes.push({id:pgUid(),t:'c',k:type,lib,d1,d2:d2||d1});
+  }
+  await pgSavePlan(plan);document.getElementById('pg-lib').value='';renderProgression();
+}
+async function pgEditerLigne(id){
+  const plan=pgGetPlan();const l=plan&&plan.lignes.find(x=>x.id===id);if(!l)return;
+  if(l.t==='l'){
+    const c=prompt('Contenu de la leçon :',l.contenu);if(c===null)return;
+    const p=prompt('Période (jj/mm/aaaa au jj/mm/aaaa) :',fmtIsoFr(l.d1)+' au '+fmtIsoFr(l.d2));if(p===null)return;
+    const o=prompt('Observation (facultatif) :',l.obs||'');if(o===null)return;
+    const m=/(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4})\s*(?:au|-|à)\s*(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4})/i.exec(p);
+    if(m){const a=pgLireDate(m[1]),b=pgLireDate(m[2]);if(a&&b&&a<=b){l.d1=a;l.d2=b;}else toast('Dates invalides : période inchangée',4000);}
+    l.contenu=c.trim()||l.contenu;l.obs=o.trim();
+  }else{
+    const c=prompt('Libellé :',l.lib);if(c===null)return;
+    const p=prompt('Période (jj/mm/aaaa au jj/mm/aaaa) :',fmtIsoFr(l.d1)+' au '+fmtIsoFr(l.d2));if(p===null)return;
+    const m=/(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4})\s*(?:au|-|à)\s*(\d{1,2}[\/.\-]\d{1,2}[\/.\-]\d{2,4})/i.exec(p);
+    if(m){const a=pgLireDate(m[1]),b=pgLireDate(m[2]);if(a&&b&&a<=b){l.d1=a;l.d2=b;}}
+    l.lib=c.trim()||l.lib;
+  }
+  await pgSavePlan(plan);renderProgression();
+}
+async function pgSupprimerLigne(id){
+  const plan=pgGetPlan();if(!plan)return;
+  if(!confirm('Supprimer cette ligne du plan ?'))return;
+  plan.lignes=plan.lignes.filter(l=>l.id!==id);
+  await pgSavePlan(plan);renderProgression();
+}
+async function pgDeplacer(id,sens){// échange le contenu avec la leçon voisine non faite (les dates restent)
+  const plan=pgGetPlan();if(!plan)return;
+  const L=pgLecons(plan);const i=L.findIndex(l=>l.id===id);const j=i+sens;
+  if(i<0||j<0||j>=L.length||L[j].fait||L[i].fait)return;
+  [L[i].contenu,L[j].contenu]=[L[j].contenu,L[i].contenu];
+  [L[i].obs,L[j].obs]=[L[j].obs,L[i].obs];
+  await pgSavePlan(plan);renderProgression();
+}
+async function pgSupprimerPlan(){
+  if(!confirm('Supprimer tout le plan de progression de cette classe ?'))return;
+  if(!confirm('Vraiment ? Les leçons et le suivi seront effacés (les séances déjà créées restent).'))return;
+  await saveExtra('progression',currentCahierClasseId,[]);renderProgression();
+}
+// ---------- confirmation d'un cours ----------
+async function pgConfirmer(date,slotId,mode,extra){
+  const cid=currentCahierClasseId;const plan=pgGetPlan(cid);if(!plan)return;
+  const slot=cache.slots.find(s=>String(s.id)===String(slotId));if(!slot)return toast('Créneau introuvable');
+  const L=pgLecons(plan);const ptr=pgPointeur(plan);const lc=ptr<L.length?L[ptr]:null;
+  const entry={id:pgUid(),date,slotId:String(slotId),statut:'fait',lid:null,titre:'',fin:false,extra:!!extra};
+  const seances=getExtra('seances',cid);
+  const creerSeance=async(titre,obs)=>{
+    const s={id:Date.now()+Math.floor(Math.random()*1000),date,mat:plan.matiere||slot.mat||'',lecon:titre,hdeb:String(slot.hdeb||'').replace('h',':'),hfin:String(slot.hfin||'').replace('h',':'),contenu:'',obs:obs||'',presences:{},fichiers:[],pg:true};
+    cache.eleves.filter(e=>e.classe_id==cid).forEach(e=>{s.presences[e.id]='P';});
+    seances.push(s);entry.seanceId=s.id;
+  };
+  if(mode==='non'){
+    const m=prompt('Pourquoi le cours n\'a-t-il pas eu lieu ?\n(ex : absence du professeur, jour férié, grève, évaluation, absence des élèves…)','Absence du professeur');
+    if(m===null)return;
+    entry.statut='annule';entry.motif=m.trim()||'Non précisé';
+  }else if(mode==='autre'){
+    const t=prompt('Quelle activité a été faite ? (exercices, devoir, évaluation…)','Exercices d\'application');
+    if(t===null)return;
+    entry.titre=t.trim()||'Activité';await creerSeance(entry.titre,'Hors plan de progression');
+  }else{
+    if(!lc)return toast('Toutes les leçons du plan sont faites');
+    entry.lid=lc.id;entry.titre=lc.contenu;entry.fin=mode==='fin';
+    const ret=pgRetard(plan,date);
+    await creerSeance(lc.contenu,(extra?'Rattrapage. ':'')+(mode==='cont'?'Leçon à continuer.':'')+(ret>0&&!extra?' (en retard sur le plan)':''));
+    if(entry.fin){lc.fait=true;lc.dateFait=date;if(ret>0&&!lc.obs)lc.obs='Retard '+ret+' leçon(s)';}
+  }
+  plan.journal=plan.journal||[];plan.journal.push(entry);
+  await saveExtra('seances',cid,seances);
+  await pgSavePlan(plan,cid);
+  renderProgression();renderSeances();
+  if(entry.statut==='fait'&&entry.fin){
+    const r=pgRetard(plan,date);
+    if(r>0&&pgPointeur(plan)<pgLecons(plan).length){
+      if(confirm('Tu as encore '+r+' leçon(s) de retard. Rattraper maintenant en faisant aussi la leçon suivante pendant ce créneau ?'))return pgConfirmer(date,slotId,'fin',true);
+    }
+  }
+  toast(mode==='non'?'Cours noté comme non tenu — la leçon est reportée':'✓ Cours confirmé · séance créée',3500);
+  pgRafraichirAlertes();
+}
+async function pgAnnulerEntree(id){
+  const cid=currentCahierClasseId;const plan=pgGetPlan(cid);if(!plan)return;
+  const j=(plan.journal||[]).find(x=>x.id===id);if(!j)return;
+  if(!confirm('Annuler cette confirmation ? (la séance créée sera supprimée)'))return;
+  if(j.lid){const l=plan.lignes.find(x=>x.id===j.lid);if(l&&j.fin){l.fait=false;l.dateFait='';}}
+  if(j.seanceId){await saveExtra('seances',cid,getExtra('seances',cid).filter(s=>s.id!==j.seanceId));}
+  plan.journal=plan.journal.filter(x=>x.id!==id);
+  await pgSavePlan(plan,cid);renderProgression();renderSeances();pgRafraichirAlertes();
+}
+// ---------- séances : leçon du jour ----------
+function pgMajSeanceBanner(){
+  const el=document.getElementById('pg-seance-banner');if(!el)return;
+  const plan=pgGetPlan(currentCahierClasseId);
+  if(!plan||!pgLecons(plan).length){el.innerHTML='';return;}
+  const L=pgLecons(plan),p=pgPointeur(plan);
+  if(p>=L.length){el.innerHTML='<div class="alert-info alert-box" style="margin-bottom:8px">📈 Toutes les leçons du plan de progression sont faites.</div>';return;}
+  const ret=pgRetard(plan,pgAuj());
+  el.innerHTML=`<div class="alert-info alert-box" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span>📈 Leçon prévue (plan de progression) : <b>${resEsc(L[p].contenu)}</b>${ret>0?` <b style="color:#c0392b">· retard de ${ret} leçon(s)</b>`:''}</span><button class="btn btn-sm btn-primary" onclick="pgUtiliserLecon()">Utiliser pour cette séance</button></div>`;
+}
+function pgUtiliserLecon(){
+  const plan=pgGetPlan(currentCahierClasseId);if(!plan)return;
+  const L=pgLecons(plan),p=pgPointeur(plan);if(p>=L.length)return;
+  const f=document.getElementById('form-seance');if(f.style.display==='none')toggleFormSeance();
+  document.getElementById('sj-lecon').value=L[p].contenu;
+  if(plan.matiere)document.getElementById('sj-mat').value=plan.matiere;
+  toast('Pense à confirmer le cours dans l\'onglet 📈 Progression',4000);
+}
+// ---------- alertes globales ----------
+function pgAlertesGlobales(){
+  const out=[];
+  (cache.classes||[]).forEach(c=>{
+    const plan=pgGetPlan(c.id);if(!plan||!(plan.lignes||[]).length)return;
+    const pend=pgAConfirmer(plan,c.id).length,ret=pgRetard(plan,pgAuj());
+    if(pend||ret)out.push({classe:c,pend,ret});
+  });
+  return out;
+}
+function pgNbAlertes(){try{return pgAlertesGlobales().reduce((t,a)=>t+(a.pend?1:0)+(a.ret?1:0),0);}catch(e){return 0;}}
+function pgAller(cid){currentClasse=cache.classes.find(c=>c.id==cid);if(!currentClasse)return;ouvrirProgression();}
+function pgHtmlAlertes(){
+  const A=pgAlertesGlobales();
+  return A.map(a=>{const ec=cache.ecoles.find(e=>e.id==a.classe.ecole_id);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;border-bottom:1px solid #f3e2c0;padding:6px 0;font-size:12px;flex-wrap:wrap"><div><strong>${resEsc(a.classe.nom)}</strong>${ec?' ('+resEsc(ec.abr)+')':''} — ${a.pend?`<b>${a.pend} cours à confirmer</b>`:''}${a.pend&&a.ret?' · ':''}${a.ret?`<b style="color:#c0392b">retard de ${a.ret} leçon(s)</b>`:''}</div><button class="btn btn-sm btn-primary" onclick="pgAller('${a.classe.id}')">Ouvrir 📈</button></div>`;}).join('');
+}
+function pgRafraichirAlertes(){
+  try{
+    const h=pgHtmlAlertes();
+    ['dash-prog','alertes-prog'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=h;});
+    ['dash-prog-card','alertes-prog-card'].forEach(id=>{const c=document.getElementById(id);if(c)c.style.display=h?'block':'none';});
+    const bb=document.getElementById('bell-badge');
+    if(bb&&typeof renderDashAbsences==='function'){/* le badge est recalculé par renderDashAbsences */}
+  }catch(e){}
+}
+
 </script>
 </body>
 </html>
