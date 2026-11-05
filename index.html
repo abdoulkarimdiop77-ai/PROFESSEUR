@@ -2235,7 +2235,7 @@ async function resBlobLocal(f){
 function resAfficherBlob(f,b,w){
   const url=URL.createObjectURL(b);
   const lisible=/^(application\/pdf|image\/|text\/)/.test(b.type);
-  if(lisible){if(w)w.location.href=url;else window.location.href=url;}
+  if(lisible){if(w)w.location.href=url;else koVoirUrl(url,f&&f.nom);}
   else{
     if(w)w.close();
     const a=document.createElement('a');a.href=url;a.download=f.nom||'fichier';document.body.appendChild(a);a.click();a.remove();
@@ -2278,7 +2278,7 @@ async function resOuvrirFichier(id){
   }
   const{data,error}=await sb.storage.from(RES_BUCKET).createSignedUrl(f.path,3600);
   if(error||!data){if(w)w.close();return toast('Impossible d\'ouvrir : '+(error?error.message:''));}
-  if(w)w.location.href=data.signedUrl;else window.location.href=data.signedUrl;
+  if(w)w.location.href=data.signedUrl;else koVoirUrl(data.signedUrl);
   if(!f.taille||f.taille<=15*1048576)resTelecharger(f).then(()=>renderRessources()).catch(()=>{});
 }
 async function resOublierLocal(path){
@@ -2455,7 +2455,7 @@ async function bibOuvrir(id){
   const w=window.open('','_blank');
   const{data,error}=await sb.storage.from(BIB_BUCKET).createSignedUrl(d.fichier_path,3600);
   if(error||!data){if(w)w.close();return toast('Impossible d\'ouvrir : '+(error?error.message:''));}
-  if(w)w.location.href=data.signedUrl;else window.location.href=data.signedUrl;
+  if(w)w.location.href=data.signedUrl;else koVoirUrl(data.signedUrl);
   sb.rpc('bib_compter',{p_id:id}).then(()=>{}).catch(()=>{});
 }
 async function bibSupprimer(id){
@@ -2972,7 +2972,7 @@ function exporterCodesClasse(){
   const ws=XLSX.utils.aoa_to_sheet([['N°','Nom','Matricule','Code devoir (mot de passe)'],...els.map((e,i)=>[i+1,e.nom,e.matricule||'',e.pwd||''])]);
   ws['!cols']=[{wch:5},{wch:30},{wch:16},{wch:26}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Codes');
-  XLSX.writeFile(wb,'codes_'+currentClasse.nom.replace(/[^A-Za-z0-9_-]+/g,'_')+'.xlsx');
+  koXlsx(wb,'codes_'+currentClasse.nom.replace(/[^A-Za-z0-9_-]+/g,'_')+'.xlsx');
 }
 async function regenererCodesClasse(){
   if(!currentClasse)return;
@@ -3039,7 +3039,7 @@ function telechargerModeleEleves(){
   const ws=XLSX.utils.aoa_to_sheet([['N°','Prénom','Nom','Matricule (facultatif)'],[1,'Mamadou','Diallo',''],[2,'Aissatou','Barry','']]);
   ws['!cols']=[{wch:6},{wch:18},{wch:18},{wch:22}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Élèves');
-  XLSX.writeFile(wb,'modele_liste_eleves.xlsx');
+  koXlsx(wb,'modele_liste_eleves.xlsx');
 }
 
 // ===== FICHE ÉLÈVE =====
@@ -3351,7 +3351,7 @@ async function exporterNotesExcel(){
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb,ws,'Notes');
-  XLSX.writeFile(wb,`Notes_${currentClasse.nom}_${ec?ec.abr:''}_2026-2027.xlsx`);
+  koXlsx(wb,`Notes_${currentClasse.nom}_${ec?ec.abr:''}_2026-2027.xlsx`);
   toast('Fichier Excel téléchargé ✓');
 }
 
@@ -3438,6 +3438,7 @@ function ficheStatique(mi){
   return`<html><head><meta charset="utf-8"><title>Fiche de notes</title><style>@page{size:${mi===null?'landscape':'portrait'};margin:12mm}body{font-family:Arial,sans-serif;font-size:${mi===null?'9':'12'}px;color:#111}table{border-collapse:collapse;width:100%;margin-top:12px}th,td{border:1px solid #888;padding:${mi===null?'2px 3px':'5px 6px'};text-align:center}</style></head><body>${tete}${tab}${pied}</body></html>`;
 }
 function imprimerFiche(mi){
+  if(koTactile())return koApercu('Fiche de notes',ficheStatique(mi));
   const w=window.open('','_blank');
   if(!w)return toast('Autorise les fenêtres pop-up pour imprimer',4500);
   w.document.write(ficheStatique(mi));w.document.close();w.focus();
@@ -5519,7 +5520,7 @@ function exporterDonnees(format){
     const wb=XLSX.utils.book_new();
     if(cache.eleves.length){XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cache.eleves.map(e=>({Matricule:e.matricule,Nom:e.nom,Classe:getClasseNomGlobal(e.classe_id)}))), 'Élèves');}
     if(cache.notes.length){XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(cache.notes.map(n=>({Titre:n.titre,Élève:getEleveNomGlobal(n.eleve_id),Note:n.note,Barème:n.bareme,Date:n.date}))),'Notes');}
-    XLSX.writeFile(wb,`cahier_professeur_${new Date().toISOString().split('T')[0]}.xlsx`);
+    koXlsx(wb,`cahier_professeur_${new Date().toISOString().split('T')[0]}.xlsx`);
     toast('Export Excel téléchargé ✓');
   }
 }
@@ -6314,6 +6315,7 @@ function resetFiltreSanctionsSilencieux(){['sf-motif','sf-du','sf-au'].forEach(i
 // ===== IMPRESSION (fenêtre cachée, marche aussi sur téléphone) =====
 function imprimerDoc(titre,corps,paysage){
   const doc='<!doctype html><html><head><meta charset="utf-8"><title>'+titre+'</title><style>@page{size:'+(paysage?'landscape':'portrait')+';margin:10mm}body{font-family:Arial,sans-serif;font-size:12px;color:#111;margin:0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #777;padding:4px 5px;text-align:left;vertical-align:top}th{background:#eef2fb}.c{text-align:center}h1,h2,h3{margin:0}.ent{text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}.sig{display:flex;justify-content:space-between;margin-top:26px;font-size:11px}.sig div{width:44%}.sig i{display:block;margin-top:30px;border-top:1px solid #000}</style></head><body>'+corps+'</body></html>';
+  if(koTactile())return koApercu(titre,doc);
   try{
     const f=document.createElement('iframe');
     f.style.cssText='position:fixed;right:0;bottom:0;width:0;height:0;border:0;visibility:hidden';
@@ -6861,7 +6863,7 @@ async function supExcel(){
   d.lignes.forEach((l,i)=>rows.push([i+1,l.e.nom,l.e.matricule||'',...f.notes.map(n=>l.vals[n.id]!==undefined?l.vals[n.id]:''),...(f.bonus?[Math.round(l.adj.net*100)/100]:[]),l.r.moy===null?'':Math.round(l.r.moy*100)/100]));
   rows.push(['','Moyenne de la classe','',...d.cm.map(x=>x===null?'':Math.round(x*100)/100),...(f.bonus?['']:[]),d.mg===null?'':Math.round(d.mg*100)/100]);
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Notes');
-  XLSX.writeFile(wb,`Notes_${f.cours}_${currentClasse.nom}_Module${f.module}.xlsx`.replace(/[\\/:*?"<>|]/g,'-'));
+  koXlsx(wb,`Notes_${f.cours}_${currentClasse.nom}_Module${f.module}.xlsx`.replace(/[\\/:*?"<>|]/g,'-'));
   toast('Fichier Excel téléchargé ✓');
 }
 
@@ -7121,7 +7123,7 @@ function pgTelechargerModele(){
     ['','18/01/2027','30/01/2027','Composition semestrielle','']];
   const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:9},{wch:12},{wch:12},{wch:60},{wch:25}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Progression');
-  XLSX.writeFile(wb,'modele_plan_de_progression.xlsx');
+  koXlsx(wb,'modele_plan_de_progression.xlsx');
 }
 function pgImporter(input){
   const f=input.files&&input.files[0];if(!f)return;
@@ -7212,7 +7214,7 @@ function pgExporterExcel(){
   });
   const ws=XLSX.utils.aoa_to_sheet(rows);ws['!cols']=[{wch:10},{wch:9},{wch:12},{wch:12},{wch:10},{wch:60},{wch:9},{wch:10},{wch:28}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Progression');
-  XLSX.writeFile(wb,'Progression_'+(currentClasse?currentClasse.nom:'classe').replace(/[^A-Za-z0-9_-]+/g,'_')+'.xlsx');
+  koXlsx(wb,'Progression_'+(currentClasse?currentClasse.nom:'classe').replace(/[^A-Za-z0-9_-]+/g,'_')+'.xlsx');
 }
 function pgImprimer(){
   const plan=pgGetPlan();if(!plan)return;
@@ -7479,6 +7481,52 @@ function pgRafraichirAlertes(){
   }catch(e){}
 }
 
+
+// ===== APERÇU PLEIN ÉCRAN AVEC BOUTON RETOUR (impression, PDF, Excel sur téléphone) =====
+function koTactile(){try{return matchMedia('(pointer:coarse)').matches||matchMedia('(display-mode: standalone)').matches||navigator.standalone===true;}catch(e){return false;}}
+let koOv=null;
+function koFermer(){if(koOv){koOv.remove();koOv=null;}}
+window.addEventListener('popstate',()=>{if(koOv)koFermer();});
+function koRetour(){if(history.state&&history.state.ko)history.back();else koFermer();}
+function koOuvrir(titre,remplir,actions){
+  koFermer();
+  const o=document.createElement('div');koOv=o;
+  o.style.cssText='position:fixed;left:0;top:0;right:0;bottom:0;z-index:2147483000;background:#fff;color:#111;display:flex;flex-direction:column';
+  o.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:#0B4FBF;color:#fff;flex-shrink:0"><button id="ko-retour" style="background:#fff;color:#0B4FBF;border:0;border-radius:8px;padding:10px 14px;font-weight:700;font-size:14px;cursor:pointer">← Retour</button><div style="flex:1;font-weight:700;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+resEsc(titre)+'</div><div id="ko-actions" style="display:flex;gap:6px"></div></div><div id="ko-corps" style="flex:1;overflow:auto;background:#f3f3f0;-webkit-overflow-scrolling:touch"></div>';
+  document.body.appendChild(o);
+  o.querySelector('#ko-retour').onclick=koRetour;
+  const ac=o.querySelector('#ko-actions');
+  (actions||[]).forEach(a=>{const b=document.createElement('button');b.textContent=a.lib;b.style.cssText='background:#F2742B;color:#fff;border:0;border-radius:8px;padding:10px 12px;font-weight:700;font-size:13px;cursor:pointer';b.onclick=a.fn;ac.appendChild(b);});
+  remplir(o.querySelector('#ko-corps'));
+  try{history.pushState({ko:1},'');}catch(e){}
+}
+function koApercu(titre,docHtml){
+  let fr=null;
+  koOuvrir(titre,c=>{fr=document.createElement('iframe');fr.style.cssText='width:100%;height:100%;border:0;background:#fff';fr.srcdoc=docHtml;c.appendChild(fr);},
+    [{lib:'🖨️ Imprimer / PDF',fn:()=>{try{fr.contentWindow.focus();fr.contentWindow.print();}catch(e){toast('Impression impossible sur cet appareil : utilise le menu du navigateur',4500);}}}]);
+}
+function koVoirUrl(url,titre){
+  koOuvrir(titre||'Document',c=>{
+    c.innerHTML='<div style="padding:18px;text-align:center"><div style="font-size:13px;margin-bottom:12px">Si le document ne s\'affiche pas ci-dessous, touche « Ouvrir ».</div><a href="'+resEsc(url)+'" target="_blank" rel="noopener" style="display:inline-block;background:#0B4FBF;color:#fff;border-radius:9px;padding:11px 16px;font-weight:700;text-decoration:none">↗ Ouvrir / télécharger</a></div><iframe src="'+resEsc(url)+'" style="width:100%;height:calc(100% - 110px);border:0;background:#fff"></iframe>';
+  });
+}
+function koXlsx(wb,nom){
+  if(!koTactile()){XLSX.writeFile(wb,nom);return;}
+  let blob,file;
+  try{
+    const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    const mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    blob=new Blob([buf],{type:mime});file=new File([blob],nom,{type:mime});
+  }catch(e){XLSX.writeFile(wb,nom);return;}
+  const peutPartager=!!(navigator.canShare&&navigator.canShare({files:[file]}));
+  koOuvrir('Fichier Excel prêt',c=>{
+    c.innerHTML='<div style="padding:22px 16px;text-align:center"><div style="font-size:40px">📗</div><div style="font-size:15px;font-weight:700;margin:6px 0">Ton fichier Excel est prêt</div><div style="font-size:12px;color:#555;margin-bottom:16px;word-break:break-all">'+resEsc(nom)+'</div><div id="ko-xb" style="display:flex;flex-direction:column;gap:9px;max-width:300px;margin:0 auto"></div><div style="font-size:11px;color:#667;margin-top:16px">Touche « ← Retour » en haut pour revenir à KOTO.</div></div>';
+    const xb=c.querySelector('#ko-xb');
+    const mk=(lib,fn,pri)=>{const b=document.createElement('button');b.textContent=lib;b.style.cssText='border:0;border-radius:10px;padding:13px;font-weight:700;font-size:14px;cursor:pointer;background:'+(pri?'#0B4FBF':'#e6eefb')+';color:'+(pri?'#fff':'#0B4FBF');b.onclick=fn;xb.appendChild(b);};
+    if(peutPartager)mk('📤 Enregistrer / Partager',async()=>{try{await navigator.share({files:[file],title:nom});}catch(e){}},true);
+    mk('⬇️ Télécharger',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nom;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();},1000);},!peutPartager);
+  });
+}
 </script>
 </body>
 </html>
