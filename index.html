@@ -7500,10 +7500,55 @@ function koOuvrir(titre,remplir,actions){
   remplir(o.querySelector('#ko-corps'));
   try{history.pushState({ko:1},'');}catch(e){}
 }
+const KO_LIBS=['https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js','https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'];
+function koScript(u){return new Promise((ok,ko)=>{if(document.querySelector('script[data-ko="'+u+'"]'))return ok();const s=document.createElement('script');s.src=u;s.dataset.ko=u;s.onload=ok;s.onerror=()=>{s.remove();ko(new Error('chargement'));};document.head.appendChild(s);});}
+// fabrique un vrai fichier PDF (pages A4) à partir du document HTML de la fiche
+async function koFaitPdf(docHtml){
+  await Promise.all(KO_LIBS.map(koScript));
+  const land=/size:landscape/.test(docHtml);
+  const W=land?1090:740;
+  const fr=document.createElement('iframe');
+  fr.style.cssText='position:fixed;left:-20000px;top:0;width:'+W+'px;height:1400px;border:0;background:#fff';
+  document.body.appendChild(fr);
+  try{
+    await new Promise(r=>{fr.onload=r;fr.srcdoc=docHtml;});
+    await new Promise(r=>setTimeout(r,350));
+    const body=fr.contentDocument.body;body.style.margin='0';body.style.padding='6px';body.style.background='#fff';
+    fr.style.height=Math.max(body.scrollHeight+20,300)+'px';
+    const canvas=await html2canvas(body,{scale:2,backgroundColor:'#ffffff',useCORS:true,windowWidth:W});
+    const pdf=new window.jspdf.jsPDF({orientation:land?'l':'p',unit:'mm',format:'a4'});
+    const pw=pdf.internal.pageSize.getWidth()-16,ph=pdf.internal.pageSize.getHeight()-16;
+    const sliceH=Math.floor(canvas.width*ph/pw);
+    let y=0,premier=true;
+    while(y<canvas.height){
+      const h=Math.min(sliceH,canvas.height-y);
+      const c2=document.createElement('canvas');c2.width=canvas.width;c2.height=h;
+      const cx=c2.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,c2.width,h);cx.drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);
+      if(!premier)pdf.addPage();premier=false;
+      pdf.addImage(c2.toDataURL('image/jpeg',0.92),'JPEG',8,8,pw,h*pw/canvas.width);
+      y+=h;
+    }
+    return pdf.output('blob');
+  }finally{fr.remove();}
+}
 function koApercu(titre,docHtml){
-  let fr=null;
+  let fr=null,pdfBlob=null,echec=false;
+  const nom=String(titre).replace(/[^A-Za-z0-9_-]+/g,'_')+'_'+new Date().toISOString().slice(0,10)+'.pdf';
+  const imprimer=()=>{try{fr.contentWindow.focus();fr.contentWindow.print();}catch(e){toast('Impression impossible sur cet appareil',4500);}};
+  const partager=async()=>{
+    if(echec)return imprimer();
+    if(!pdfBlob)return toast('Préparation du PDF… touche à nouveau dans un instant',3000);
+    const file=new File([pdfBlob],nom,{type:'application/pdf'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:titre});}
+      catch(e){if(e&&e.name!=='AbortError')koVoirUrl(URL.createObjectURL(pdfBlob),nom);}
+    }else koVoirUrl(URL.createObjectURL(pdfBlob),nom);
+  };
   koOuvrir(titre,c=>{fr=document.createElement('iframe');fr.style.cssText='width:100%;height:100%;border:0;background:#fff';fr.srcdoc=docHtml;c.appendChild(fr);},
-    [{lib:'🖨️ Imprimer / PDF',fn:()=>{try{fr.contentWindow.focus();fr.contentWindow.print();}catch(e){toast('Impression impossible sur cet appareil : utilise le menu du navigateur',4500);}}}]);
+    [{lib:'⏳ PDF…',fn:partager}]);
+  const btn=document.querySelector('#ko-actions button');
+  koFaitPdf(docHtml).then(b=>{pdfBlob=b;if(btn)btn.textContent='📤 Enregistrer / WhatsApp';})
+    .catch(()=>{echec=true;if(btn)btn.textContent='🖨️ Imprimer / PDF';});
 }
 function koVoirUrl(url,titre){
   koOuvrir(titre||'Document',c=>{
