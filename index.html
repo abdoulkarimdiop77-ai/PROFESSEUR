@@ -1078,7 +1078,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
     <button data-r="p" onclick="showTab('alertes')">🔔 Alertes</button>
     <button data-r="p" onclick="showTab('messagerie')">💬 Messagerie<span id="nav-chat-badge" class="badge-notif"></span></button>
     <button data-r="p" onclick="showTab('parametres')">⚙️ Paramètres</button>
-    <button id="nav-admin" data-r="a" onclick="showTab('admin-abo')">💼 Abonnements</button>
+    <button id="nav-admin" data-r="a" onclick="showTab('admin-abo')">💼 Abonnements<span id="nav-abo-badge" class="badge-notif"></span></button>
     <button id="nav-admin-msg" data-r="a" onclick="showTab('admin-msg')">📨 Messages<span id="nav-msg-badge" class="badge-notif"></span></button>
     <button data-r="a" onclick="showTab('parametres')">🔒 Compte</button>
     <div class="side-quote">« Un bon enseignant change le monde, une classe à la fois. »</div>
@@ -1088,7 +1088,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
     <button data-r="p" data-bn="ecoles" onclick="showTab('ecoles')"><i>🏫</i>Écoles</button>
     <button data-r="p" data-bn="devoirs-global" class="bn-devoirs" onclick="showTab('devoirs-global')"><i>📋</i>Devoirs</button>
     <button data-r="p" data-bn="ressources" onclick="showTab('ressources')"><i>📁</i>Ressources</button>
-    <button data-r="a" data-bn="admin-abo" onclick="showTab('admin-abo')"><i>💼</i>Abonnements</button>
+    <button data-r="a" data-bn="admin-abo" onclick="showTab('admin-abo')"><i>💼</i>Abonnements<span id="nav-abo-badge2" class="badge-notif"></span></button>
     <button data-r="a" data-bn="admin-msg" onclick="showTab('admin-msg')"><i>📨</i>Messages</button>
     <button data-r="a" data-bn="parametres" onclick="showTab('parametres')"><i>🔒</i>Compte</button>
     <button data-bn="plus" onclick="basculerMenu()"><i>☰</i>Plus</button>
@@ -5607,6 +5607,7 @@ async function renderAdminAbo(){
   renderAdminStats();
   const p=document.getElementById('admin-paiements'),a=document.getElementById('admin-abonnes');
   const r1=await sb.from('paiements').select('*').eq('statut','en_attente').order('created_at');
+  if(!r1.error){payAttente=(r1.data||[]).length;payConnus=new Set((r1.data||[]).map(x=>x.id));majBadgesMessages();}
   p.innerHTML=(r1.data&&r1.data.length)?r1.data.map(x=>`<div style="border:1px solid #e5e5e0;border-radius:8px;padding:9px;margin-bottom:6px;font-size:12px">
     <strong>${resEsc(x.email)}</strong> · ${x.mois} mois · <strong>${x.montant.toLocaleString('fr-FR')} GNF</strong><br>
     Code paiement : <strong>${resEsc(x.reference)}</strong> · Compte OM : ${resEsc(x.telephone)} · ${new Date(x.created_at).toLocaleString('fr-FR')}<br>
@@ -5706,7 +5707,7 @@ function retour(){
 })();
 
 // ===== MESSAGES / PROPOSITIONS =====
-let annoncesCache=[],annoncesLues=new Set(),msgNonLus=0,msgConnus=null,sugNonLues=0,sugConnues=null,sigAnn='';
+let annoncesCache=[],annoncesLues=new Set(),msgNonLus=0,msgConnus=null,sugNonLues=0,sugConnues=null,sigAnn='',payAttente=0,payConnus=null;
 function notifier(titre,corps){
   toast('📨 '+titre+(corps?' : '+corps:''),5000);
   try{if('Notification' in window&&Notification.permission==='granted')new Notification(titre,{body:corps||'',icon:'icon-192.png'});}catch(e){}
@@ -5714,10 +5715,10 @@ function notifier(titre,corps){
 }
 function majBadgesMessages(){
   const adm=estAdmin(),n=nbNonLus(),ct=adm?0:chatTotal();
-  [['menu-badge',n+ct],['nav-chat-badge',ct],['nav-msg-badge',adm?n:0],['param-prop-badge',adm?0:n],['nav-prop-badge',adm?0:n]].forEach(([id,v])=>{
+  [['menu-badge',n+ct+(adm?payAttente:0)],['nav-abo-badge',adm?payAttente:0],['nav-abo-badge2',adm?payAttente:0],['nav-chat-badge',ct],['nav-msg-badge',adm?n:0],['param-prop-badge',adm?0:n],['nav-prop-badge',adm?0:n]].forEach(([id,v])=>{
     const e=document.getElementById(id);if(!e)return;e.textContent=v;e.style.display=v>0?'inline-block':'none';
   });
-  document.title=(n>0?'('+n+') ':'')+'KOTO — Cahier du Professeur';
+  document.title=((n+(adm?payAttente:0))>0?'('+(n+(adm?payAttente:0))+') ':'')+'KOTO — Cahier du Professeur';
 }
 async function verifierMessages(premiere){
   if(!currentUser)return;
@@ -5732,6 +5733,17 @@ async function verifierMessages(premiere){
       if(premiere&&ids.size)toast('📨 '+ids.size+' proposition(s) non lue(s)',4500);
       else if(nouveaux.length)notifier('Nouvelle proposition','Un professeur t\'a écrit.');
       sugConnues=ids;
+      try{
+        const pr=await sb.from('paiements').select('id').eq('statut','en_attente');
+        if(!pr.error){
+          const pids=new Set((pr.data||[]).map(x=>x.id));
+          const pn=[...pids].filter(i=>payConnus&&!payConnus.has(i));
+          payAttente=pids.size;
+          if(premiere&&pids.size)toast('💳 '+pids.size+' paiement(s) à valider',5000);
+          else if(pn.length)notifier('💳 Nouveau paiement','Un professeur a confirmé son paiement : à vérifier et valider.');
+          payConnus=pids;
+        }
+      }catch(e){}
     }else{
       const[a,l]=await Promise.all([
         sb.from('annonces').select('*').order('created_at',{ascending:false}).limit(60),
