@@ -4596,7 +4596,7 @@ function renderDevoirs(){
     const nbCopies=cache.copies.filter(c=>c.devoir_id===dv.id).length;
     const nbEl=cache.eleves.filter(e=>e.classe_id==dv.classe_id).length;
     const ec=cache.ecoles.find(e=>e.id==dv.ecole_id);const col=ec?ec.couleur:'#0B4FBF';
-    return `<div style="border:1px solid #e5e5e0;border-radius:9px;padding:11px 13px;margin-bottom:9px">
+    return `<div style="border:1px solid #e5e5e0;border-radius:9px;padding:11px 13px;margin-bottom:9px;background:#fff;color:#111">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div>
           <span style="font-size:10px;font-weight:700;color:${col};background:${col}20;padding:1px 6px;border-radius:20px">${ec?ec.abr:'?'}</span>
