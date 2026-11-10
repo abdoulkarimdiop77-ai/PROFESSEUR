@@ -612,9 +612,17 @@ body.dark :is(.card,.modal,.ecole-card,.classe-card,.dossier-card,.ressource-car
 body.dark :is(.card,.modal,.ecole-card,.classe-card,.dossier-card,.ressource-card,.eleve-row,.seance-card,.msg-item,.corbeille-item,.eleve-rappel,.kpi,.shortcut,.breadcrumb,#bottom-nav,.auth-card,.alert-box,.notes-table-wrap,.k2-ic) ::placeholder{color:#000!important;opacity:.55}
 body.dark :is(input,select,textarea):not(:is(.card,.modal,.ecole-card,.classe-card,.dossier-card,.ressource-card,.eleve-row,.seance-card,.msg-item,.corbeille-item,.eleve-rappel,.kpi,.shortcut,.breadcrumb,#bottom-nav,.auth-card,.alert-box,.notes-table-wrap,.k2-ic) *),body.dark .section :is(label,p,li,td,th){font-weight:700}
 body.dark .main a,body.dark .breadcrumb a{font-weight:700}
+.aide-faq details{border-bottom:1px solid #e3e8f2;padding:8px 2px}
+.aide-faq summary{cursor:pointer;font-weight:700;font-size:13.5px}
+.aide-faq p,.aide-faq ol{font-size:12.5px;color:#445;margin:7px 0 2px 4px;line-height:1.5}
+.aide-faq ol{padding-left:22px}
+.ic{width:1.15em;height:1.15em;vertical-align:-.2em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;display:inline-block}
+.k2-ic .ic{width:26px;height:26px;color:var(--g2)}
+.btn-xs .ic,.matricule-badge .ic{width:1em;height:1em}
 </style>
 </head>
 <body>
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><!-- Icônes Lucide (licence ISC) --><symbol id="ic-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="m12 5 7 7-7 7" /></symbol><symbol id="ic-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M4.929 4.929 19.07 19.071" /></symbol><symbol id="ic-banknote" viewBox="0 0 24 24"><rect width="20" height="12" x="2" y="6" rx="2" /> <circle cx="12" cy="12" r="2" /> <path d="M6 12h.01M18 12h.01" /></symbol><symbol id="ic-bell" viewBox="0 0 24 24"><path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" /></symbol><symbol id="ic-book" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20" /></symbol><symbol id="ic-book-open" viewBox="0 0 24 24"><path d="M12 5v16" /> <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></symbol><symbol id="ic-bot" viewBox="0 0 24 24"><path d="M12 8V4H8" /> <rect width="16" height="12" x="4" y="8" rx="2" /> <path d="M2 14h2" /> <path d="M20 14h2" /> <path d="M15 13v2" /> <path d="M9 13v2" /></symbol><symbol id="ic-briefcase" viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /> <rect width="20" height="14" x="2" y="6" rx="2" /></symbol><symbol id="ic-calendar" viewBox="0 0 24 24"><path d="M8 2v3" /> <path d="M16 2v3" /> <rect x="3" y="3" width="18" height="18" rx="2" /> <path d="M3 9h18" /></symbol><symbol id="ic-calendar-days" viewBox="0 0 24 24"><path d="M8 2v3" /> <path d="M16 2v3" /> <rect x="3" y="3" width="18" height="18" rx="2" /> <path d="M3 9h18" /> <path d="M8 13h.01" /> <path d="M12 13h.01" /> <path d="M16 13h.01" /> <path d="M8 17h.01" /> <path d="M12 17h.01" /> <path d="M16 17h.01" /></symbol><symbol id="ic-camera" viewBox="0 0 24 24"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z" /> <circle cx="12" cy="13" r="3" /></symbol><symbol id="ic-chart-column" viewBox="0 0 24 24"><path d="M3 3v16a2 2 0 0 0 2 2h16" /> <path d="M18 17V9" /> <path d="M13 17V5" /> <path d="M8 17v-3" /></symbol><symbol id="ic-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5" /></symbol><symbol id="ic-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /></symbol><symbol id="ic-circle-check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="m16 9-5.5 5.5L8 12" /></symbol><symbol id="ic-circle-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /> <path d="M12 17h.01" /></symbol><symbol id="ic-circle-x" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="m15 9-6 6" /> <path d="m9 9 6 6" /></symbol><symbol id="ic-clapperboard" viewBox="0 0 24 24"><path d="m12.296 3.464 3.02 3.956" /> <path d="M20.2 6 3 11l-.9-2.4c-.3-1.1.3-2.2 1.3-2.5l13.5-4c1.1-.3 2.2.3 2.5 1.3z" /> <path d="M3 11h18v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /> <path d="m6.18 5.276 3.1 3.899" /></symbol><symbol id="ic-clipboard-list" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1" /> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" /> <path d="M12 11h4" /> <path d="M12 16h4" /> <path d="M8 11h.01" /> <path d="M8 16h.01" /></symbol><symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <path d="M12 6v6l4 2" /></symbol><symbol id="ic-credit-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2" /> <line x1="2" x2="22" y1="10" y2="10" /> <path d="M6 14h2" /></symbol><symbol id="ic-dices" viewBox="0 0 24 24"><rect width="12" height="12" x="2" y="10" rx="2" ry="2" /> <path d="m17.92 14 3.5-3.5a2.24 2.24 0 0 0 0-3l-5-4.92a2.24 2.24 0 0 0-3 0L10 6" /> <path d="M6 18h.01" /> <path d="M10 14h.01" /> <path d="M15 6h.01" /> <path d="M18 9h.01" /></symbol><symbol id="ic-download" viewBox="0 0 24 24"><path d="M12 15V3" /> <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /> <path d="m7 10 5 5 5-5" /></symbol><symbol id="ic-eye" viewBox="0 0 24 24"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0" /> <circle cx="12" cy="12" r="3" /></symbol><symbol id="ic-factory" viewBox="0 0 24 24"><path d="M12 16h.01" /> <path d="M16 16h.01" /> <path d="M3 19a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5a.5.5 0 0 0-.769-.422l-4.462 2.844A.5.5 0 0 1 15 10.5v-2a.5.5 0 0 0-.769-.422L9.77 10.922A.5.5 0 0 1 9 10.5V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2z" /> <path d="M8 16h.01" /></symbol><symbol id="ic-file-text" viewBox="0 0 24 24"><path d="M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z" /> <path d="M14 2v5a1 1 0 0 0 1 1h5" /> <path d="M10 9H8" /> <path d="M16 13H8" /> <path d="M16 17H8" /></symbol><symbol id="ic-folder" viewBox="0 0 24 24"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z" /></symbol><symbol id="ic-gift" viewBox="0 0 24 24"><path d="M12 7v14" /> <path d="M20 11v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8" /> <path d="M7.5 7a1 1 0 0 1 0-5A4.8 8 0 0 1 12 7a4.8 8 0 0 1 4.5-5 1 1 0 0 1 0 5" /> <rect x="3" y="7" width="18" height="4" rx="1" /></symbol><symbol id="ic-graduation-cap" viewBox="0 0 24 24"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" /> <path d="M22 10v6" /> <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" /></symbol><symbol id="ic-hand" viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2" /> <path d="M14 10V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v2" /> <path d="M10 10.5V6a2 2 0 0 0-2-2a2 2 0 0 0-2 2v8" /> <path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" /></symbol><symbol id="ic-hash" viewBox="0 0 24 24"><line x1="4" x2="20" y1="9" y2="9" /> <line x1="4" x2="20" y1="15" y2="15" /> <line x1="10" x2="8" y1="3" y2="21" /> <line x1="16" x2="14" y1="3" y2="21" /></symbol><symbol id="ic-house" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" /> <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /></symbol><symbol id="ic-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /> <circle cx="9" cy="9" r="2" /> <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></symbol><symbol id="ic-key-round" viewBox="0 0 24 24"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z" /> <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" /></symbol><symbol id="ic-landmark" viewBox="0 0 24 24"><path d="M10 18v-7" /> <path d="M11.119 2.205a2 2 0 0 1 1.762 0l7.84 3.846A.5.5 0 0 1 20.5 7h-17a.5.5 0 0 1-.22-.949z" /> <path d="M14 18v-7" /> <path d="M18 18v-7" /> <path d="M3 22h18" /> <path d="M6 18v-7" /></symbol><symbol id="ic-library" viewBox="0 0 24 24"><path d="m16 6 4 14" /> <path d="M12 6v14" /> <path d="M8 8v12" /> <path d="M4 4v16" /></symbol><symbol id="ic-lightbulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5" /> <path d="M9 18h6" /> <path d="M10 22h4" /></symbol><symbol id="ic-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" /> <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" /></symbol><symbol id="ic-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 10 0v4" /></symbol><symbol id="ic-lock-open" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2" /> <path d="M7 11V7a5 5 0 0 1 9.9-1" /></symbol><symbol id="ic-log-out" viewBox="0 0 24 24"><path d="m16 17 5-5-5-5" /> <path d="M21 12H9" /> <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /></symbol><symbol id="ic-mail" viewBox="0 0 24 24"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7" /> <rect x="2" y="4" width="20" height="16" rx="2" /></symbol><symbol id="ic-megaphone" viewBox="0 0 24 24"><path d="M11 6a13 13 0 0 0 8.4-2.8A1 1 0 0 1 21 4v12a1 1 0 0 1-1.6.8A13 13 0 0 0 11 14H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" /> <path d="M6 14a12 12 0 0 0 2.4 7.2 2 2 0 0 0 3.2-2.4A8 8 0 0 1 10 14" /> <path d="M8 6v8" /></symbol><symbol id="ic-menu" viewBox="0 0 24 24"><path d="M4 5h16" /> <path d="M4 12h16" /> <path d="M4 19h16" /></symbol><symbol id="ic-message-circle" viewBox="0 0 24 24"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719" /></symbol><symbol id="ic-minus" viewBox="0 0 24 24"><path d="M5 12h14" /></symbol><symbol id="ic-moon" viewBox="0 0 24 24"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></symbol><symbol id="ic-notebook" viewBox="0 0 24 24"><path d="M2 6h4" /> <path d="M2 10h4" /> <path d="M2 14h4" /> <path d="M2 18h4" /> <rect width="16" height="20" x="4" y="2" rx="2" /> <path d="M16 2v20" /></symbol><symbol id="ic-notebook-pen" viewBox="0 0 24 24"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4" /> <path d="M2 6h4" /> <path d="M2 10h4" /> <path d="M2 14h4" /> <path d="M2 18h4" /> <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z" /></symbol><symbol id="ic-palette" viewBox="0 0 24 24"><path d="M12 22a1 1 0 0 1 0-20 10 9 0 0 1 10 9 5 5 0 0 1-5 5h-2.25a1.75 1.75 0 0 0-1.4 2.8l.3.4a1.75 1.75 0 0 1-1.4 2.8z" /> <circle cx="13.5" cy="6.5" r=".5" fill="currentColor" /> <circle cx="17.5" cy="10.5" r=".5" fill="currentColor" /> <circle cx="6.5" cy="12.5" r=".5" fill="currentColor" /> <circle cx="8.5" cy="7.5" r=".5" fill="currentColor" /></symbol><symbol id="ic-paperclip" viewBox="0 0 24 24"><path d="m16 6-8.414 8.586a2 2 0 0 0 2.829 2.829l8.414-8.586a4 4 0 1 0-5.657-5.657l-8.379 8.551a6 6 0 1 0 8.485 8.485l8.379-8.551" /></symbol><symbol id="ic-party-popper" viewBox="0 0 24 24"><path d="M5.8 11.3 2 22l10.7-3.79" /> <path d="M4 3h.01" /> <path d="M22 8h.01" /> <path d="M15 2h.01" /> <path d="M22 20h.01" /> <path d="m22 2-2.24.75a2.9 2.9 0 0 0-1.96 3.12c.1.86-.57 1.63-1.45 1.63h-.38c-.86 0-1.6.6-1.76 1.44L14 10" /> <path d="m22 13-.82-.33c-.86-.34-1.82.2-1.98 1.11c-.11.7-.72 1.22-1.43 1.22H17" /> <path d="m11 2 .33.82c.34.86-.2 1.82-1.11 1.98C9.52 4.9 9 5.52 9 6.23V7" /> <path d="M11 13c1.93 1.93 2.83 4.17 2 5-.83.83-3.07-.07-5-2-1.93-1.93-2.83-4.17-2-5 .83-.83 3.07.07 5 2Z" /></symbol><symbol id="ic-pen-line" viewBox="0 0 24 24"><path d="M13 21h8" /> <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /></symbol><symbol id="ic-pencil" viewBox="0 0 24 24"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z" /> <path d="m15 5 4 4" /></symbol><symbol id="ic-pin" viewBox="0 0 24 24"><path d="M12 17v5" /> <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" /></symbol><symbol id="ic-plus" viewBox="0 0 24 24"><path d="M5 12h14" /> <path d="M12 5v14" /></symbol><symbol id="ic-printer" viewBox="0 0 24 24"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /> <path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6" /> <rect x="6" y="14" width="12" height="8" rx="1" /></symbol><symbol id="ic-receipt" viewBox="0 0 24 24"><path d="M12 17V7" /> <path d="M16 8h-6a2 2 0 0 0 0 4h4a2 2 0 0 1 0 4H8" /> <path d="M4 3a1 1 0 0 1 1-1 1.3 1.3 0 0 1 .7.2l.933.6a1.3 1.3 0 0 0 1.4 0l.934-.6a1.3 1.3 0 0 1 1.4 0l.933.6a1.3 1.3 0 0 0 1.4 0l.933-.6a1.3 1.3 0 0 1 1.4 0l.934.6a1.3 1.3 0 0 0 1.4 0l.933-.6A1.3 1.3 0 0 1 19 2a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1 1.3 1.3 0 0 1-.7-.2l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.934.6a1.3 1.3 0 0 1-1.4 0l-.933-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-1.4 0l-.934-.6a1.3 1.3 0 0 0-1.4 0l-.933.6a1.3 1.3 0 0 1-.7.2 1 1 0 0 1-1-1z" /></symbol><symbol id="ic-recycle" viewBox="0 0 24 24"><path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.004-1.784L7.196 9.5" /> <path d="M11 19h8.203a1.83 1.83 0 0 0 1.556-.89 1.784 1.784 0 0 0 0-1.775l-1.226-2.12" /> <path d="m14 16-3 3 3 3" /> <path d="M8.293 13.596 7.196 9.5 3.1 10.598" /> <path d="m9.344 5.811 1.093-1.892A1.83 1.83 0 0 1 11.985 3a1.784 1.784 0 0 1 1.546.888l3.943 6.843" /> <path d="m13.378 9.633 4.096 1.098 1.097-4.096" /></symbol><symbol id="ic-refresh-cw" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" /> <path d="M21 3v5h-5" /> <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" /> <path d="M8 16H3v5" /></symbol><symbol id="ic-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4" /> <path d="M3 11v-1a4 4 0 0 1 4-4h14" /> <path d="m7 22-4-4 4-4" /> <path d="M21 13v1a4 4 0 0 1-4 4H3" /></symbol><symbol id="ic-rocket" viewBox="0 0 24 24"><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" /> <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09" /> <path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z" /> <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05" /></symbol><symbol id="ic-save" viewBox="0 0 24 24"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z" /> <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7" /> <path d="M7 3v4a1 1 0 0 0 1 1h7" /></symbol><symbol id="ic-scale" viewBox="0 0 24 24"><path d="M12 3v18" /> <path d="m19 8 3 8a5 5 0 0 1-6 0zV7" /> <path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1" /> <path d="m5 8 3 8a5 5 0 0 1-6 0zV7" /> <path d="M7 21h10" /></symbol><symbol id="ic-school" viewBox="0 0 24 24"><path d="M14 21v-3a2 2 0 0 0-4 0v3" /> <path d="M18 4.933V21" /> <path d="m4 6 7.106-3.79a2 2 0 0 1 1.788 0L20 6" /> <path d="m6 11-3.52 2.147a1 1 0 0 0-.48.854V19a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-5a1 1 0 0 0-.48-.853L18 11" /> <path d="M6 4.933V21" /> <circle cx="12" cy="9" r="2" /></symbol><symbol id="ic-search" viewBox="0 0 24 24"><path d="m21 21-4.34-4.34" /> <circle cx="11" cy="11" r="8" /></symbol><symbol id="ic-settings" viewBox="0 0 24 24"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915" /> <circle cx="12" cy="12" r="3" /></symbol><symbol id="ic-siren" viewBox="0 0 24 24"><path d="M7 18v-6a5 5 0 1 1 10 0v6" /> <path d="M5 21a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-1a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2z" /> <path d="M21 12h1" /> <path d="M18.5 4.5 18 5" /> <path d="M2 12h1" /> <path d="M12 2v1" /> <path d="m4.929 4.929.707.707" /> <path d="M12 12v6" /></symbol><symbol id="ic-smartphone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2" ry="2" /> <path d="M12 18h.01" /></symbol><symbol id="ic-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" /> <path d="M20 2v4" /> <path d="M22 4h-4" /> <circle cx="4" cy="20" r="2" /></symbol><symbol id="ic-square-check" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" /> <path d="m16 9-5.5 5.5L8 12" /></symbol><symbol id="ic-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" /></symbol><symbol id="ic-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /> <path d="M12 2v2" /> <path d="M12 20v2" /> <path d="m4.93 4.93 1.41 1.41" /> <path d="m17.66 17.66 1.41 1.41" /> <path d="M2 12h2" /> <path d="M20 12h2" /> <path d="m6.34 17.66-1.41 1.41" /> <path d="m19.07 4.93-1.41 1.41" /></symbol><symbol id="ic-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" /> <circle cx="12" cy="12" r="6" /> <circle cx="12" cy="12" r="2" /></symbol><symbol id="ic-trash-2" viewBox="0 0 24 24"><path d="M10 11v6" /> <path d="M14 11v6" /> <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" /> <path d="M3 6h18" /> <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></symbol><symbol id="ic-trending-up" viewBox="0 0 24 24"><path d="M16 7h6v6" /> <path d="m22 7-8.5 8.5-5-5L2 17" /></symbol><symbol id="ic-triangle-alert" viewBox="0 0 24 24"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" /> <path d="M12 9v4" /> <path d="M12 17h.01" /></symbol><symbol id="ic-trophy" viewBox="0 0 24 24"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2" /> <path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2" /> <path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3" /> <path d="M4 22h16" /> <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z" /> <path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3" /></symbol><symbol id="ic-turtle" viewBox="0 0 24 24"><path d="m12 10 2 4v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3a8 8 0 1 0-16 0v3a1 1 0 0 0 1 1h2a1 1 0 0 0 1-1v-3l2-4h4Z" /> <path d="M4.82 7.9 8 10" /> <path d="M15.18 7.9 12 10" /> <path d="M16.93 10H20a2 2 0 0 1 0 4H2" /></symbol><symbol id="ic-upload" viewBox="0 0 24 24"><path d="M12 3v12" /> <path d="m17 8-5-5-5 5" /> <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /></symbol><symbol id="ic-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /> <circle cx="12" cy="7" r="4" /></symbol><symbol id="ic-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /> <path d="M16 3.128a4 4 0 0 1 0 7.744" /> <path d="M22 21v-2a4 4 0 0 0-3-3.87" /> <circle cx="9" cy="7" r="4" /></symbol><symbol id="ic-wifi" viewBox="0 0 24 24"><path d="M12 20h.01" /> <path d="M2 8.82a15 15 0 0 1 20 0" /> <path d="M5 12.859a10 10 0 0 1 14 0" /> <path d="M8.5 16.429a5 5 0 0 1 7 0" /></symbol><symbol id="ic-wifi-off" viewBox="0 0 24 24"><path d="M12 20h.01" /> <path d="M8.5 16.429a5 5 0 0 1 7 0" /> <path d="M5 12.859a10 10 0 0 1 5.17-2.69" /> <path d="M19 12.859a10 10 0 0 0-2.007-1.523" /> <path d="M2 8.82a15 15 0 0 1 4.177-2.643" /> <path d="M22 8.82a15 15 0 0 0-11.288-3.764" /> <path d="m2 2 20 20" /></symbol><symbol id="ic-x" viewBox="0 0 24 24"><path d="M18 6 6 18" /> <path d="m6 6 12 12" /></symbol><symbol id="ic-zap" viewBox="0 0 24 24"><path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z" /></symbol></svg>
 <div id="splash" style="position:fixed;inset:0;z-index:99999;background:linear-gradient(160deg,#0B4FBF,#0A3A9E);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;transition:opacity .6s">
   <img src="icon-512.png" alt="KOTO" style="width:150px;height:150px;border-radius:32px;box-shadow:0 8px 30px rgba(0,0,0,.35);animation:splashpop .9s ease-out">
   <div style="font-size:34px;font-weight:800;letter-spacing:6px;margin-top:20px">KOTO</div>
@@ -714,6 +722,19 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
 </div>
 
 <!-- MODAL AJOUTER ÉLÈVE -->
+<div class="modal-overlay" id="modal-mat-mode">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>🔢 Matricules de la classe</h2>
+      <button class="modal-close" onclick="closeModal('modal-mat-mode')">✕</button>
+    </div>
+    <div style="font-size:12.5px;color:#445;margin-bottom:10px">Comment veux-tu gérer les matricules des élèves de cette classe ? Tu pourras changer ce choix plus tard avec le bouton « 🔢 Matricules ».</div>
+    <label style="display:block;border:1px solid #d5deef;border-radius:8px;padding:9px 11px;margin-bottom:7px;cursor:pointer"><input type="radio" name="mm-choix" value="auto" style="width:auto;margin-right:7px"><b>KOTO crée les matricules</b><div style="font-size:11.5px;color:#667;margin:3px 0 0 24px">Un matricule est généré automatiquement pour chaque élève.</div></label>
+    <label style="display:block;border:1px solid #d5deef;border-radius:8px;padding:9px 11px;margin-bottom:7px;cursor:pointer"><input type="radio" name="mm-choix" value="manuel" style="width:auto;margin-right:7px"><b>Je saisis les matricules de l'école</b><div style="font-size:11.5px;color:#667;margin:3px 0 0 24px">Tu écris (ou importes depuis Excel) les matricules donnés par l'établissement.</div></label>
+    <label style="display:block;border:1px solid #d5deef;border-radius:8px;padding:9px 11px;margin-bottom:10px;cursor:pointer"><input type="radio" name="mm-choix" value="aucun" style="width:auto;margin-right:7px"><b>Pas de matricule</b><div style="font-size:11.5px;color:#667;margin:3px 0 0 24px">La colonne matricule disparaît des listes, fiches de notes, impressions et exports.</div></label>
+    <button class="btn btn-primary" style="width:100%" onclick="validerMatMode()">✔ Valider</button>
+  </div>
+</div>
 <div class="modal-overlay" id="modal-add-eleve">
   <div class="modal">
     <div class="modal-header">
@@ -1031,7 +1052,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
     <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:10px;margin-bottom:14px">
       <h2 id="pr-ecole" style="font-size:16px"></h2>
       <h3 id="pr-classe" style="font-size:14px;color:#555"></h3>
-      <p id="pr-date" style="font-size:11px;color:#888"></p>
+      <p id="pz-date" style="font-size:11px;color:#888"></p>
     </div>
     <h3 style="text-align:center;color:#c0392b;margin-bottom:12px">⚠️ LISTE DES ÉLÈVES À SANCTIONNER</h3>
     <div id="pr-content"></div>
@@ -1081,6 +1102,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
     <button id="nav-admin" data-r="a" onclick="showTab('admin-abo')">💼 Abonnements<span id="nav-abo-badge" class="badge-notif"></span></button>
     <button id="nav-admin-msg" data-r="a" onclick="showTab('admin-msg')">📨 Messages<span id="nav-msg-badge" class="badge-notif"></span></button>
     <button data-r="a" onclick="showTab('parametres')">🔒 Compte</button>
+    <button data-r="p" onclick="showTab('aide')">❓ Aide</button>
     <div class="side-quote">« Un bon enseignant change le monde, une classe à la fois. »</div>
   </nav>
   <div id="bottom-nav">
@@ -1172,6 +1194,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       <strong style="font-size:15px" id="eleves-titre">Élèves</strong>
       <div style="display:flex;gap:7px;flex-wrap:wrap">
         <button class="btn btn-primary" onclick="openModal('modal-add-eleve')">+ Ajouter un élève</button>
+        <button class="btn btn-sm" onclick="ouvrirMatMode()" title="Matricules : automatiques, donnés par l'école, ou aucun">🔢 Matricules</button>
         <button class="btn btn-info btn-sm" onclick="ouvrirEdtClasse()">🗓️ Mes cours</button>
         <button class="btn btn-info btn-sm" onclick="ouvrirPresences()">✅ Contrôle de présence</button>
         <button class="btn btn-warn btn-sm" onclick="ouvrirSanctions()">⚠️ Sanctions</button>
@@ -1185,12 +1208,13 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
     <!-- Import Excel -->
     <div class="card" style="margin-bottom:10px">
       <div class="card-title">📥 Import liste élèves (Excel)</div>
-      <div class="alert-info alert-box" style="margin-bottom:7px">Format du fichier : <code>N° | Prénom | Nom | Matricule (facultatif)</code> (1ère ligne = en-tête). Si le matricule est vide, il est créé automatiquement (cycle supérieur : le matricule est obligatoire, les lignes sans matricule sont ignorées). <a onclick="telechargerModeleEleves()" style="color:#0B4FBF;cursor:pointer;text-decoration:underline">⬇️ Télécharger le modèle</a></div>
+      <div class="alert-info alert-box" style="margin-bottom:7px">Format du fichier : <code>N° | Prénom | Nom | Matricule (facultatif)</code> (1ère ligne = en-tête). <span id="import-mat-hint"></span> <a onclick="telechargerModeleEleves()" style="color:#0B4FBF;cursor:pointer;text-decoration:underline">⬇️ Télécharger le modèle</a></div>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="file" id="import-eleves-file" accept=".xlsx,.xls,.csv" onchange="importExcelEleves(this)" style="flex:1">
       </div>
       <div id="import-eleves-preview" style="margin-top:7px"></div>
     </div>
+    <div id="rech-eleves-box" style="display:none;margin-bottom:8px"><input id="rech-eleves" type="search" placeholder="🔍 Rechercher un élève (nom ou matricule)…" oninput="renderElevesClasse(currentClasse.id)" style="width:100%"><div id="rech-eleves-info" style="font-size:11px;color:#667;margin-top:3px"></div></div>
     <div id="liste-eleves-classe"><div class="loading"><div class="spinner"></div>Chargement...</div></div>
   </div>
 
@@ -1203,6 +1227,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
           <option value="">Toutes matières</option>
         </select>
         <select id="notes-mois" onchange="renderNotesClasse()" style="width:190px"></select>
+        <input id="notes-rech" type="search" placeholder="🔍 Chercher un élève…" oninput="rechAppliquer('notes-rech','notes-classe-content')" style="width:170px">
         <button class="btn btn-primary btn-sm" onclick="sauvegarderNotesClasse()">💾 Sauvegarder</button>
         <button class="btn btn-warn btn-sm" id="notes-print-mois" onclick="imprimerFicheMois()">🖨️ Imprimer la fiche du mois</button>
         <button class="btn btn-sm" onclick="ouvrirCompo()">🏆 Compositions</button>
@@ -1410,6 +1435,51 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
   </div>
 
   <!-- PARAMÈTRES -->
+  <div id="aide" class="section">
+    <div class="card" style="margin-bottom:10px">
+      <div class="card-title">❓ Aide — bien démarrer avec KOTO</div>
+      <div id="aide-abo" style="margin:6px 0"></div>
+      <div style="font-size:12.5px;color:#445">Touche un titre pour afficher la réponse. Un souci que tu ne trouves pas ici ? Écris-nous sur WhatsApp, on te répond.</div>
+      <a class="btn btn-primary" style="display:inline-block;margin-top:8px;text-decoration:none" href="https://wa.me/224621954382?text=Bonjour%2C%20j%27ai%20besoin%20d%27aide%20avec%20KOTO" target="_blank" rel="noopener">💬 Nous écrire sur WhatsApp</a>
+    </div>
+    <div class="card aide-faq">
+      <details open><summary>🚀 Démarrage rapide en 5 étapes</summary>
+        <ol>
+          <li><b>Crée ton école</b> : onglet « Écoles » → « + Ajouter une école ».</li>
+          <li><b>Crée une classe</b> dans l'école. KOTO te demande alors comment gérer les matricules.</li>
+          <li><b>Ajoute tes élèves</b> un par un, ou importe ta liste depuis Excel (bouton de modèle dans la classe).</li>
+          <li><b>Remplis ton emploi du temps</b> (« Mes cours ») : KOTO te rappelle tes cours du lendemain.</li>
+          <li><b>Fais l'appel, mets les notes, lance des devoirs en ligne</b> : tout est enregistré automatiquement.</li>
+        </ol>
+      </details>
+      <details><summary>🔢 Les matricules</summary>
+        <p>Pour chaque classe tu choisis : <b>KOTO crée les matricules</b>, <b>tu saisis ceux de l'école</b>, ou <b>pas de matricule</b>. Tu peux changer à tout moment avec le bouton « 🔢 Matricules » dans la classe. Choisir « pas de matricule » ne supprime rien : il suffit de réactiver pour les revoir.</p>
+      </details>
+      <details><summary>🔍 Chercher un élève</summary>
+        <p>Dans la liste des élèves et dans les fiches de notes, tape quelques lettres du nom (ou du matricule) dans la barre de recherche. La recherche ne touche pas aux notes déjà saisies.</p>
+      </details>
+      <details><summary>📋 Devoirs en ligne et correction automatique</summary>
+        <p>Crée un devoir avec des questions (QCM ou réponses libres), puis envoie le lien et le code à tes élèves. Pour chaque question libre, remplis la <b>fiche de correction</b> : réponse attendue, autres formulations acceptées et, si tu veux, des <b>mots-clés</b>.</p>
+        <p><b>Mots-clés :</b> sépare-les par des virgules. Mets « / » entre deux synonymes (<i>photosynthèse / photosynthese</i>). Un <b>*</b> devant un mot le rend indispensable : s'il manque, la note proposée ne dépasse pas la moitié des points.</p>
+        <p>Sur chaque copie, KOTO <b>propose</b> une note : c'est toi qui la modifies et la valides. La note peut ensuite être reportée automatiquement dans la fiche de notes.</p>
+      </details>
+      <details><summary>📲 Installer l'application sur le téléphone</summary>
+        <p><b>Android :</b> installe l'application KOTO (fichier APK fourni) ou ouvre le site dans Chrome → menu ⋮ → « Ajouter à l'écran d'accueil ».</p>
+        <p><b>iPhone :</b> ouvre le site dans Safari → bouton Partager → « Sur l'écran d'accueil ».</p>
+        <p><b>Ordinateur :</b> dans Chrome ou Edge, clique sur l'icône d'installation à droite de la barre d'adresse.</p>
+      </details>
+      <details><summary>💳 Abonnement et paiement</summary>
+        <p>Tu as <b>2 mois gratuits</b>, puis l'abonnement coûte <b>20 000 GNF par mois</b>. Paiement par <b>Orange Money</b> : clique sur « Payer / Prolonger » (bandeau en haut ou ci-dessus), envoie le montant au numéro indiqué, puis valide. Ton accès est activé après vérification. Tu peux payer plusieurs mois d'avance. Si l'abonnement se termine, <b>tes données sont conservées</b>.</p>
+      </details>
+      <details><summary>📶 Sans internet</summary>
+        <p>Tu peux continuer à travailler hors connexion : tes saisies sont gardées dans le téléphone puis envoyées dès que le réseau revient. Évite de te déconnecter tant que l'indicateur de synchronisation n'est pas revenu au vert.</p>
+      </details>
+      <details><summary>🔑 Mot de passe oublié</summary>
+        <p>Sur l'écran de connexion, utilise « Mot de passe oublié » : tu recevras un lien par e-mail. Sans réponse, écris-nous sur WhatsApp.</p>
+      </details>
+    </div>
+  </div>
+
   <div id="parametres" class="section">
 
     <div style="display:grid;grid-template-columns:220px 1fr;gap:14px">
@@ -1728,6 +1798,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
       </div>
       <div id="questions-builder"></div>
     </div>
+    <div id="dv-rep-box" style="background:#E6EEFB;border:1px solid #B5D4F4;border-radius:8px;padding:9px 11px;margin:8px 0"></div>
     <button class="btn btn-primary" style="width:100%" onclick="dvOuvrirPond()">➡️ Suivant : pondérer le sujet</button>
     <div style="font-size:10.5px;color:#667;margin-top:5px;text-align:center">Tu fixes les points de chaque question, puis tu crées le devoir et son lien.</div>
   </div>
@@ -1914,7 +1985,7 @@ function toast(msg,dur=3000){const t=document.getElementById('toast');t.textCont
 function openModal(id){
   try{
     if(id==='modal-add-classe')cyclesClasse();
-    if(id==='modal-add-eleve'){const b=document.getElementById('add-mat-box');if(b)b.style.display=estSupClasse()?'block':'none';}
+    if(id==='modal-add-eleve'){const b=document.getElementById('add-mat-box');if(b)b.style.display=(currentClasse&&matMode(currentClasse.id)==='manuel')?'block':'none';}
   }catch(e){}
   document.getElementById(id).classList.add('show');
 }
@@ -1926,6 +1997,43 @@ function genCode(){return Math.random().toString(36).substr(2,8).toUpperCase();}
 function genMatricule(ecoleAbr,classeNom){
   const p=(ecoleAbr||'XXX').substr(0,3).toUpperCase()+(classeNom||'00').replace(/[^0-9]/g,'').substr(0,2)||'00';
   return p+'-'+String(Date.now()).slice(-4);
+}
+// ===== MODE DE MATRICULE PAR CLASSE : 'auto' | 'manuel' (donnés par l'école) | 'aucun' =====
+function matMode(cid){
+  cid=cid||(currentClasse&&currentClasse.id);
+  const c=getExtra('matricule_mode',cid)[0];
+  if(c&&['auto','manuel','aucun'].includes(c.mode))return c.mode;
+  const cl=cache.classes.find(x=>x.id===cid)||currentClasse;
+  return (monCycle==='superieur'||(cl&&(cl.cycle==='Supérieur'||cl.cycle==='Professionnel')))?'manuel':'auto';
+}
+function matVisible(){return !currentClasse||matMode(currentClasse.id)!=='aucun';}
+let matModeCid=null;
+function ouvrirMatMode(cid){
+  matModeCid=cid||(currentClasse&&currentClasse.id);if(!matModeCid)return;
+  const m=matMode(matModeCid);
+  document.querySelectorAll('input[name=mm-choix]').forEach(r=>{r.checked=r.value===m;});
+  openModal('modal-mat-mode');
+}
+async function validerMatMode(){
+  const r=document.querySelector('input[name=mm-choix]:checked');if(!r||!matModeCid)return;
+  await saveExtra('matricule_mode',matModeCid,[{mode:r.value}]);
+  closeModal('modal-mat-mode');
+  if(currentClasse&&currentClasse.id===matModeCid)renderElevesClasse(matModeCid);
+  toast(r.value==='auto'?'Matricules créés automatiquement ✓':r.value==='manuel'?'Tu saisiras les matricules donnés par l\'école ✓':'Cette classe fonctionne sans matricule ✓',4000);
+}
+// ===== RECHERCHE (liste d'élèves, fiches de notes) =====
+function rechNorm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();}
+function rechAppliquer(inputId,contId){
+  const i=document.getElementById(inputId),c=document.getElementById(contId);if(!i||!c)return;
+  const q=rechNorm(i.value);let nb=0,tot=0;
+  c.querySelectorAll('tbody tr').forEach(tr=>{
+    const cell=tr.querySelector('td.nom-col strong');if(!cell)return;
+    tot++;
+    const ok=!q||rechNorm(tr.querySelector('td.nom-col').textContent+' '+(tr.querySelector('.matricule-badge')||{textContent:''}).textContent).includes(q);
+    tr.style.display=ok?'':'none';if(ok)nb++;
+  });
+  const inf=document.getElementById(inputId+'-info');
+  if(inf)inf.textContent=q?(nb+' / '+tot+' résultat(s)'):'';
 }
 const NB=()=>monCycle==='primaire'?10:20;
 function noteColor(n){if(n===null||n===undefined||n==='')return '';const v=parseFloat(n)*20/NB();if(v>=14)return '#085041';if(v>=10)return '#633806';return '#791F1F';}
@@ -2547,7 +2655,7 @@ const TEINTES={
  bleu:['#3F7BFF','#0B24D6','#030A3E'],violet:['#A14BE0','#5A0E9C','#1E0236'],vert:['#3FAE3F','#0A6B0A','#012A01'],
  orange:['#D9691A','#8A3A05','#2C1002'],rose:['#C4189A','#8A0670','#2A0220'],cyan:['#2FB4E8','#0B58B8','#041A4A'],
  rouge:['#E0463C','#8E1236','#2A0414'],ardoise:['#5C74B8','#1E2F72','#080E2A']};
-const TEINTE_ONGLET={'dashboard':'bleu','ecoles':'violet','vue-classes':'violet','vue-eleves':'violet','vue-notes':'violet','vue-notes-sup':'violet','devoirs-global':'vert','ressources':'orange','bibliotheque':'rose','edt-global':'cyan','alertes':'rouge','messagerie':'violet','parametres':'ardoise','admin-abo':'bleu','admin-msg':'rose'};
+const TEINTE_ONGLET={'dashboard':'bleu','ecoles':'violet','vue-classes':'violet','vue-eleves':'violet','vue-notes':'violet','vue-notes-sup':'violet','devoirs-global':'vert','ressources':'orange','bibliotheque':'rose','edt-global':'cyan','alertes':'rouge','messagerie':'violet','parametres':'ardoise','aide':'cyan','admin-abo':'bleu','admin-msg':'rose'};
 function appliquerTeinte(){
   const t=TEINTES[TEINTE_ONGLET[sectionActuelle()]||'bleu'];
   const bg='radial-gradient(ellipse 60% 38% at 50% 30%,'+t[0]+'66 0%,transparent 70%),radial-gradient(ellipse 80% 30% at 50% 0%,'+t[0]+'88 0%,transparent 75%),linear-gradient(180deg,'+t[1]+' 0%,'+t[2]+' 100%)';
@@ -2555,7 +2663,7 @@ function appliquerTeinte(){
   document.body.style.setProperty('--pagebg',bg);
 }
 
-const TAB_COULEURS={'dashboard':'#2F6FE0','ecoles':'#2E9E3E','devoirs-global':'#F08A00','ressources':'#E5A800','bibliotheque':'#1E90FF','edt-global':'#4A72D6','alertes':'#F2742B','messagerie':'#29A8F0','propositions':'#29A8F0','parametres':'#7A8DB5','admin-abo':'#4A72D6','admin-msg':'#29A8F0'};
+const TAB_COULEURS={'dashboard':'#2F6FE0','ecoles':'#2E9E3E','devoirs-global':'#F08A00','ressources':'#E5A800','bibliotheque':'#1E90FF','edt-global':'#4A72D6','alertes':'#F2742B','messagerie':'#29A8F0','propositions':'#29A8F0','parametres':'#7A8DB5','aide':'#29A8F0','admin-abo':'#4A72D6','admin-msg':'#29A8F0'};
 // ===== SUPABASE CRUD =====
 async function sbGet(table,filters={}){
   let q=sb.from(table).select('*').eq('user_id',currentUser.id);
@@ -2718,7 +2826,7 @@ function showTab(t){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('show'));
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
   document.getElementById(t).classList.add('show');
-  const tabs=['dashboard','ecoles','devoirs-global','ressources','bibliotheque','edt-global','alertes','messagerie','parametres','admin-abo','admin-msg'];
+  const tabs=['dashboard','ecoles','devoirs-global','ressources','bibliotheque','edt-global','alertes','messagerie','parametres','admin-abo','admin-msg',null,'aide'];
   const idx=tabs.indexOf(t);
   if(idx>=0)document.querySelectorAll('.nav button')[idx].classList.add('active');
   if(t==='devoirs-global')renderDevoirs();
@@ -2730,6 +2838,7 @@ function showTab(t){
   if(t==='admin-abo')renderAdminAbo();
   if(t==='admin-msg')renderAdminMsg();
   if(t==='messagerie')renderMessagerie();
+  if(t==='aide')renderAide();
   if(t==='ecoles')renderEcoles();
   if(t==='parametres'){showParamTab(aboInfo&&aboInfo.admin?'p-securite':'p-compte');}
 }
@@ -2758,6 +2867,8 @@ function goTo(vue,ecole,classe){
       {label:'📚 Classes',action:"goTo('classes',currentEcole)"},
     ]);
     document.getElementById('eleves-titre').textContent='👥 Élèves — '+classe.nom+(ec?' ('+ec.abr+')':'');
+    {const r=document.getElementById('rech-eleves');if(r)r.value='';}
+    majHintImport();
     document.getElementById('vue-eleves').classList.add('show');
     renderElevesClasse(classe.id);
   }
@@ -2873,6 +2984,7 @@ async function addClasse(){
   closeModal('modal-add-classe');
   document.getElementById('cl-lettre').value='';document.getElementById('cl-eff').value='';
   renderClassesEcole(currentEcole.id);refreshAllSelects();toast('Classe ajoutée ✓');
+  ouvrirMatMode(data.id);
 }
 async function delClasse(id,e){
   e.stopPropagation();
@@ -2917,12 +3029,12 @@ async function saveNewEleve(){
   if(!currentClasse)return toast('Aucune classe sélectionnée');
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
   const nomComplet=prenom+' '+nom;
-  let mat;
-  if(estSupClasse()){
+  let mat;const mmode=matMode(currentClasse.id);
+  if(mmode==='manuel'){
     mat=document.getElementById('add-mat').value.trim();
-    if(!mat)return toast('Écris le matricule de l\'étudiant (donné par l\'établissement)',4500);
+    if(!mat)return toast('Écris le matricule de l\'élève (donné par l\'établissement)',4500);
     if(cache.eleves.some(x=>(x.matricule||'').toLowerCase()===mat.toLowerCase()))return toast('Ce matricule est déjà utilisé',4500);
-  }else mat=genMatricule(ec?ec.abr:'',currentClasse.nom);
+  }else mat=genMatricule(ec?ec.abr:'',currentClasse.nom)+Math.floor(Math.random()*10);
   const pwd=genPwd();
   const obj={nom:nomComplet,prenom,nom_famille:nom,classe_id:currentClasse.id,ecole_id:currentClasse.ecole_id,matricule:mat,pwd,photo:addPhotoData||'',observations:[]};
   const data=await sbInsert('eleves',obj);
@@ -2936,7 +3048,7 @@ async function saveNewEleve(){
   closeModal('modal-add-eleve');
   renderElevesClasse(currentClasse.id);
   updateEcolesStats();
-  toast('Élève ajouté ✓ — Matricule : '+mat);
+  toast('Élève ajouté ✓'+(mmode==='aucun'?'':' — Matricule : '+mat));
 }
 
 async function delEleve(id){
@@ -2948,18 +3060,24 @@ async function delEleve(id){
 function updateEcolesStats(){renderEcoles();}
 function renderElevesClasse(classeId){
   const el=document.getElementById('liste-eleves-classe');
-  const arr=cache.eleves.filter(e=>e.classe_id===classeId).sort((a,b)=>cmpFr(a.nom,b.nom)||cmpFr(a.matricule,b.matricule));
-  if(!arr.length){el.innerHTML='<div class="empty">Aucun élève — clique sur "+ Ajouter un élève" ou importe depuis Excel</div>';return;}
+  const tous=cache.eleves.filter(e=>e.classe_id===classeId).sort((a,b)=>cmpFr(a.nom,b.nom)||cmpFr(a.matricule,b.matricule));
+  const bar=document.getElementById('rech-eleves-box');if(bar)bar.style.display=tous.length>5?'':'none';
+  if(!tous.length){el.innerHTML='<div class="empty">Aucun élève — clique sur "+ Ajouter un élève" ou importe depuis Excel</div>';return;}
+  const showMat=matMode(classeId)!=='aucun';
+  const rq=rechNorm((document.getElementById('rech-eleves')||{}).value);
+  const arr=rq?tous.filter(e=>rechNorm(e.nom+' '+(showMat?e.matricule:'')).includes(rq)):tous;
+  const ri=document.getElementById('rech-eleves-info');if(ri)ri.textContent=rq?(arr.length+' / '+tous.length+' élève(s)'):'';
+  if(!arr.length){el.innerHTML='<div class="empty">Aucun élève ne correspond à « '+resEsc((document.getElementById('rech-eleves')||{}).value)+' »</div>';return;}
   const absAl=new Map(absencesAlertes(classeId).map(a=>[a.eleve.id,a.n]));
   const sancAl=new Map(sanctionsAlertes(classeId).map(a=>[a.eleve.id,a.n]));
   el.innerHTML=arr.map((e,i)=>`
     <div class="eleve-row" onclick="ouvrirFicheEleve('${e.id}')">
       <div class="eleve-avatar">${e.photo?`<img src="${e.photo}">`:'👤'}</div>
       <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:600;font-size:13px">${e.nom}</span><span class="matricule-badge mat-petit">${e.matricule||'—'}</span></div>
+        <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span style="font-weight:600;font-size:13px">${e.nom}</span>${showMat?`<span class="matricule-badge mat-petit">${e.matricule||'—'}</span>`:''}</div>
         ${(absAl.has(e.id)||sancAl.has(e.id))?`<div style="margin-top:3px">${absAl.has(e.id)?`<span class="sanction-chip">⚠️ ${absAl.get(e.id)} absences / 2 mois</span>`:''}${sancAl.has(e.id)?`<span class="sanction-chip">🚨 ${sancAl.get(e.id)} sanctions / 2 mois</span>`:''}</div>`:''}
       </div>
-      <div style="font-size:11px;color:#aaa">#${i+1}</div>
+      <div style="font-size:11px;color:#aaa">#${tous.indexOf(e)+1}</div>
       <button class="btn btn-danger btn-xs" onclick="event.stopPropagation();delEleve('${e.id}')">✕</button>
     </div>`).join('');
 }
@@ -2969,8 +3087,8 @@ function exporterCodesClasse(){
   if(!currentClasse)return;
   const els=cache.eleves.filter(e=>e.classe_id===currentClasse.id).sort((a,b)=>(a.nom||'').localeCompare(b.nom||''));
   if(!els.length)return toast('Aucun élève dans cette classe');
-  const ws=XLSX.utils.aoa_to_sheet([['N°','Nom','Matricule','Code devoir (mot de passe)'],...els.map((e,i)=>[i+1,e.nom,e.matricule||'',e.pwd||''])]);
-  ws['!cols']=[{wch:5},{wch:30},{wch:16},{wch:26}];
+  const ws=XLSX.utils.aoa_to_sheet([['N°','Nom',...(matVisible()?['Matricule']:[]),'Code devoir (mot de passe)'],...els.map((e,i)=>[i+1,e.nom,...(matVisible()?[e.matricule||'']:[]),e.pwd||''])]);
+  ws['!cols']=matVisible()?[{wch:5},{wch:30},{wch:16},{wch:26}]:[{wch:5},{wch:30},{wch:26}];
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Codes');
   koXlsx(wb,'codes_'+currentClasse.nom.replace(/[^A-Za-z0-9_-]+/g,'_')+'.xlsx');
 }
@@ -3018,9 +3136,10 @@ function importExcelEleves(input){
         const nom=txt(r[2]);
         if(!prenom&&!nom)continue;
         const nomComplet=prenom+(nom?' '+nom:'');
-        let mat=txt(r[3]);
+        const mmode=matMode(currentClasse.id);
+        let mat=mmode==='manuel'?txt(r[3]):'';
         if(mat&&matUtilises.has(mat.toLowerCase())){ignores++;continue;}
-        if(!mat&&estSupClasse()){ignores++;continue;}
+        if(!mat&&mmode==='manuel'){ignores++;continue;}
         if(!mat){do{mat=genMatricule(ec?ec.abr:'',currentClasse.nom)+Math.floor(Math.random()*10);}while(matUtilises.has(mat.toLowerCase()));}
         matUtilises.add(mat.toLowerCase());
         const pwd=genPwd();
@@ -3029,12 +3148,13 @@ function importExcelEleves(input){
         if(d){cache.eleves.unshift(d);added++;}
       }
       renderElevesClasse(currentClasse.id);updateEcolesStats();
-      prev.innerHTML=`<div class="alert-success alert-box">✓ ${added} élève(s) importé(s) avec succès !${ignores?' · '+ignores+' ignoré(s) (matricule déjà utilisé)':''}</div>`;
+      prev.innerHTML=`<div class="alert-success alert-box">✓ ${added} élève(s) importé(s) avec succès !${ignores?' · '+ignores+' ignoré(s) (matricule déjà utilisé ou manquant)':''}</div>`;
       toast(`${added} élèves importés ✓`);
     }catch(err){toast('Erreur : '+err.message);}
   };reader.readAsBinaryString(file);
   input.value='';
 }
+function majHintImport(){const e=document.getElementById('import-mat-hint');if(!e||!currentClasse)return;const m=matMode(currentClasse.id);e.textContent=m==='manuel'?'Mode « matricules de l\'école » : la colonne Matricule est obligatoire (les lignes sans matricule sont ignorées).':m==='auto'?'Mode « matricules automatiques » : la colonne Matricule est ignorée, KOTO crée les matricules.':'Cette classe fonctionne sans matricule : la colonne Matricule est ignorée.';}
 function telechargerModeleEleves(){
   const ws=XLSX.utils.aoa_to_sheet([['N°','Prénom','Nom','Matricule (facultatif)'],[1,'Mamadou','Diallo',''],[2,'Aissatou','Barry','']]);
   ws['!cols']=[{wch:6},{wch:18},{wch:18},{wch:22}];
@@ -3055,7 +3175,7 @@ function ouvrirFicheEleve(id){
       </div>
       <div style="flex:1">
         <div style="font-size:16px;font-weight:700">${e.nom}</div>
-        <div style="margin-top:4px"><span class="matricule-badge">${e.matricule||'—'}</span></div>
+        ${matMode(e.classe_id)!=='aucun'?`<div style="margin-top:4px"><span class="matricule-badge">${e.matricule||'—'}</span></div>`:''}
         ${e.ddn?`<div style="font-size:11px;color:#888;margin-top:4px">📅 Né(e) le : ${e.ddn}</div>`:''}
         <div style="font-size:11px;color:#888;margin-top:3px">🔑 Mdp devoir : <code style="background:#f0f0eb;padding:1px 5px;border-radius:3px">${e.pwd||'—'}</code></div>
       </div>
@@ -3071,7 +3191,7 @@ function ouvrirFicheEleve(id){
       <div class="form-group"><label>Prénom</label><input id="fe-prenom" readonly value="${resEsc(e.prenom||(e.nom||'').split(' ')[0]||'')}"></div>
       <div class="form-group"><label>Nom</label><input id="fe-nom" readonly value="${resEsc(e.nom_famille||(e.nom||'').split(' ').slice(1).join(' ')||'')}"></div>
     </div>
-    <div class="form-group"><label>Matricule</label><input id="fe-mat" readonly value="${resEsc(e.matricule||'')}"></div>
+    ${matMode(e.classe_id)!=='aucun'?`<div class="form-group"><label>Matricule</label><input id="fe-mat" ${matMode(e.classe_id)==='manuel'?'':'readonly'} value="${resEsc(e.matricule||'')}"></div>`:''}
     <div id="fe-photo" style="display:none;margin:6px 0;padding:8px;background:#f9f9f7;border-radius:7px">
       <div style="font-size:11px;font-weight:600;margin-bottom:6px">📷 Modifier la photo</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap"><label class="btn btn-sm" style="cursor:pointer">🖼️ Importer<input type="file" accept="image/*" onchange="updatePhotoEleve('${e.id}',this)" style="display:none"></label><label class="btn btn-sm" style="cursor:pointer">📷 Prendre une photo<input type="file" accept="image/*" capture="user" onchange="updatePhotoEleve('${e.id}',this)" style="display:none"></label></div>
@@ -3109,10 +3229,13 @@ async function enregistrerInfosEleve(id){
   const e=cache.eleves.find(x=>x.id===id);if(!e)return;
   const prenom=document.getElementById('fe-prenom').value.trim().replace(/\s+/g,' ');
   const nomF=document.getElementById('fe-nom').value.trim().replace(/\s+/g,' ');
-  const mat=document.getElementById('fe-mat').value.trim();
+  const fm=document.getElementById('fe-mat');
+  const mat=fm?fm.value.trim():(e.matricule||'');
   if(!prenom||!nomF)return toast('Prénom et nom requis');
+  if(fm){
   if(!mat)return toast('Le matricule ne peut pas être vide');
   if(cache.eleves.some(x=>x.id!==id&&(x.matricule||'').toLowerCase()===mat.toLowerCase()))return toast('Ce matricule est déjà utilisé par un autre élève',4500);
+  }
   const ancienNom=e.nom,nom=prenom+' '+nomF;
   await sbUpdate('eleves',id,{nom,prenom,nom_famille:nomF,matricule:mat});
   e.nom=nom;e.prenom=prenom;e.nom_famille=nomF;e.matricule=mat;
@@ -3187,7 +3310,7 @@ function renderNotesGenerale(){
       <tr>
         <th rowspan="2" class="nom-col">N°</th>
         <th rowspan="2" class="nom-col" style="min-width:160px">Prénom & Nom</th>
-        <th rowspan="2" style="min-width:80px">Matricule</th>
+        ${matVisible()?'<th rowspan="2" style="min-width:80px">Matricule</th>':''}
         ${MOIS.map(m=>`<th colspan="2" style="text-align:center;border-left:2px solid #ddd">${m}</th>`).join('')}
         <th rowspan="2" style="min-width:60px">Moy. Gén.</th>
       </tr>
@@ -3235,7 +3358,7 @@ function renderNotesGenerale(){
     html+=`<tr>
       <td style="color:#888;font-size:11px">${i+1}</td>
       <td class="nom-col"><strong>${e.nom}</strong></td>
-      <td><span class="matricule-badge" style="font-size:9px">${e.matricule||'—'}</span></td>
+      ${matVisible()?`<td><span class="matricule-badge" style="font-size:9px">${e.matricule||'—'}</span></td>`:''}
       ${MOIS.map((m,mi)=>`
         <td style="border-left:2px solid #ddd;padding:2px">
           <input class="note-input oral" type="number" step="0.5" min="0" max="${NB()}"
@@ -3330,7 +3453,7 @@ async function exporterNotesExcel(){
   const sanctData=getExtra('sanctions',currentClasse.id);
   const ec=cache.ecoles.find(e=>e.id===currentClasse.ecole_id);
 
-  const headers=['N°','Prénom & Nom','Matricule'];
+  const headers=['N°','Prénom & Nom',...(matVisible()?['Matricule']:[])];
   MOIS.forEach(m=>{headers.push(m+' Oral /'+NB());headers.push(m+' Écrit /'+NB());});
   headers.push('Moyenne Générale');
 
@@ -3343,7 +3466,7 @@ async function exporterNotesExcel(){
     sanctData.filter(s=>s.eleveId===e.id&&s.points>0).forEach(s=>{const idx=parseInt(s.moisIdx||0);if(idx>=0&&idx<9){oralNotes[idx]=(parseFloat(oralNotes[idx])||0)-s.points;oralNotes[idx]=Math.max(0,oralNotes[idx]);}});
     const allN=[...oralNotes,...ecritNotes].filter(n=>n!==''&&n!==null);
     const moy=allN.length?(allN.reduce((s,n)=>s+parseFloat(n),0)/allN.length).toFixed(2):'';
-    const row=[i+1,e.nom,e.matricule||''];
+    const row=[i+1,e.nom,...(matVisible()?[e.matricule||'']:[])];
     MOIS.forEach((m,mi)=>{row.push(oralNotes[mi]);row.push(ecritNotes[mi]);});
     row.push(moy);rows.push(row);
   });
@@ -3395,6 +3518,7 @@ function renderNotesClasse(){
   const b=document.getElementById('notes-print-mois');
   if(b)b.style.display=mi===null?'none':'';
   if(mi===null)renderNotesGenerale();else renderNotesMois(mi);
+  rechAppliquer('notes-rech','notes-classe-content');
 }
 function renderNotesMois(mi){
   const el=document.getElementById('notes-classe-content');
@@ -3404,10 +3528,10 @@ function renderNotesMois(mi){
   const lignes=eleves.map(e=>{const v=notesValeurs(e,mat);return{e,o:v.oral[mi],x:v.ecrit[mi]};});
   const mo=moyenneListe(lignes.map(l=>l.o)),mx=moyenneListe(lignes.map(l=>l.x)),mm=moyenneListe(lignes.map(l=>moyenneListe([l.o,l.x])));
   let html=`<div class="alert-info alert-box" style="font-size:12px;margin-bottom:8px">🗓️ <strong>Fiche de ${MOIS[mi]}</strong> — remplis les notes du mois puis clique sur <strong>💾 Sauvegarder</strong> : elles vont automatiquement dans la <strong>fiche générale</strong>.<br>Moyenne de la classe : Oral <strong>${fmtNote(mo)}</strong> · Écrit <strong>${fmtNote(mx)}</strong> · Mois <strong>${fmtNote(mm)}</strong></div>
-  <table class="notes-table notes-mois"><thead><tr><th class="nom-col">N°</th><th class="nom-col">Prénom & Nom</th><th>Matricule</th><th style="background:#E6F1FB;color:#0C447C;min-width:80px">Oral /${NB()}</th><th style="background:#E1F5EE;color:#085041;min-width:80px">Écrit /${NB()}</th><th style="min-width:80px">Moyenne du mois</th></tr></thead><tbody>`;
+  <table class="notes-table notes-mois"><thead><tr><th class="nom-col">N°</th><th class="nom-col">Prénom & Nom</th>${matVisible()?'<th>Matricule</th>':''}<th style="background:#E6F1FB;color:#0C447C;min-width:80px">Oral /${NB()}</th><th style="background:#E1F5EE;color:#085041;min-width:80px">Écrit /${NB()}</th><th style="min-width:80px">Moyenne du mois</th></tr></thead><tbody>`;
   lignes.forEach((l,i)=>{
     const e=l.e,m=moyenneListe([l.o,l.x]);
-    html+=`<tr><td style="color:#888;font-size:11px">${i+1}</td><td class="nom-col"><strong>${resEsc(e.nom)}</strong></td><td><span class="matricule-badge" style="font-size:9px">${resEsc(e.matricule||'—')}</span></td>
+    html+=`<tr><td style="color:#888;font-size:11px">${i+1}</td><td class="nom-col"><strong>${resEsc(e.nom)}</strong></td>${matVisible()?`<td><span class="matricule-badge" style="font-size:9px">${resEsc(e.matricule||'—')}</span></td>`:''}
     <td style="padding:2px"><input class="note-input oral" type="number" step="0.5" min="0" max="${NB()}" inputmode="decimal" style="width:100%;min-width:64px" value="${l.o!==null&&l.o!==undefined?l.o:''}" placeholder="—" data-eleve="${e.id}" data-mois="${mi}" data-type="oral" onchange="noteChanged(this)"></td>
     <td style="padding:2px"><input class="note-input ecrit" type="number" step="0.5" min="0" max="${NB()}" inputmode="decimal" style="width:100%;min-width:64px" value="${l.x!==null&&l.x!==undefined?l.x:''}" placeholder="—" data-eleve="${e.id}" data-mois="${mi}" data-type="ecrit" onchange="noteChanged(this)"></td>
     <td><span class="moy-cell moy-mois" style="background:${m===null?'':noteBg(m)};color:${m===null?'':noteColor(m)}">${fmtNote(m)}</span></td></tr>`;
@@ -3426,9 +3550,9 @@ function ficheStatique(mi){
   let tab;
   if(mi!==null){
     const lignes=eleves.map(e=>{const v=notesValeurs(e,mat);return{e,o:v.oral[mi],x:v.ecrit[mi]};});
-    tab=`<table><thead><tr><th ${th}>N°</th><th ${th} style="text-align:left">Prénom & Nom</th><th ${th}>Matricule</th><th ${th}>Oral /${NB()}</th><th ${th}>Écrit /${NB()}</th><th ${th}>Moyenne</th><th ${th} style="width:28%">Observations</th></tr></thead><tbody>`+
-      lignes.map((l,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${resEsc(l.e.nom)}</td><td>${resEsc(l.e.matricule||'')}</td><td>${fmtVide(l.o)}</td><td>${fmtVide(l.x)}</td><td><b>${fmtVide(moyenneListe([l.o,l.x]))}</b></td><td></td></tr>`).join('')+
-      `<tr><td colspan="3" style="text-align:right"><b>Moyenne de la classe</b></td><td><b>${fmtVide(moyenneListe(lignes.map(l=>l.o)))}</b></td><td><b>${fmtVide(moyenneListe(lignes.map(l=>l.x)))}</b></td><td><b>${fmtVide(moyenneListe(lignes.map(l=>moyenneListe([l.o,l.x]))))}</b></td><td></td></tr></tbody></table>`;
+    tab=`<table><thead><tr><th ${th}>N°</th><th ${th} style="text-align:left">Prénom & Nom</th>${matVisible()?`<th ${th}>Matricule</th>`:''}<th ${th}>Oral /${NB()}</th><th ${th}>Écrit /${NB()}</th><th ${th}>Moyenne</th><th ${th} style="width:28%">Observations</th></tr></thead><tbody>`+
+      lignes.map((l,i)=>`<tr><td>${i+1}</td><td style="text-align:left">${resEsc(l.e.nom)}</td>${matVisible()?`<td>${resEsc(l.e.matricule||'')}</td>`:''}<td>${fmtVide(l.o)}</td><td>${fmtVide(l.x)}</td><td><b>${fmtVide(moyenneListe([l.o,l.x]))}</b></td><td></td></tr>`).join('')+
+      `<tr><td colspan="${matVisible()?3:2}" style="text-align:right"><b>Moyenne de la classe</b></td><td><b>${fmtVide(moyenneListe(lignes.map(l=>l.o)))}</b></td><td><b>${fmtVide(moyenneListe(lignes.map(l=>l.x)))}</b></td><td><b>${fmtVide(moyenneListe(lignes.map(l=>moyenneListe([l.o,l.x]))))}</b></td><td></td></tr></tbody></table>`;
   }else{
     tab=`<table><thead><tr><th ${th} rowspan="2">N°</th><th ${th} rowspan="2" style="text-align:left">Prénom & Nom</th>${MOIS.map(m=>`<th ${th} colspan="2">${resEsc(m)}</th>`).join('')}<th ${th} rowspan="2">Moy.</th></tr><tr>${MOIS.map(()=>`<th ${th}>O</th><th ${th}>É</th>`).join('')}</tr></thead><tbody>`+
       eleves.map((e,i)=>{const v=notesValeurs(e,mat);return`<tr><td>${i+1}</td><td style="text-align:left;white-space:nowrap">${resEsc(e.nom)}</td>${MOIS.map((m,k)=>`<td>${fmtVide(v.oral[k])}</td><td>${fmtVide(v.ecrit[k])}</td>`).join('')}<td><b>${fmtVide(moyenneListe([...v.oral,...v.ecrit]))}</b></td></tr>`;}).join('')+`</tbody></table>
@@ -4317,12 +4441,150 @@ async function dvImporter(input){
 }
 function dvToggleType(i){
   const q=dvQArr[i];if(!q)return;
+  delete q._f;delete q._expl;
   if(q.type==='qcm'){q.type='open';q.options=null;q.reponse='';}
   else{q.type='qcm';q.options=['','','',''];q.reponse='';}
   renderQBuilder();
 }
 function dvAjouterOption(i){const q=dvQArr[i];if(q&&q.options&&q.options.length<8){q.options.push('');renderQBuilder();}}
 function dvRetirerImage(i){if(dvQArr[i]){dvQArr[i].image='';renderQBuilder();}}
+
+// ===== FICHE DE CORRECTION (questions ouvertes) + PROPOSITION DE NOTE + REPORT DANS LA FICHE DE NOTES =====
+// La fiche de correction est stockée dans q.reponse (champ déjà masqué aux élèves avant la correction) :
+//   formes séparées par "\n||\n", "[50%] " devant une forme = demi-points, "\n##\n" puis l'explication.
+const DV_STOP=new Set('le la les un une des de du et ou en au aux est sont ce ces cette qui que dans pour par sur avec sans son sa ses leur leurs il elle ils elles on se ne pas plus ainsi comme afin donc car mais ont etre a y'.split(' '));
+function dvNorm(s){return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,' ').trim();}
+function dvTokens(s){return dvNorm(s).split(' ').filter(w=>w&&!DV_STOP.has(w)&&(w.length>=2||/\d/.test(w)));}
+function dvStem(w){return /^\d+$/.test(w)?w:(w.length>6?w.slice(0,6):(w.length>4?w.slice(0,-1):w));}
+function dvCorrParse(rep){
+  const s=String(rep==null?'':rep);let expl='',main=s,mots='';
+  const k=s.indexOf('\n##\n');if(k>=0){expl=s.slice(k+4).trim();main=s.slice(0,k);}
+  const k2=main.indexOf('\n@@\n');if(k2>=0){mots=main.slice(k2+4).trim();main=main.slice(0,k2);}
+  const formes=main.split('\n||\n').map(t=>{t=t.trim();let pct=100;const m=t.match(/^\[(\d{1,3})%\]\s*/);if(m){pct=Math.min(100,parseInt(m[1],10));t=t.slice(m[0].length);}return{txt:t,pct};}).filter(f=>f.txt);
+  return{formes,expl,mots};
+}
+// mots-clés : "a, b / c, *d" → virgule = mots distincts, / = synonymes, * = indispensable
+function dvMotsParse(m){
+  return String(m||'').split(/[,;\n]+/).map(x=>x.trim()).filter(Boolean).map(x=>{const must=x[0]==='*';if(must)x=x.slice(1);return{must,alts:x.split('/').map(a=>[...new Set(dvTokens(a).map(dvStem))]).filter(a=>a.length)};}).filter(k=>k.alts.length);
+}
+function dvCorrSerialize(formes,expl,mots){
+  const f=(formes||[]).filter(x=>x.txt&&x.txt.trim()).map(x=>(x.pct<100?'['+x.pct+'%] ':'')+x.txt.trim()).join('\n||\n');
+  const e=(expl||'').trim(),m=(mots||'').trim();
+  return f+(m?'\n@@\n'+m:'')+(e?'\n##\n'+e:'');
+}
+function dvPropose(q,rep,pts){
+  if(!q||q.type!=='open')return null;
+  const{formes,mots}=dvCorrParse(q.reponse);
+  const kws=dvMotsParse(mots);
+  if(!formes.length&&!kws.length)return null;
+  if(!String(rep||'').trim())return{pts:0,forme:-1,cov:0};
+  const st=new Set(dvTokens(rep).map(dvStem));
+  let best={forme:0,cov:0,score:-1};
+  formes.forEach((f,i)=>{
+    const ft=[...new Set(dvTokens(f.txt).map(dvStem))];
+    if(!ft.length)return;
+    const cov=ft.filter(w=>st.has(w)).length/ft.length;
+    const frac=cov>=0.85?1:(cov<0.3?0:cov);
+    const sc=frac*f.pct;
+    if(sc>best.score)best={forme:i,cov,score:sc};
+  });
+  let score=Math.max(0,best.score),cov=best.cov,manque=[];
+  if(kws.length){
+    let ok=0;
+    kws.forEach(k=>{const trouve=k.alts.some(a=>a.every(w=>st.has(w)));if(trouve)ok++;else if(k.must)manque.push(k);});
+    const ks=ok/kws.length*100;
+    if(ks>score){score=ks;cov=ok/kws.length;best.forme=formes.length?best.forme:-2;}
+    if(manque.length)score=Math.min(score,50);
+  }
+  const p=Math.round(pts*score/100*4)/4;
+  return{pts:Math.min(pts,p),forme:best.forme,cov,manque:manque.length};
+}
+function dvQEnsure(q){if(q._f===undefined){const p=dvCorrParse(q.reponse);q._f=p.formes.length?p.formes:[{txt:'',pct:100}];q._expl=p.expl;q._mots=p.mots;}}
+function dvQSync(i){const q=dvQArr[i];q.reponse=dvCorrSerialize(q._f,q._expl,q._mots);}
+function dvFAdd(i){const q=dvQArr[i];dvQEnsure(q);q._f.push({txt:'',pct:100});renderQBuilder();}
+function dvFDel(i,k){const q=dvQArr[i];dvQEnsure(q);q._f.splice(k,1);if(!q._f.length)q._f.push({txt:'',pct:100});dvQSync(i);renderQBuilder();}
+function dvFSet(i,k,champ,v){const q=dvQArr[i];dvQEnsure(q);q._f[k][champ]=champ==='pct'?parseInt(v,10):v;dvQSync(i);}
+function dvMotsSet(i,v){const q=dvQArr[i];dvQEnsure(q);q._mots=v;dvQSync(i);}
+function dvExplSet(i,v){const q=dvQArr[i];dvQEnsure(q);q._expl=v;dvQSync(i);}
+function dvQPropres(){return dvQArr.map(q=>{const c={};Object.keys(q).forEach(k=>{if(k[0]!=='_')c[k]=q[k];});return c;});}
+function dvFicheEditeur(q,i){
+  dvQEnsure(q);
+  return `<div style="font-size:11px;font-weight:700;margin:4px 0 3px;color:#085041">📝 Fiche de correction — formes de réponse acceptées</div>
+  ${q._f.map((f,k)=>`<div style="display:flex;gap:5px;align-items:flex-start;margin-bottom:4px"><textarea onchange="dvFSet(${i},${k},'txt',this.value)" placeholder="${k===0?'Réponse attendue (forme complète)…':'Autre façon de répondre, acceptée aussi…'}" style="flex:1;min-height:34px">${resEsc(f.txt)}</textarea><select onchange="dvFSet(${i},${k},'pct',this.value)" style="width:84px" title="Part des points accordée à cette forme">${[100,75,50,25].map(p=>`<option value="${p}"${f.pct==p?' selected':''}>${p} %</option>`).join('')}</select>${q._f.length>1?`<button class="btn btn-danger btn-xs" onclick="dvFDel(${i},${k})">✕</button>`:''}</div>`).join('')}
+  <button class="btn btn-xs" onclick="dvFAdd(${i})">+ Autre forme de réponse</button>
+  <input onchange="dvMotsSet(${i},this.value)" value="${resEsc(q._mots||'')}" placeholder="Mots-clés (facultatif) : photosynthèse / photosynthese, *chlorophylle, lumière" style="margin-top:5px"><div style="font-size:10px;color:#667;margin:2px 0 0">Virgule = mots différents · « / » = synonymes · « * » devant un mot = indispensable (sinon la note proposée est limitée à 50 %).</div>
+  <textarea onchange="dvExplSet(${i},this.value)" placeholder="Explication montrée à l'élève après la correction (facultatif)" style="min-height:30px;margin-top:5px">${resEsc(q._expl||'')}</textarea>
+  <div style="font-size:10px;color:#667;margin-top:3px">KOTO compare la réponse de l'élève à ces formes (mots importants) et te <b>propose une note</b> sur chaque copie : tu la modifies ou tu la valides.</div>`;
+}
+function dvAttenduProf(q){
+  if(q.reponse===''||q.reponse==null)return '';
+  const p=dvCorrParse(q.reponse);
+  if(!p.formes.length&&!p.expl&&!p.mots)return '';
+  return `<div style="color:#085041;font-size:10px">`+(p.mots?`Mots-clés : ${resEsc(p.mots)}<br>`:'')+p.formes.map((f,k)=>`${k===0?'Attendu':'Ou'}${f.pct<100?' ('+f.pct+' %)':''} : ${resEsc(f.txt)}`).join('<br>')+(p.expl?`<br><i>Explication : ${resEsc(p.expl)}</i>`:'')+`</div>`;
+}
+function dvAttenduEleve(q){
+  if(q.reponse===''||q.reponse===undefined||q.reponse===null)return '';
+  if(q.type==='qcm')return `<div style="font-size:12px;background:#E1F5EE;color:#085041;border-radius:6px;padding:6px 8px;margin-bottom:4px"><b>Réponse attendue :</b> ${resEsc((q.options||[])[parseInt(q.reponse)]||q.reponse)}</div>`;
+  const p=dvCorrParse(q.reponse);
+  let h='';
+  if(p.formes.length)h+=`<div style="font-size:12px;background:#E1F5EE;color:#085041;border-radius:6px;padding:6px 8px;margin-bottom:4px"><b>Réponse attendue :</b> ${resEsc(p.formes[0].txt)}`+p.formes.slice(1).map(f=>`<div style="margin-top:3px;font-size:11px"><b>Autre formulation acceptée${f.pct<100?' ('+f.pct+' % des points)':''} :</b> ${resEsc(f.txt)}</div>`).join('')+`</div>`;
+  if(p.expl)h+=`<div style="font-size:12px;background:#f4f8fd;color:#0A3A9E;border-radius:6px;padding:6px 8px;margin-bottom:4px"><b>Explication :</b> ${resEsc(p.expl)}</div>`;
+  return h;
+}
+function dvFicheCorrection(id){
+  const dv=cache.devoirs.find(x=>x.id===id);if(!dv)return;
+  const qs=dv.questions||[];if(!qs.length)return toast("Ce devoir n'a pas de questions en ligne");
+  const cl=cache.classes.find(c=>c.id===dv.classe_id),ec=cache.ecoles.find(e=>e.id===dv.ecole_id);
+  let h=`<h2 style="margin:0">${resEsc(ec?ec.nom:'')}</h2><div style="margin-top:3px">Classe : <b>${resEsc(cl?cl.nom:'')}</b> · Matière : <b>${resEsc(dv.mat||'')}</b> · Barème : <b>${dv.bareme||20}</b></div><h3 style="margin:9px 0">Fiche de correction — ${resEsc(dv.titre)}</h3>`;
+  h+=qs.map((q,i)=>{
+    let att='';
+    if(q.type==='qcm'){att=(q.options||[]).map((o,oi)=>`<div>${q.reponse==oi?'✔':'○'} ${String.fromCharCode(65+oi)}) ${resEsc(o)}</div>`).join('');}
+    else{const p=dvCorrParse(q.reponse);att=p.formes.length?p.formes.map((f,k)=>`<div><b>${k===0?'Réponse attendue':'Autre forme acceptée'}${f.pct<100?' ('+f.pct+' % des points)':''} :</b> ${resEsc(f.txt)}</div>`).join(''):'<i>Pas de réponse attendue renseignée</i>';if(p.expl)att+=`<div style="margin-top:3px"><i>Explication : ${resEsc(p.expl)}</i></div>`;}
+    return `<div style="border:1px solid #888;border-radius:5px;padding:7px 9px;margin-bottom:7px;page-break-inside:avoid"><div><b>Q${i+1}</b> · ${dvPtsQ(dv,i)} pt(s) — ${resEsc(q.enonce)}</div><div style="margin-top:4px">${att}</div></div>`;
+  }).join('');
+  imprimerDoc('Fiche de correction — '+dv.titre,h);
+}
+// ----- report de la note dans la fiche de notes -----
+function dvCfgDef(){const d=new Date();return{actif:true,mois:Math.max(0,Math.min(8,(d.getFullYear()-2026)*12+d.getMonth()-9)),type:'ecrit',mode:'remplacer'};}
+function dvRepHtml(p,cfg,oc){
+  cfg=cfg||dvCfgDef();
+  const so=(arr,val)=>arr.map(([v,l])=>`<option value="${v}"${String(v)===String(val)?' selected':''}>${l}</option>`).join('');
+  return `<label style="display:flex;gap:7px;align-items:center;font-size:12px;font-weight:700;cursor:pointer"><input type="checkbox" id="${p}-actif" ${cfg.actif?'checked':''} onchange="${oc}" style="width:auto"> 📊 Reporter la note dans la fiche de notes</label>
+  <div style="font-size:10.5px;color:#556;margin:3px 0 6px">Quand tu valides une copie, sa note (ramenée sur ${NB()}) s'inscrit dans la fiche de notes de la classe.</div>
+  <div class="three-col"><div class="form-group"><label>Mois</label><select id="${p}-mois" onchange="${oc}">${so(MOIS.map((m,i)=>[i,m]),cfg.mois)}</select></div>
+  <div class="form-group"><label>Colonne</label><select id="${p}-type" onchange="${oc}">${so([['ecrit','Note écrite'],['oral','Note orale (recalculée avec les rappels)']],cfg.type)}</select></div>
+  <div class="form-group"><label>Si une note existe déjà</label><select id="${p}-mode" onchange="${oc}">${so([['remplacer','La remplacer'],['moyenne','Moyenne des devoirs du mois']],cfg.mode)}</select></div></div>`;
+}
+function dvCfgLire(p){const g=x=>document.getElementById(p+'-'+x);if(!g('actif'))return dvCfgDef();return{actif:g('actif').checked,mois:parseInt(g('mois').value,10)||0,type:g('type').value,mode:g('mode').value};}
+function dvCfgGet(dv){const x=getExtra('devoirs_cfg',dv.classe_id).find(y=>y.id===dv.id);return x?x.report:null;}
+async function dvCfgSet(dv,cfg){const a=getExtra('devoirs_cfg',dv.classe_id).filter(y=>y.id!==dv.id);a.push({id:dv.id,report:cfg});await saveExtra('devoirs_cfg',dv.classe_id,a);}
+async function dvCfgMaj(id){const dv=cache.devoirs.find(x=>x.id===id);if(!dv)return;await dvCfgSet(dv,dvCfgLire('rr'));toast('Choix de report enregistré ✓');}
+function dvRepInit(){const b=document.getElementById('dv-rep-box');if(b)b.innerHTML=dvRepHtml('dv-rep',null,'');}
+setTimeout(dvRepInit,0);
+async function dvReporterNote(dv,eleveId,note,cfg){
+  const bar=dv.bareme||20,n20=Math.round(note/bar*NB()*100)/100,cid=dv.classe_id;
+  const rep=getExtra('devoirs_report',cid).filter(x=>!(x.d===dv.id&&x.e===eleveId));
+  rep.push({d:dv.id,e:eleveId,m:cfg.mois,t:cfg.type,n:n20});
+  await saveExtra('devoirs_report',cid,rep);
+  const meme=rep.filter(x=>x.e===eleveId&&x.m===cfg.mois&&x.t===cfg.type);
+  const val=cfg.mode==='moyenne'?Math.round(meme.reduce((a,x)=>a+x.n,0)/meme.length*100)/100:n20;
+  const ex=cache.notes.find(n=>n.eleve_id===eleveId&&n.classe_id===cid&&n.mois_idx===cfg.mois&&n.type_note===cfg.type);
+  if(ex){await sbUpdate('notes',ex.id,{note:val});ex.note=val;}
+  else{
+    const cl=cache.classes.find(c=>c.id===cid);
+    const d=await sbInsert('notes',{titre:'Note '+MOIS[cfg.mois],type:cfg.type==='oral'?'Évaluation orale':'Évaluation écrite',type_note:cfg.type,mois_idx:cfg.mois,mat:dv.mat||'—',ecole_id:cl?cl.ecole_id:dv.ecole_id,classe_id:cid,eleve_id:eleveId,bareme:NB(),note:val,obs:''});
+    if(d)cache.notes.unshift(d);
+  }
+}
+async function corrToutValider(devoirId){
+  const tous=Object.keys(corrEtat).filter(c=>corrEtat[c].eleve&&!corrEtat[c].corrige);
+  const prets=tous.filter(c=>[...document.querySelectorAll('.cq-'+c)].every(i=>i.value!==''));
+  if(!tous.length)return toast('Toutes les copies sont déjà validées');
+  if(!prets.length)return toast('Aucune copie complète : remplis les points manquants',4500);
+  if(!confirm('Valider la note proposée pour '+prets.length+' copie(s) ?'+(tous.length>prets.length?'\n('+(tous.length-prets.length)+' copie(s) avec des points manquants seront laissées à corriger.)':'')+'\nTu pourras encore modifier chaque note ensuite.'))return;
+  for(const c of prets){corrTotal(c);await corrSauver(c,devoirId,true);}
+  toast(prets.length+' copie(s) validée(s) ✓',4000);voirResultats(devoirId);
+}
 function renderQBuilder(){
   const el=document.getElementById('questions-builder');
   if(!dvQArr.length){el.innerHTML='';return;}
@@ -4338,7 +4600,7 @@ function renderQBuilder(){
         :`<label class="btn btn-xs" style="margin-bottom:5px;cursor:pointer">🖼️ Ajouter une image (analyse / interprétation)<input type="file" accept="image/*" style="display:none" onchange="dvImage(${i},this)"></label>`}
       ${qcm?(q.options||[]).map((opt,oi)=>`<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px"><input type="radio" name="c_${q.id}" value="${oi}" ${q.reponse==oi&&q.reponse!==''?'checked':''} onchange="dvQArr[${i}].reponse='${oi}'" style="width:auto" title="Bonne réponse"><input type="text" value="${resEsc(opt)}" placeholder="Option ${oi+1}" onchange="dvQArr[${i}].options[${oi}]=this.value" style="flex:1"></div>`).join('')+
         `<div style="display:flex;justify-content:space-between;align-items:center"><button class="btn btn-xs" onclick="dvAjouterOption(${i})">+ option</button>${q.reponse===''?'<span style="font-size:10px;color:#c0392b">⚠ coche la bonne réponse (●)</span>':''}</div>`
-        :`<textarea onchange="dvQArr[${i}].reponse=this.value" placeholder="Réponse attendue (pour toi)...">${resEsc(q.reponse)}</textarea>`}
+        :dvFicheEditeur(q,i)}
     </div>`;
   }).join('');
 }
@@ -4407,15 +4669,16 @@ async function saveDevoir(){
     lancISO=lt.toISOString();
   }
   const code=genCode();
-  const obj={titre,type:document.getElementById('dv-type').value,ecole_id:ecoleId,classe_id:classeId,mat:document.getElementById('dv-mat').value,deadline:document.getElementById('dv-deadline').value,duree:document.getElementById('dv-duree').value,bareme:barFinal,consignes:document.getElementById('dv-consignes').value,drive_link:document.getElementById('dv-drive-link').value,questions:JSON.parse(JSON.stringify(dvQArr)),code,statut:'ouvert'};
+  const obj={titre,type:document.getElementById('dv-type').value,ecole_id:ecoleId,classe_id:classeId,mat:document.getElementById('dv-mat').value,deadline:document.getElementById('dv-deadline').value,duree:document.getElementById('dv-duree').value,bareme:barFinal,consignes:document.getElementById('dv-consignes').value,drive_link:document.getElementById('dv-drive-link').value,questions:dvQPropres(),code,statut:'ouvert'};
   if(lancISO)obj.lancement=lancISO;
   const data=await sbInsert('devoirs',obj);
   if(!data)return;
   cache.devoirs.unshift(data);
+  try{await dvCfgSet(data,dvCfgLire('dv-rep'));}catch(e){console.warn(e);}
   dvQArr=[];['dv-titre','dv-consignes','dv-mat','dv-drive-link','dv-lancement'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('questions-builder').innerHTML='';
   document.getElementById('dv-import-info').innerHTML='';
-  closeModal('modal-pond');closeModal('modal-add-devoir');renderDevoirs();toast('Devoir créé ✓ — Partage le lien !',4000);
+  dvRepInit();closeModal('modal-pond');closeModal('modal-add-devoir');renderDevoirs();toast('Devoir créé ✓ — Partage le lien !',4000);
 }
 let salleId=null,salleTimer=null,salleOff=0;
 function dvSalleOuvrir(id){
@@ -4472,17 +4735,21 @@ async function cloturerDevoir(id){
 let corrEtat={};
 async function voirResultats(id){
   const dv=cache.devoirs.find(x=>x.id===id);if(!dv)return;
+  corrEtat={};
   const{data:copies}=await sb.from('copies').select('*').eq('devoir_id',id);
   document.getElementById('res-titre').textContent='Résultats — '+dv.titre;
   const bareme=dv.bareme||20,nq=(dv.questions||[]).length;
   const nbF=(copies||[]).filter(c=>c.fraude).length;
   const nbC=(copies||[]).filter(c=>c.corrige).length;
   let html=`<div style="font-size:12px;color:#666;margin-bottom:9px">${(copies||[]).length} copie(s)${nbC?` · ✅ ${nbC} corrigée(s)`:''}${nbF?` · <b style="color:#c0392b">🚨 ${nbF} devoir(s) bloqué(s)</b>`:''} · noté sur <b>${bareme}</b></div>`;
+  {const c0=dvCfgGet(dv)||{...dvCfgDef(),actif:false};
+   html+=`<div style="background:#E6EEFB;border:1px solid #B5D4F4;border-radius:8px;padding:9px 11px;margin-bottom:9px">${dvRepHtml('rr',c0,"dvCfgMaj('"+id+"')")}</div>`;
+   if((copies||[]).some(c=>!c.corrige&&!c.fraude))html+=`<button class="btn btn-primary btn-sm" style="margin-bottom:9px" onclick="corrToutValider('${id}')">✅ Valider toutes les propositions</button><div style="font-size:10.5px;color:#667;margin:-4px 0 9px">Les notes proposées sont enregistrées pour toutes les copies complètes.</div>`;}
   if(!copies||!copies.length)html+='<div class="empty">Aucune copie</div>';
   else(copies||[]).forEach(cp=>{
     const el=cache.eleves.find(e=>e.id==cp.eleve_id);
     const dsec=cp.duree_sec;
-    corrEtat[cp.id]={manuel:!!cp.note_manuelle};
+    corrEtat[cp.id]={manuel:!!cp.note_manuelle,eleve:cp.fraude?null:cp.eleve_id,corrige:!!cp.corrige};
     html+=`<div style="border:1px solid ${cp.fraude?'#e8a5a5':'#e5e5e0'};border-radius:7px;padding:9px 12px;margin-bottom:9px;${cp.fraude?'background:#fff5f5':''}">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:5px">
         <div style="font-weight:700">${el?resEsc(el.nom):'Élève'}</div>
@@ -4498,11 +4765,14 @@ async function voirResultats(id){
         let init='';
         if(cp.notes_q&&cp.notes_q[i]!==null&&cp.notes_q[i]!==undefined)init=cp.notes_q[i];
         else if(q.type==='qcm'&&q.reponse!=='')init=ok?pts:0;
+        let prop=null;
+        if(q.type==='open'&&!(cp.notes_q&&cp.notes_q[i]!==null&&cp.notes_q[i]!==undefined)){prop=dvPropose(q,rep,pts);if(prop)init=prop.pts;}
         html+=`<div style="background:#f9f9f7;border-radius:5px;padding:6px 8px;margin-bottom:5px;font-size:11px">
           <div style="font-weight:600">Q${i+1} : ${resEsc(q.enonce)}${q.image?' 🖼️':''}</div>
           <div>→ ${q.type==='qcm'?(rep===''?'<i>pas de réponse</i>':`<span style="color:${ok?'#085041':'#c0392b'}">${resEsc((q.options||[])[parseInt(rep)]||rep)} ${ok?'✓':'✗'}</span>`):(rep?resEsc(rep):'<i>pas de réponse</i>')}</div>
           ${q.type==='qcm'&&!ok?`<div style="color:#085041;font-size:10px">✓ ${resEsc((q.options||[])[parseInt(q.reponse)]||'(non définie)')}</div>`:''}
-          ${q.type==='open'&&q.reponse?`<div style="color:#085041;font-size:10px">Attendu : ${resEsc(q.reponse)}</div>`:''}
+          ${q.type==='open'?dvAttenduProf(q):''}
+          ${prop?`<div style="font-size:10.5px;background:#FFF7E6;border:1px solid #F5D08A;border-radius:5px;padding:3px 7px;margin-top:3px">💡 <b>Proposition : ${fmtNote(prop.pts)} / ${pts}</b> — ${prop.forme===-1?'pas de réponse':prop.forme===-2?Math.round(prop.cov*100)+' % des mots-clés trouvés':'proche de la forme '+(prop.forme+1)+' ('+Math.round(prop.cov*100)+' % des mots importants)'}${prop.manque?' · ⚠ mot indispensable absent (note limitée à 50 %)':''}. Modifie si besoin.</div>`:''}
           <div style="display:flex;align-items:center;gap:6px;margin-top:5px"><span>Points :</span><input type="number" class="cq-${cp.id}" data-max="${pts}" min="0" max="${pts}" step="0.25" inputmode="decimal" value="${init}" placeholder="—" oninput="corrTotal('${cp.id}')" style="width:76px"><span>/ ${pts}</span></div>
         </div>`;
       });
@@ -4511,7 +4781,7 @@ async function voirResultats(id){
         <div style="font-size:13px;font-weight:700">Note du devoir : <span id="cf-${cp.id}"></span> / ${bareme} <button class="btn btn-xs" onclick="corrManuel('${cp.id}')" title="Modifier la note à la main">✏️ Modifier la note</button></div></div>
         <div id="cmw-${cp.id}" style="display:${cp.note_manuelle?'flex':'none'};gap:6px;align-items:center;margin-top:6px;font-size:11px"><span>Note imposée :</span><input type="number" id="cm-${cp.id}" min="0" max="${bareme}" step="0.25" inputmode="decimal" value="${cp.note_manuelle&&cp.note_finale!=null?cp.note_finale:''}" oninput="corrTotal('${cp.id}')" style="width:80px"><span>/ ${bareme}</span><button class="btn btn-xs" onclick="corrManuel('${cp.id}',false)">↩ Revenir au total automatique</button></div>
         <textarea id="cc-${cp.id}" rows="2" maxlength="500" placeholder="Appréciation pour l'élève (facultatif)" style="margin-top:6px;width:100%">${resEsc(cp.commentaire||'')}</textarea>
-        <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="corrSauver('${cp.id}','${id}')">💾 Enregistrer la correction</button>
+        <button class="btn btn-primary btn-sm" style="margin-top:6px" onclick="corrSauver('${cp.id}','${id}')">✅ Valider la note</button>
         <span id="cs-${cp.id}" style="font-size:11px;color:#085041;margin-left:6px"></span>
       </div>`;
       (cp.reclamations||[]).forEach((r,k)=>{
@@ -4546,7 +4816,7 @@ function corrTotal(cid){
   if((corrEtat[cid]||{}).manuel){const m=parseFloat((document.getElementById('cm-'+cid)||{}).value);if(!isNaN(m))fin=m;}
   if(e2)e2.textContent=fmtNote(fin);
 }
-async function corrSauver(cid,devoirId){
+async function corrSauver(cid,devoirId,silencieux){
   const dv=cache.devoirs.find(x=>x.id===devoirId),bareme=dv.bareme||20;
   const notes=[...document.querySelectorAll('.cq-'+cid)].map(i=>i.value===''?null:Math.max(0,Math.min(parseFloat(i.dataset.max),parseFloat(i.value))));
   let note=corrSomme(cid),manuel=!!(corrEtat[cid]||{}).manuel;
@@ -4555,8 +4825,15 @@ async function corrSauver(cid,devoirId){
   const{error}=await sb.from('copies').update({notes_q:notes,note_finale:Math.round(note*100)/100,note_manuelle:manuel,commentaire,corrige:true}).eq('id',cid);
   if(error)return toast('Enregistrement impossible : '+error.message+' (as-tu lancé devoirs_correction.sql ?)',7000);
   const c=cache.copies.find(x=>String(x.id)===String(cid));if(c)Object.assign(c,{notes_q:notes,note_finale:note,note_manuelle:manuel,commentaire,corrige:true});
-  const s=document.getElementById('cs-'+cid);if(s)s.textContent='✓ Enregistré — l\'élève verra sa copie corrigée avec le même lien';
-  toast('Correction enregistrée ✓');
+  if(corrEtat[cid])corrEtat[cid].corrige=true;
+  let rap='';
+  try{
+    const cfg=document.getElementById('rr-actif')?dvCfgLire('rr'):dvCfgGet(dv);
+    const eid=(corrEtat[cid]||{}).eleve;
+    if(cfg&&cfg.actif&&eid){await dvReporterNote(dv,eid,note,cfg);rap=' · note reportée dans la fiche de notes ('+MOIS[cfg.mois]+')';}
+  }catch(e){rap=' · report dans la fiche de notes impossible : '+(e.message||e);}
+  const s=document.getElementById('cs-'+cid);if(s)s.textContent='✓ Note validée'+rap+' — l\'élève verra sa copie corrigée avec le même lien';
+  if(!silencieux)toast('Note validée ✓'+rap,5000);
 }
 async function reclRepondre(cid,k,devoirId){
   const t=(document.getElementById('cr-'+cid+'-'+k).value||'').trim();
@@ -4610,6 +4887,7 @@ function renderDevoirs(){
         </div>
         <div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">
           <button class="btn btn-primary btn-sm" onclick="voirResultats('${dv.id}')">📊 Résultats</button>
+          <button class="btn btn-sm" onclick="dvFicheCorrection('${dv.id}')">🧾 Fiche de correction</button>
           ${dv.lancement&&dv.statut==='ouvert'?`<button class="btn btn-sm" onclick="dvSalleOuvrir('${dv.id}')">🚪 Salle d'attente</button>`:''}
           ${dv.statut==='ouvert'?`<button class="btn btn-warn btn-sm" onclick="cloturerDevoir('${dv.id}')">🔒 Clôturer</button>`:''}
           <button class="btn btn-danger btn-sm" onclick="delDevoir('${dv.id}')">✕</button>
@@ -4843,7 +5121,7 @@ function renderCorrectionEleve(){
       <div style="font-size:13px;font-weight:500;margin-bottom:6px;white-space:pre-wrap">${resEsc(q.enonce)}</div>
       ${(q.image&&/^data:image\//i.test(q.image))?`<img src="${q.image}" style="max-width:100%;border:1px solid #ddd;border-radius:7px;margin-bottom:6px;display:block">`:''}
       <div style="font-size:12px;background:#f9f9f7;border-radius:6px;padding:6px 8px;margin-bottom:4px"><b>Ta réponse :</b> ${rep===''?'<i>aucune</i>':resEsc(q.type==='qcm'?((q.options||[])[parseInt(rep)]||rep):rep)} ${ok===null?'':(ok?'<span style="color:#085041">✓</span>':'<span style="color:#c0392b">✗</span>')}</div>
-      ${q.reponse!==''&&q.reponse!==undefined?`<div style="font-size:12px;background:#E1F5EE;color:#085041;border-radius:6px;padding:6px 8px;margin-bottom:4px"><b>Réponse attendue :</b> ${resEsc(q.type==='qcm'?((q.options||[])[parseInt(q.reponse)]||q.reponse):q.reponse)}</div>`:''}
+      ${dvAttenduEleve(q)}
       ${rec.map(r=>`<div style="font-size:11px;background:${r.statut==='ouverte'?'#FFF7E6':'#f4f8fd'};border-radius:6px;padding:6px 8px;margin-top:4px"><b>${r.statut==='ouverte'?'🔔 Ta réclamation (en attente)':'✔ Réclamation traitée'}</b> · ${resEsc(r.date||'')}<div style="white-space:pre-wrap">${resEsc(r.texte)}</div>${r.reponse?`<div style="margin-top:3px;color:#0A3A9E"><b>Réponse du professeur :</b> ${resEsc(r.reponse)}</div>`:''}</div>`).join('')}
       ${ouverte?'':`<button class="btn btn-sm" style="margin-top:5px" onclick="reclamerOuvrir(${i})">✋ Réclamer sur cette question</button><div id="rc-${i}" style="display:none;margin-top:5px"><textarea id="rct-${i}" rows="2" maxlength="500" placeholder="Explique pourquoi tu penses que ta réponse mérite plus de points" style="width:100%"></textarea><button class="btn btn-primary btn-sm" style="margin-top:4px" onclick="reclamerEnvoyer(${i})">Envoyer la réclamation</button><span id="rce-${i}" style="font-size:11px;color:#c0392b;margin-left:6px"></span></div>`}
     </div>`;
@@ -5558,6 +5836,14 @@ async function verifierAcces(){
     if(document.getElementById('abo-overlay').dataset.bloque==='1')cacherAbo();
     return true;
   }catch(e){console.warn(e);return true;}
+}
+function renderAide(){
+  const el=document.getElementById('aide-abo');if(!el)return;
+  if(!aboInfo||aboInfo.admin){el.innerHTML='';return;}
+  const fin=new Date(Math.max(new Date(aboInfo.essai_fin),aboInfo.paye_jusqua?new Date(aboInfo.paye_jusqua):0));
+  const j=Math.ceil((fin-new Date())/86400000);
+  const abonne=aboInfo.paye_jusqua&&new Date(aboInfo.paye_jusqua)>new Date(aboInfo.essai_fin);
+  el.innerHTML=`<div style="background:${j<=7?'#FAEEDA':'#E1F5EE'};border-radius:8px;padding:8px 11px;font-size:12.5px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><span>${abonne?'✅ Abonné jusqu\'au ':'🎁 Essai gratuit jusqu\'au '}<b>${aboDate(fin)}</b> · ${Math.max(0,j)} jour(s) restant(s)</span><button class="btn btn-sm btn-primary" onclick="afficherAbo(false)">💳 Payer / Prolonger</button></div>`;
 }
 function majBanniere(){
   const el=document.getElementById('abo-banner');if(!el||!aboInfo)return;
@@ -6326,7 +6612,8 @@ function resetFiltreSanctionsSilencieux(){['sf-motif','sf-du','sf-au'].forEach(i
 
 // ===== IMPRESSION (fenêtre cachée, marche aussi sur téléphone) =====
 function imprimerDoc(titre,corps,paysage){
-  const doc='<!doctype html><html><head><meta charset="utf-8"><title>'+titre+'</title><style>@page{size:'+(paysage?'landscape':'portrait')+';margin:10mm}body{font-family:Arial,sans-serif;font-size:12px;color:#111;margin:0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #777;padding:4px 5px;text-align:left;vertical-align:top}th{background:#eef2fb}.c{text-align:center}h1,h2,h3{margin:0}.ent{text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}.sig{display:flex;justify-content:space-between;margin-top:26px;font-size:11px}.sig div{width:44%}.sig i{display:block;margin-top:30px;border-top:1px solid #000}</style></head><body>'+corps+'</body></html>';
+  const doc0='<!doctype html><html><head><meta charset="utf-8"><title>'+titre+'</title><style>@page{size:'+(paysage?'landscape':'portrait')+';margin:10mm}body{font-family:Arial,sans-serif;font-size:12px;color:#111;margin:0}table{border-collapse:collapse;width:100%}th,td{border:1px solid #777;padding:4px 5px;text-align:left;vertical-align:top}th{background:#eef2fb}.c{text-align:center}h1,h2,h3{margin:0}.ent{text-align:center;border-bottom:2px solid #000;padding-bottom:8px;margin-bottom:12px}.sig{display:flex;justify-content:space-between;margin-top:26px;font-size:11px}.sig div{width:44%}.sig i{display:block;margin-top:30px;border-top:1px solid #000}</style></head><body>'+corps+'</body></html>';
+  const doc=window.icoStrip?window.icoStrip(doc0):doc0;
   if(koTactile())return koApercu(titre,doc);
   try{
     const f=document.createElement('iframe');
@@ -6401,9 +6688,9 @@ function sancFiche(du,au,motif){
     const e=cache.eleves.find(y=>y.id===x.id);
     const tri=x.l.slice().sort((a,b)=>a.date<b.date?-1:1);
     const pts=tri.reduce((t,s)=>t+(parseFloat(s.points)||0),0);
-    return '<tr><td class="c">'+(i+1)+'</td><td><b>'+resEsc(x.nom)+'</b>'+(alertes.has(x.id)?'<br><span style="color:#c0392b;font-size:10px">⚠ '+alertes.get(x.id)+' sanctions en 2 mois</span>':'')+'</td><td class="c">'+resEsc(e&&e.matricule||'')+'</td><td>'+tri.map(s=>fmtIsoFr(s.date)).join('<br>')+'</td><td>'+tri.map(s=>resEsc((motif?'':s.motif+' ')+(s.detail||''))||'—').join('<br>')+'</td><td class="c">'+(pts?'-'+Math.round(pts*100)/100:'')+'</td><td class="c"><b>'+tri.length+'</b></td></tr>';
+    return '<tr><td class="c">'+(i+1)+'</td><td><b>'+resEsc(x.nom)+'</b>'+(alertes.has(x.id)?'<br><span style="color:#c0392b;font-size:10px">⚠ '+alertes.get(x.id)+' sanctions en 2 mois</span>':'')+'</td>'+(matVisible()?'<td class="c">'+resEsc(e&&e.matricule||'')+'</td>':'')+'<td>'+tri.map(s=>fmtIsoFr(s.date)).join('<br>')+'</td><td>'+tri.map(s=>resEsc((motif?'':s.motif+' ')+(s.detail||''))||'—').join('<br>')+'</td><td class="c">'+(pts?'-'+Math.round(pts*100)/100:'')+'</td><td class="c"><b>'+tri.length+'</b></td></tr>';
   }).join('');
-  const corps=enteteFiche(titre,sous)+'<table><thead><tr><th class="c" style="width:26px">N°</th><th>Prénom &amp; Nom</th><th class="c">Matricule</th><th>Date</th><th>'+(motif?'Leçon / précisions':'Motif et précisions')+'</th><th class="c">Points retirés</th><th class="c">Nb</th></tr></thead><tbody>'+lig+'</tbody></table><div style="margin-top:8px;font-size:11px">Total : <b>'+lignes.length+'</b> élève(s), <b>'+l.length+'</b> sanction(s).</div>'+SIG;
+  const corps=enteteFiche(titre,sous)+'<table><thead><tr><th class="c" style="width:26px">N°</th><th>Prénom &amp; Nom</th>'+(matVisible()?'<th class="c">Matricule</th>':'')+'<th>Date</th><th>'+(motif?'Leçon / précisions':'Motif et précisions')+'</th><th class="c">Points retirés</th><th class="c">Nb</th></tr></thead><tbody>'+lig+'</tbody></table><div style="margin-top:8px;font-size:11px">Total : <b>'+lignes.length+'</b> élève(s), <b>'+l.length+'</b> sanction(s).</div>'+SIG;
   imprimerDoc('Fiche de sanctions',corps,false);
   return true;
 }
@@ -6785,11 +7072,12 @@ function renderFicheSup(){
   let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px"><strong style="font-size:15px">📘 ${resEsc(f.cours)}</strong><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm" onclick="supRetourListe()">← Mes cours</button><button class="btn btn-primary btn-sm" onclick="supSauverNotes()">💾 Sauvegarder</button><button class="btn btn-warn btn-sm" onclick="supImprimer()">🖨️ Imprimer</button><button class="btn btn-info btn-sm" onclick="supExcel()">📊 Excel</button><button class="btn btn-sm" onclick="supOuvrirModale('${f.id}')">✏️ Modifier</button><button class="btn btn-danger btn-sm" onclick="supSupprimerFiche('${f.id}')">🗑️</button></div></div>`;
   h+=`<div class="alert-info alert-box" style="font-size:12px;margin-bottom:8px"><b>${f.credits} crédits</b> · ${SUP_MOD[f.module]} · notes sur <b>${f.bareme}</b><br>${f.notes.map(n=>resEsc(n.nom)+' <b>'+supPoidsTxt(f,n)+'</b>').join(' · ')}${f.bonus?'<br>➕ Bonus et ➖ sanctions du module ajoutés à la moyenne (points tels quels, ex. +1 = +1 sur '+f.bareme+').':''}</div>`;
   if(!eleves.length){el.innerHTML=h+'<div class="empty">Aucun étudiant dans cette classe</div>';return;}
-  h+=`<div class="notes-table-wrap"><table class="notes-table notes-sup"><thead><tr><th class="nom-col">N°</th><th class="nom-col">Prénom &amp; Nom</th><th class="ns-mat">Matricule</th>${f.notes.map(n=>`<th>${resEsc(n.nom)}<br><span style="font-weight:400;font-size:8px">${supPoidsTxt(f,n)}</span></th>`).join('')}${f.bonus?'<th>Bonus / sanc.</th>':''}<th>Moyenne /${f.bareme}</th></tr></thead><tbody>`;
+  h+=`<input id="ns-rech" type="search" placeholder="🔍 Chercher un étudiant…" oninput="rechAppliquer('ns-rech','ns-contenu')" style="width:100%;margin-bottom:6px"><div id="ns-rech-info" style="font-size:11px;color:#667;margin:-3px 0 5px"></div>`;
+  h+=`<div class="notes-table-wrap"><table class="notes-table notes-sup"><thead><tr><th class="nom-col">N°</th><th class="nom-col">Prénom &amp; Nom</th>${matVisible()?'<th class="ns-mat">Matricule</th>':''}${f.notes.map(n=>`<th>${resEsc(n.nom)}<br><span style="font-weight:400;font-size:8px">${supPoidsTxt(f,n)}</span></th>`).join('')}${f.bonus?'<th>Bonus / sanc.</th>':''}<th>Moyenne /${f.bareme}</th></tr></thead><tbody>`;
   eleves.forEach((e,i)=>{
-    h+=`<tr><td style="color:#888;font-size:11px">${i+1}</td><td class="nom-col"><strong>${resEsc(e.nom)}</strong></td><td class="ns-mat"><span class="matricule-badge" style="font-size:9px">${resEsc(e.matricule||'—')}</span></td>`+f.notes.map(n=>{if(n.auto){const av=supAuto(f,e.id);return `<td style="background:#FFF3D6;text-align:center;font-weight:600">${av===undefined?'<span style="color:#aaa">—</span>':fmtNote(av)}</td>`;}const v=supValeur(f,e.id,n.id);return `<td style="padding:2px"><input class="note-input" type="number" step="0.25" min="0" max="${f.bareme}" inputmode="decimal" style="width:100%;min-width:52px" value="${v!==undefined&&v!==null&&v!==''?v:''}" placeholder="—" data-e="${e.id}" data-n="${n.id}" onchange="supNoteChange(this)"></td>`;}).join('')+(f.bonus?`<td style="text-align:center;font-size:11px;font-weight:700" data-adj="${e.id}"></td>`:'')+`<td><span class="moy-cell" data-moy="${e.id}"></span></td></tr>`;
+    h+=`<tr><td style="color:#888;font-size:11px">${i+1}</td><td class="nom-col"><strong>${resEsc(e.nom)}</strong></td>${matVisible()?`<td class="ns-mat"><span class="matricule-badge" style="font-size:9px">${resEsc(e.matricule||'—')}</span></td>`:''}`+f.notes.map(n=>{if(n.auto){const av=supAuto(f,e.id);return `<td style="background:#FFF3D6;text-align:center;font-weight:600">${av===undefined?'<span style="color:#aaa">—</span>':fmtNote(av)}</td>`;}const v=supValeur(f,e.id,n.id);return `<td style="padding:2px"><input class="note-input" type="number" step="0.25" min="0" max="${f.bareme}" inputmode="decimal" style="width:100%;min-width:52px" value="${v!==undefined&&v!==null&&v!==''?v:''}" placeholder="—" data-e="${e.id}" data-n="${n.id}" onchange="supNoteChange(this)"></td>`;}).join('')+(f.bonus?`<td style="text-align:center;font-size:11px;font-weight:700" data-adj="${e.id}"></td>`:'')+`<td><span class="moy-cell" data-moy="${e.id}"></span></td></tr>`;
   });
-  h+=`<tr style="background:#f4f4f0"><td></td><td class="nom-col"><b>Moyenne de la classe</b></td><td class="ns-mat"></td>${f.notes.map(n=>`<td><b data-cm="${n.id}"></b></td>`).join('')}${f.bonus?'<td></td>':''}<td><b data-cm="_g"></b></td></tr></tbody></table></div><div style="font-size:10px;color:#e8e8e8;margin-top:5px">* moyenne provisoire : il manque au moins une note de l'étudiant.</div>`;
+  h+=`<tr style="background:#f4f4f0"><td></td><td class="nom-col"><b>Moyenne de la classe</b></td>${matVisible()?'<td class="ns-mat"></td>':''}${f.notes.map(n=>`<td><b data-cm="${n.id}"></b></td>`).join('')}${f.bonus?'<td></td>':''}<td><b data-cm="_g"></b></td></tr></tbody></table></div><div style="font-size:10px;color:#e8e8e8;margin-top:5px">* moyenne provisoire : il manque au moins une note de l'étudiant.</div>`;
   el.innerHTML=h;
   supRecalculer(f);
 }
@@ -6862,17 +7150,17 @@ async function supImprimer(){
   const d=supTableauDonnees(f);
   const paysage=f.notes.length+(f.bonus?1:0)>5;
   const cols=f.notes.map(n=>`<th class="c">${resEsc(n.nom)}<br><span style="font-weight:400;font-size:9px">${supPoidsTxt(f,n)}</span></th>`).join('')+(f.bonus?'<th class="c">Bonus / sanc.</th>':'');
-  const lig=d.lignes.map((l,i)=>`<tr><td class="c">${i+1}</td><td>${resEsc(l.e.nom)}</td><td class="c">${resEsc(l.e.matricule||'')}</td>${f.notes.map(n=>`<td class="c">${l.vals[n.id]!==undefined?fmtNote(l.vals[n.id]):''}</td>`).join('')}${f.bonus?`<td class="c">${supAdjTxt(l.adj)}</td>`:''}<td class="c"><b>${l.r.moy===null?'':fmtNote(l.r.moy)+(l.r.complet?'':'*')}</b></td><td style="width:16%"></td></tr>`).join('');
-  const pied=`<tr style="background:#f4f4f0"><td></td><td colspan="2"><b>Moyenne de la classe</b></td>${d.cm.map(x=>`<td class="c"><b>${x===null?'':fmtNote(x)}</b></td>`).join('')}${f.bonus?'<td></td>':''}<td class="c"><b>${d.mg===null?'':fmtNote(d.mg)}</b></td><td></td></tr>`;
-  const corps=enteteFiche('FICHE DE NOTES — '+resEsc(f.cours).toUpperCase(),f.credits+' crédits · '+SUP_MOD[f.module]+' · notes sur '+f.bareme)+`<table><thead><tr><th class="c" style="width:26px">N°</th><th>Prénom &amp; Nom</th><th class="c">Matricule</th>${cols}<th class="c">Moyenne /${f.bareme}</th><th>Observations</th></tr></thead><tbody>${lig}${pied}</tbody></table><div style="font-size:10px;margin-top:5px">* moyenne provisoire (il manque au moins une note). Moyenne = notes pondérées par leur poids.${f.bonus?' Bonus et sanctions du module ajoutés / retirés en points.':''}${f.rappel?' La note « Rappels de cours » est la moyenne des notes de rappel du module.':''}</div><div style="margin-top:6px;font-size:11px">Fait le ${new Date().toLocaleDateString('fr-FR')}</div>`+SIG;
+  const lig=d.lignes.map((l,i)=>`<tr><td class="c">${i+1}</td><td>${resEsc(l.e.nom)}</td>${matVisible()?`<td class="c">${resEsc(l.e.matricule||'')}</td>`:''}${f.notes.map(n=>`<td class="c">${l.vals[n.id]!==undefined?fmtNote(l.vals[n.id]):''}</td>`).join('')}${f.bonus?`<td class="c">${supAdjTxt(l.adj)}</td>`:''}<td class="c"><b>${l.r.moy===null?'':fmtNote(l.r.moy)+(l.r.complet?'':'*')}</b></td><td style="width:16%"></td></tr>`).join('');
+  const pied=`<tr style="background:#f4f4f0"><td></td><td colspan="${matVisible()?2:1}"><b>Moyenne de la classe</b></td>${d.cm.map(x=>`<td class="c"><b>${x===null?'':fmtNote(x)}</b></td>`).join('')}${f.bonus?'<td></td>':''}<td class="c"><b>${d.mg===null?'':fmtNote(d.mg)}</b></td><td></td></tr>`;
+  const corps=enteteFiche('FICHE DE NOTES — '+resEsc(f.cours).toUpperCase(),f.credits+' crédits · '+SUP_MOD[f.module]+' · notes sur '+f.bareme)+`<table><thead><tr><th class="c" style="width:26px">N°</th><th>Prénom &amp; Nom</th>${matVisible()?'<th class="c">Matricule</th>':''}${cols}<th class="c">Moyenne /${f.bareme}</th><th>Observations</th></tr></thead><tbody>${lig}${pied}</tbody></table><div style="font-size:10px;margin-top:5px">* moyenne provisoire (il manque au moins une note). Moyenne = notes pondérées par leur poids.${f.bonus?' Bonus et sanctions du module ajoutés / retirés en points.':''}${f.rappel?' La note « Rappels de cours » est la moyenne des notes de rappel du module.':''}</div><div style="margin-top:6px;font-size:11px">Fait le ${new Date().toLocaleDateString('fr-FR')}</div>`+SIG;
   imprimerDoc('Fiche de notes',corps,paysage);
 }
 async function supExcel(){
   if(Object.keys(supBrouillon).length)await supSauverNotes(true);
   const f=supFiches(currentClasse.id).find(x=>x.id===supSel);if(!f)return;
   const d=supTableauDonnees(f);
-  const rows=[['N°','Prénom & Nom','Matricule',...f.notes.map(n=>n.nom+' ('+supPoidsTxt(f,n)+')'),...(f.bonus?['Bonus / sanctions']:[]),'Moyenne /'+f.bareme]];
-  d.lignes.forEach((l,i)=>rows.push([i+1,l.e.nom,l.e.matricule||'',...f.notes.map(n=>l.vals[n.id]!==undefined?l.vals[n.id]:''),...(f.bonus?[Math.round(l.adj.net*100)/100]:[]),l.r.moy===null?'':Math.round(l.r.moy*100)/100]));
+  const rows=[['N°','Prénom & Nom',...(matVisible()?['Matricule']:[]),...f.notes.map(n=>n.nom+' ('+supPoidsTxt(f,n)+')'),...(f.bonus?['Bonus / sanctions']:[]),'Moyenne /'+f.bareme]];
+  d.lignes.forEach((l,i)=>rows.push([i+1,l.e.nom,...(matVisible()?[l.e.matricule||'']:[]),...f.notes.map(n=>l.vals[n.id]!==undefined?l.vals[n.id]:''),...(f.bonus?[Math.round(l.adj.net*100)/100]:[]),l.r.moy===null?'':Math.round(l.r.moy*100)/100]));
   rows.push(['','Moyenne de la classe','',...d.cm.map(x=>x===null?'':Math.round(x*100)/100),...(f.bonus?['']:[]),d.mg===null?'':Math.round(d.mg*100)/100]);
   const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Notes');
   koXlsx(wb,`Notes_${f.cours}_${currentClasse.nom}_Module${f.module}.xlsx`.replace(/[\\/:*?"<>|]/g,'-'));
@@ -7584,6 +7872,49 @@ function koXlsx(wb,nom){
     mk('⬇️ Télécharger',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=nom;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();},1000);},!peutPartager);
   });
 }
+</script>
+<script>
+/* Icônes : les emoji de l'interface sont remplacés par des icônes de la bibliothèque Lucide (sprite SVG intégré, fonctionne hors ligne). */
+(function(){
+  var MAP={"✓": "check", "✔": "check", "☑": "square-check", "✅": "circle-check", "✕": "x", "✗": "x", "❌": "circle-x", "➕": "plus", "➖": "minus", "🗓": "calendar-days", "📅": "calendar", "📊": "chart-column", "📈": "trending-up", "🏫": "school", "🏛": "landmark", "🏭": "factory", "🏠": "house", "⚠": "triangle-alert", "🚨": "siren", "📁": "folder", "📋": "clipboard-list", "💾": "save", "💬": "message-circle", "📎": "paperclip", "🗑": "trash-2", "📚": "library", "📘": "book", "📗": "book", "📕": "book", "📙": "book", "📖": "book-open", "📔": "notebook", "👤": "user", "👥": "users", "🧒": "user", "📤": "upload", "📥": "download", "⬇": "download", "⬆": "upload", "🖨": "printer", "🔔": "bell", "🖼": "image", "🔒": "lock", "🔓": "lock-open", "🔐": "lock", "✏": "pencil", "✎": "pencil", "✍": "pen-line", "🔍": "search", "🔎": "search", "💳": "credit-card", "♻": "recycle", "📨": "mail", "✉": "mail", "❓": "circle-help", "📄": "file-text", "💡": "lightbulb", "🔗": "link", "🔢": "hash", "⚙": "settings", "🚪": "log-out", "📷": "camera", "🔑": "key-round", "🎁": "gift", "🎯": "target", "⭐": "star", "🌙": "moon", "☀": "sun", "🕘": "clock", "🕒": "clock", "📴": "wifi-off", "📶": "wifi", "🎓": "graduation-cap", "📝": "notebook-pen", "🔄": "refresh-cw", "🔁": "repeat", "✋": "hand", "☰": "menu", "💼": "briefcase", "🏆": "trophy", "🎨": "palette", "⚖": "scale", "🧾": "receipt", "👁": "eye", "🚫": "ban", "🎲": "dices", "⚡": "zap", "📌": "pin", "🚀": "rocket", "📲": "smartphone", "➡": "arrow-right", "🎉": "party-popper", "🤖": "bot", "🎬": "clapperboard", "🆕": "sparkles", "💰": "banknote", "💵": "banknote", "📣": "megaphone", "👉": "arrow-right", "🔵": "circle", "🟢": "circle", "🐢": "turtle"};
+  var K=Object.keys(MAP).join('|');
+  var RX=new RegExp('('+K+')\\ufe0f?','g');
+  var RXA=new RegExp('(?:'+K+')\\ufe0f?\\s*','g');
+  var SKIP={SCRIPT:1,STYLE:1,TEXTAREA:1,OPTION:1,TITLE:1,SVG:1,svg:1,INPUT:1,SELECT:1};
+  function mk(k){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('class','ic');s.setAttribute('aria-hidden','true');var u=document.createElementNS('http://www.w3.org/2000/svg','use');u.setAttribute('href','#ic-'+MAP[k]);s.appendChild(u);return s;}
+  function noeud(t){
+    var v=t.nodeValue;RX.lastIndex=0;if(!RX.test(v))return;
+    var f=document.createDocumentFragment(),last=0,m;RX.lastIndex=0;
+    while((m=RX.exec(v))){if(m.index>last)f.appendChild(document.createTextNode(v.slice(last,m.index)));f.appendChild(mk(m[1]));last=RX.lastIndex;}
+    if(last<v.length)f.appendChild(document.createTextNode(v.slice(last)));
+    t.parentNode.replaceChild(f,t);
+  }
+  function passe(root){
+    if(!root)return;
+    if(root.nodeType===3){if(root.parentNode&&!SKIP[root.parentNode.nodeName])noeud(root);return;}
+    if(root.nodeType!==1||SKIP[root.nodeName])return;
+    var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){var p=n.parentNode;return p&&!SKIP[p.nodeName]?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;}}),l=[],n;
+    while((n=w.nextNode()))l.push(n);
+    l.forEach(noeud);
+    var q=root.querySelectorAll?root.querySelectorAll('option,[placeholder],[title]'):[];
+    for(var i=0;i<q.length;i++){var e=q[i];
+      if(e.nodeName==='OPTION'){var t=e.textContent;RXA.lastIndex=0;if(RXA.test(t))e.textContent=t.replace(RXA,'');}
+      ['placeholder','title'].forEach(function(a){var x=e.getAttribute&&e.getAttribute(a);if(x){RXA.lastIndex=0;if(RXA.test(x))e.setAttribute(a,x.replace(RXA,''));}});
+    }
+  }
+  var file=[],prog=false;
+  function planifier(n){file.push(n);if(prog)return;prog=true;(window.requestAnimationFrame||setTimeout)(function(){prog=false;var l=file;file=[];l.forEach(function(x){try{passe(x);}catch(e){}});});}
+  window.icoPasse=passe;
+  window.icoStrip=function(h){return String(h).replace(RXA,'');};
+  function go(){
+    passe(document.body);
+    new MutationObserver(function(ms){ms.forEach(function(m){
+      if(m.type==='characterData')planifier(m.target);
+      else m.addedNodes.forEach(function(n){planifier(n);});
+    });}).observe(document.body,{childList:true,subtree:true,characterData:true});
+  }
+  if(document.body)go();else document.addEventListener('DOMContentLoaded',go);
+})();
 </script>
 </body>
 </html>

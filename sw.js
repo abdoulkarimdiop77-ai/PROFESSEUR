@@ -1,6 +1,6 @@
 // KOTO — service worker : fonctionnement sans internet.
 // Les données (Supabase) ne sont jamais mises en cache ici : elles sont gardées par l'application elle-même.
-const VERSION='koto-v5';
+const VERSION='koto-v6';
 const COEUR=['./','index.html','manifest.json','icon-192.png','icon-512.png','apple-touch-icon.png','favicon-32.png'];
 const BIBLIOTHEQUES=[
   'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js',
