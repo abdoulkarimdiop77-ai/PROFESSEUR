@@ -620,6 +620,30 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
 .btn-primary .ic,.btn-info .ic,.btn-success .ic,.btn-warn .ic,.btn-danger .ic,.menu-actif .ic,#abo-banner .btn-primary .ic{color:inherit!important}
 .nav .ic,header .ic{filter:brightness(1.5) saturate(.8)}
 .nav button.active .ic{color:#fff!important;filter:none}
+.rech-bar{display:flex;align-items:center;gap:8px;background:#fff;border:2px solid #4C8DF6;border-radius:12px;padding:6px 12px;margin:0 0 10px;position:sticky;top:calc(var(--hh,64px) + 6px);z-index:20;box-shadow:0 4px 14px rgba(10,46,134,.18)}
+.rech-bar .rech-ic{font-size:16px}
+.rech-bar input{flex:1;border:0!important;outline:0;background:transparent!important;padding:6px 2px;font-size:14px;min-width:0;box-shadow:none!important}
+.rech-bar .rech-info{font-size:11px;color:#667;white-space:nowrap}
+@media(max-width:480px){
+  header .logout-btn{display:none}
+  #btn-retour .rt-txt{display:none}
+  header{padding-left:10px;padding-right:10px}
+  header>div:first-child{gap:6px!important;flex-wrap:nowrap!important}
+  .h-logo img{width:30px!important;height:30px!important}
+  .hright{gap:5px}
+}
+#abo-banner{gap:8px}
+#abo-banner span{font-size:12px;line-height:1.35}
+#abo-banner .btn{white-space:nowrap;padding:5px 10px;font-size:11.5px}
+@media(max-width:480px){#abo-banner{padding:5px 10px!important}#abo-banner .btn{padding:4px 8px;font-size:11px}}
+.cl-main{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}
+.cl-main .btn{padding:12px 8px;font-size:13px;text-align:center;line-height:1.25}
+.cl-plus-btn{margin-bottom:10px}
+.cl-plus{background:rgba(255,255,255,.96);border-radius:12px;padding:10px 12px;margin-bottom:12px;color:#223}
+.cl-grp{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:8px}
+.cl-grp:last-child{margin-bottom:0}
+.cl-gt{width:100%;font-size:11px;font-weight:700;color:#0A2E86;text-transform:uppercase;letter-spacing:.4px}
+@media(max-width:700px){.cl-main{grid-template-columns:1fr 1fr}}
 .k2-ic .ic{width:26px;height:26px;color:var(--g2)!important}
 .btn-xs .ic,.matricule-badge .ic{width:1em;height:1em}
 </style>
@@ -1060,7 +1084,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
 <div class="app-page" id="app-page">
   <header>
     <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-      <button id="btn-retour" class="menu-btn" style="display:none" onclick="retour()">← Retour</button>
+      <button id="btn-retour" class="menu-btn" style="display:none" onclick="retour()">←<span class="rt-txt"> Retour</span></button>
       <button class="menu-btn" onclick="basculerMenu()">☰ MENU<span id="menu-badge" class="badge-notif"></span></button>
     <h1 class="h-logo"><img src="icon-192.png" alt="" style="width:40px;height:40px;border-radius:11px"><span class="h-txt"><span class="h-koto">KOTO</span><span class="h-sous">Cahier du Professeur</span></span></h1><div class="h-tag">Ensemble pour une éducation de qualité</div>
     </div>
@@ -1183,31 +1207,37 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
 
   <!-- VUE ÉLÈVES (d'une classe) -->
   <div id="vue-eleves" class="section">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
-      <strong style="font-size:15px" id="eleves-titre">Élèves</strong>
-      <div style="display:flex;gap:7px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="openModal('modal-add-eleve')">+ Ajouter un élève</button>
-        <button class="btn btn-sm" onclick="ouvrirMatMode()" title="Matricules : automatiques, donnés par l'école, ou aucun">🔢 Matricules</button>
+    <strong style="font-size:15px;display:block;margin-bottom:10px;color:#fff" id="eleves-titre">Élèves</strong>
+    <div class="cl-main">
+      <button class="btn btn-primary" onclick="openModal('modal-add-eleve')">➕ Ajouter un élève</button>
+      <button class="btn btn-info" onclick="ouvrirPresences()">✅ Contrôle de présence</button>
+      <button class="btn btn-info" onclick="ouvrirNotesClasse()">📊 Fiche de notes</button>
+      <button class="btn btn-info" onclick="showTab('devoirs-global')">📋 Devoirs</button>
+    </div>
+    <button class="btn btn-sm cl-plus-btn" id="cl-plus-btn" onclick="basculerPlusClasse()" aria-expanded="false">☰ Plus d'actions <span id="cl-plus-fl">▾</span></button>
+    <div class="cl-plus" id="cl-plus" style="display:none">
+      <div class="cl-grp"><div class="cl-gt">Suivi de la classe</div>
         <button class="btn btn-info btn-sm" onclick="ouvrirEdtClasse()">🗓️ Mes cours</button>
-        <button class="btn btn-info btn-sm" onclick="ouvrirPresences()">✅ Contrôle de présence</button>
-        <button class="btn btn-warn btn-sm" onclick="ouvrirSanctions()">⚠️ Sanctions</button>
         <button class="btn btn-info btn-sm" onclick="ouvrirCahier()">📔 Cahier journal</button>
         <button class="btn btn-info btn-sm" onclick="ouvrirProgression()">📈 Progression</button>
-        <button class="btn btn-sm" onclick="ouvrirNotesClasse()">📊 Fiche de notes</button>
+        <button class="btn btn-warn btn-sm" onclick="ouvrirSanctions()">⚠️ Sanctions</button>
+      </div>
+      <div class="cl-grp"><div class="cl-gt">Élèves et codes</div>
+        <button class="btn btn-sm" onclick="ouvrirMatMode()" title="Matricules : automatiques, donnés par l'école, ou aucun">🔢 Matricules</button>
         <button class="btn btn-sm" onclick="regenererCodesClasse()" title="Nouveaux mots de passe de devoir pour tous les élèves">🔑 Régénérer les codes</button>
         <button class="btn btn-sm" onclick="exporterCodesClasse()">⬇️ Exporter les codes</button>
       </div>
     </div>
     <!-- Import Excel -->
-    <div class="card" style="margin-bottom:10px">
-      <div class="card-title">📥 Import liste élèves (Excel)</div>
+    <details class="card" style="margin-bottom:10px">
+      <summary class="card-title" style="cursor:pointer;margin:0">📥 Importer une liste d'élèves (Excel) — touche pour ouvrir</summary>
       <div class="alert-info alert-box" style="margin-bottom:7px">Format du fichier : <code>N° | Prénom | Nom | Matricule (facultatif)</code> (1ère ligne = en-tête). <span id="import-mat-hint"></span> <a onclick="telechargerModeleEleves()" style="color:#0B4FBF;cursor:pointer;text-decoration:underline">⬇️ Télécharger le modèle</a></div>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="file" id="import-eleves-file" accept=".xlsx,.xls,.csv" onchange="importExcelEleves(this)" style="flex:1">
       </div>
       <div id="import-eleves-preview" style="margin-top:7px"></div>
-    </div>
-    <div id="rech-eleves-box" style="display:none;margin-bottom:8px"><input id="rech-eleves" type="search" placeholder="🔍 Rechercher un élève (nom ou matricule)…" oninput="renderElevesClasse(currentClasse.id)" style="width:100%"><div id="rech-eleves-info" style="font-size:11px;color:#667;margin-top:3px"></div></div>
+    </details>
+    <div id="rech-eleves-box" class="rech-bar" style="display:none"><span class="rech-ic">🔍</span><input id="rech-eleves" type="search" placeholder="Chercher (nom ou matricule)…" oninput="renderElevesClasse(currentClasse.id)"><span id="rech-eleves-info" class="rech-info"></span></div>
     <div id="liste-eleves-classe"><div class="loading"><div class="spinner"></div>Chargement...</div></div>
   </div>
 
@@ -1220,7 +1250,6 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
           <option value="">Toutes matières</option>
         </select>
         <select id="notes-mois" onchange="renderNotesClasse()" style="width:190px"></select>
-        <input id="notes-rech" type="search" placeholder="🔍 Chercher un élève…" oninput="rechAppliquer('notes-rech','notes-classe-content')" style="width:170px">
         <button class="btn btn-primary btn-sm" onclick="sauvegarderNotesClasse()">💾 Sauvegarder</button>
         <button class="btn btn-warn btn-sm" id="notes-print-mois" onclick="imprimerFicheMois()">🖨️ Imprimer la fiche du mois</button>
         <button class="btn btn-sm" onclick="ouvrirCompo()">🏆 Compositions</button>
@@ -1231,6 +1260,7 @@ body.dark .main a,body.dark .breadcrumb a{font-weight:700}
     <div class="alert-info alert-box" style="font-size:11px">
       💡 <strong>Note Orale</strong> = participation + rappels + bonus − sanctions (synchronisé automatiquement) &nbsp;|&nbsp; <strong>Note Écrite</strong> = devoirs et compositions
     </div>
+    <div class="rech-bar" id="notes-rech-bar"><span class="rech-ic">🔍</span><input id="notes-rech" type="search" placeholder="Rechercher un élève dans la fiche de notes (nom ou matricule)…" oninput="rechAppliquer('notes-rech','notes-classe-content')"><span id="notes-rech-info" class="rech-info"></span></div>
     <div class="notes-table-wrap">
       <div id="notes-classe-content"><div class="loading"><div class="spinner"></div>Chargement...</div></div>
     </div>
@@ -2022,7 +2052,7 @@ function rechAppliquer(inputId,contId){
   c.querySelectorAll('tbody tr').forEach(tr=>{
     const cell=tr.querySelector('td.nom-col strong');if(!cell)return;
     tot++;
-    const ok=!q||rechNorm(tr.querySelector('td.nom-col').textContent+' '+(tr.querySelector('.matricule-badge')||{textContent:''}).textContent).includes(q);
+    const hay=rechNorm(tr.querySelector('td.nom-col').textContent+' '+(tr.querySelector('.matricule-badge')||{textContent:''}).textContent);const ok=!q||q.split(' ').every(w=>hay.includes(w));
     tr.style.display=ok?'':'none';if(ok)nb++;
   });
   const inf=document.getElementById(inputId+'-info');
@@ -3044,11 +3074,11 @@ function updateEcolesStats(){renderEcoles();}
 function renderElevesClasse(classeId){
   const el=document.getElementById('liste-eleves-classe');
   const tous=cache.eleves.filter(e=>e.classe_id===classeId).sort((a,b)=>cmpFr(a.nom,b.nom)||cmpFr(a.matricule,b.matricule));
-  const bar=document.getElementById('rech-eleves-box');if(bar)bar.style.display=tous.length>5?'':'none';
+  const bar=document.getElementById('rech-eleves-box');if(bar)bar.style.display=tous.length>3?'flex':'none';
   if(!tous.length){el.innerHTML='<div class="empty">Aucun élève — clique sur "+ Ajouter un élève" ou importe depuis Excel</div>';return;}
   const showMat=matMode(classeId)!=='aucun';
   const rq=rechNorm((document.getElementById('rech-eleves')||{}).value);
-  const arr=rq?tous.filter(e=>rechNorm(e.nom+' '+(showMat?e.matricule:'')).includes(rq)):tous;
+  const arr=rq?tous.filter(e=>(h=>rq.split(' ').every(w=>h.includes(w)))(rechNorm(e.nom+' '+(showMat?e.matricule:'')))):tous;
   const ri=document.getElementById('rech-eleves-info');if(ri)ri.textContent=rq?(arr.length+' / '+tous.length+' élève(s)'):'';
   if(!arr.length){el.innerHTML='<div class="empty">Aucun élève ne correspond à « '+resEsc((document.getElementById('rech-eleves')||{}).value)+' »</div>';return;}
   const absAl=new Map(absencesAlertes(classeId).map(a=>[a.eleve.id,a.n]));
@@ -3136,6 +3166,13 @@ function importExcelEleves(input){
     }catch(err){toast('Erreur : '+err.message);}
   };reader.readAsBinaryString(file);
   input.value='';
+}
+function basculerPlusClasse(){
+  const p=document.getElementById('cl-plus'),b=document.getElementById('cl-plus-btn');if(!p)return;
+  const ouvert=p.style.display==='none';
+  p.style.display=ouvert?'block':'none';
+  b.setAttribute('aria-expanded',ouvert?'true':'false');
+  document.getElementById('cl-plus-fl').textContent=ouvert?'▴':'▾';
 }
 function majHintImport(){const e=document.getElementById('import-mat-hint');if(!e||!currentClasse)return;const m=matMode(currentClasse.id);e.textContent=m==='manuel'?'Mode « matricules de l\'école » : la colonne Matricule est obligatoire (les lignes sans matricule sont ignorées).':m==='auto'?'Mode « matricules automatiques » : la colonne Matricule est ignorée, KOTO crée les matricules.':'Cette classe fonctionne sans matricule : la colonne Matricule est ignorée.';}
 function telechargerModeleEleves(){
@@ -5822,7 +5859,7 @@ function majBanniere(){
   const alerte=jours<=7;
   el.style.display='flex';
   el.style.background=alerte?'#FAEEDA':'#E1F5EE';el.style.color=alerte?'#633806':'#085041';
-  el.innerHTML=`<span>${abonne?'✅ Abonné jusqu\'au '+aboDate(fin):'🎁 Essai gratuit jusqu\'au '+aboDate(fin)} · ${jours} jour(s) restant(s)</span><button class="btn btn-sm btn-primary" onclick="afficherAbo(false)">💳 Payer / Prolonger</button>`;
+  el.innerHTML=`<span>${abonne?'✅ Abonné':'🎁 Essai gratuit'} · <b>${Math.max(0,jours)} jour(s)</b> restant(s) <span style="opacity:.75">(jusqu'au ${fin.toLocaleDateString('fr-FR')})</span></span><button class="btn btn-sm btn-primary" onclick="afficherAbo(false)">💳 Payer / Prolonger</button>`;
 }
 function afficherAbo(bloque){
   const o=document.getElementById('abo-overlay');o.dataset.bloque=bloque?'1':'0';
@@ -7040,7 +7077,7 @@ function renderFicheSup(){
   let h=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px"><strong style="font-size:15px">📘 ${resEsc(f.cours)}</strong><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn btn-sm" onclick="supRetourListe()">← Mes cours</button><button class="btn btn-primary btn-sm" onclick="supSauverNotes()">💾 Sauvegarder</button><button class="btn btn-warn btn-sm" onclick="supImprimer()">🖨️ Imprimer</button><button class="btn btn-info btn-sm" onclick="supExcel()">📊 Excel</button><button class="btn btn-sm" onclick="supOuvrirModale('${f.id}')">✏️ Modifier</button><button class="btn btn-danger btn-sm" onclick="supSupprimerFiche('${f.id}')">🗑️</button></div></div>`;
   h+=`<div class="alert-info alert-box" style="font-size:12px;margin-bottom:8px"><b>${f.credits} crédits</b> · ${SUP_MOD[f.module]} · notes sur <b>${f.bareme}</b><br>${f.notes.map(n=>resEsc(n.nom)+' <b>'+supPoidsTxt(f,n)+'</b>').join(' · ')}${f.bonus?'<br>➕ Bonus et ➖ sanctions du module ajoutés à la moyenne (points tels quels, ex. +1 = +1 sur '+f.bareme+').':''}</div>`;
   if(!eleves.length){el.innerHTML=h+'<div class="empty">Aucun étudiant dans cette classe</div>';return;}
-  h+=`<input id="ns-rech" type="search" placeholder="🔍 Chercher un étudiant…" oninput="rechAppliquer('ns-rech','ns-contenu')" style="width:100%;margin-bottom:6px"><div id="ns-rech-info" style="font-size:11px;color:#667;margin:-3px 0 5px"></div>`;
+  h+=`<div class="rech-bar"><span class="rech-ic">🔍</span><input id="ns-rech" type="search" placeholder="Rechercher un étudiant (nom ou matricule)…" oninput="rechAppliquer('ns-rech','ns-contenu')"><span id="ns-rech-info" class="rech-info"></span></div>`;
   h+=`<div class="notes-table-wrap"><table class="notes-table notes-sup"><thead><tr><th class="nom-col">N°</th><th class="nom-col">Prénom &amp; Nom</th>${matVisible()?'<th class="ns-mat">Matricule</th>':''}${f.notes.map(n=>`<th>${resEsc(n.nom)}<br><span style="font-weight:400;font-size:8px">${supPoidsTxt(f,n)}</span></th>`).join('')}${f.bonus?'<th>Bonus / sanc.</th>':''}<th>Moyenne /${f.bareme}</th></tr></thead><tbody>`;
   eleves.forEach((e,i)=>{
     h+=`<tr><td style="color:#888;font-size:11px">${i+1}</td><td class="nom-col"><strong>${resEsc(e.nom)}</strong></td>${matVisible()?`<td class="ns-mat"><span class="matricule-badge" style="font-size:9px">${resEsc(e.matricule||'—')}</span></td>`:''}`+f.notes.map(n=>{if(n.auto){const av=supAuto(f,e.id);return `<td style="background:#FFF3D6;text-align:center;font-weight:600">${av===undefined?'<span style="color:#aaa">—</span>':fmtNote(av)}</td>`;}const v=supValeur(f,e.id,n.id);return `<td style="padding:2px"><input class="note-input" type="number" step="0.25" min="0" max="${f.bareme}" inputmode="decimal" style="width:100%;min-width:52px" value="${v!==undefined&&v!==null&&v!==''?v:''}" placeholder="—" data-e="${e.id}" data-n="${n.id}" onchange="supNoteChange(this)"></td>`;}).join('')+(f.bonus?`<td style="text-align:center;font-size:11px;font-weight:700" data-adj="${e.id}"></td>`:'')+`<td><span class="moy-cell" data-moy="${e.id}"></span></td></tr>`;
