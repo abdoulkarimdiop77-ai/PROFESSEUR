@@ -1885,7 +1885,8 @@ with check (bucket_id = 'ressources' and (storage.foldername(name))[1] = auth.ui
     <div style="background:#E6EEFB;border-radius:9px;padding:11px;font-size:13px;margin-bottom:10px">
       <strong>Tarif : 20 000 GNF par mois</strong><br>
       1. Écris ci-dessous ton <strong>numéro Orange Money</strong> et le nombre de mois.<br>
-      2. Compose sur ton téléphone le code de paiement marchand : <span style="font-size:16px;font-weight:700;color:#0B4FBF">*144*4*2*1</span><br>
+      2. Compose sur ton téléphone le code de paiement marchand, <strong>avec le # à la fin</strong> puis appel : <span id="abo-ussd" style="font-size:17px;font-weight:700;color:#0B4FBF;white-space:nowrap">*144*4*2*1#</span>
+      <div style="display:flex;gap:7px;margin:6px 0 4px;flex-wrap:wrap"><a class="btn btn-sm btn-primary" href="tel:*144*4*2*1%23" style="text-decoration:none">📞 Composer le code</a><button type="button" class="btn btn-sm" onclick="copierTexte('*144*4*2*1#')">📋 Copier le code</button></div>
       3. Tu reçois un <strong>code de paiement à 6 chiffres</strong> : saisis-le ci-dessous, puis clique sur <strong>Confirmer</strong>.<br>
       4. Ton accès est activé après vérification du paiement.
     </div>
